@@ -49,7 +49,7 @@ object Allocation{
     for (line <- bufferedSource.getLines) { // foreach line
       if (linenumber == 0) {
         val u = line.toDouble
-        if (debug) println(s"Cmax = $u")
+        if (debug) println(s"Rule = $u")
       }
       if (linenumber == 1) {
         val t = line.toDouble

@@ -6,7 +6,7 @@ import org.scamata.core.MATA
 /**
   * Abstract class for solving an MATA problem by translating the problem/outcome
   */
-abstract class DualSolver(pb: MATA) extends Solver(pb){
+abstract class DualSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule){
 
   var preSolvingTime : Long = 0
 

@@ -2,7 +2,7 @@
 package org.scamata.core
 
 import scala.collection.SortedSet
-import org.scamata.solver.LPSolver
+import org.scamata.solver._
 
 
 /**
@@ -80,6 +80,6 @@ object MATA extends App {
   val debug = true
   import org.scamata.example.toy4x4._
   println(pb)
-  val solver = new LPSolver(pb)
+  val solver = new LPSolver(pb,Cmax)
   printf(solver.solve().toString)
 }

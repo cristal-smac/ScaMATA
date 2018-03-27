@@ -4,11 +4,23 @@ package org.scamata.solver
 import org.scamata.core.MATA
 import org.scamata.core.Allocation
 
+class SocialRule{
+  /**
+    * Returns a string representation of the social rule
+    */
+  override def toString: String = this match{
+    case Cmax => "Cmax"
+    case Flowtime => "Flowtime"
+  }
+}
+case object Flowtime extends SocialRule
+case object Cmax extends SocialRule
+
 /**
   * Abstract class representing a solver
   * @param pb to be solver
   */
-abstract class Solver(pb : MATA) {
+abstract class Solver(val pb : MATA, val rule : SocialRule) {
   var debug = false
 
   var solvingTime : Long = 0

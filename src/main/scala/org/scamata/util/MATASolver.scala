@@ -22,10 +22,12 @@ object MATASolver extends App {
     Usage: java -jar ScaMATA-assembly-X.Y.jar [-v] inputFilename outputFilename
     The following options are available:
     -v: verbose (false by default)
+    -f: flowtime (cmax by default)
   """
 
   // Default parameters for the solver
   var verbose = false
+  var socialRule : SocialRule = Cmax
 
   // Default fileNames/path for the input/output
   var inputFilename = new String()
@@ -54,6 +56,7 @@ object MATASolver extends App {
     s"""
     Run solver with the following parameters:
     verbose:$verbose
+    socialRule:$socialRule
     ...
   """)
   val solver = selectSolver(pb)
@@ -61,7 +64,11 @@ object MATASolver extends App {
   val allocation = solver.run()
   val writer = new AllocationWriter(outputFilename, allocation)
   writer.write()
-  println(s"Makespan: ${allocation.makespan}")
+  socialRule match {
+    case Cmax => println(s"Makespan: ${allocation.makespan}")
+    case Flowtime => println(s"Flowtime: ${allocation.flowtime}")
+  }
+
   println(s"Preprocessing time: ${solver.asInstanceOf[DualSolver].preSolvingTime} (ns)")
   println(s"Postprocessing time: ${solver.asInstanceOf[DualSolver].postSolvingTime} (ns)")
   println(s"Postprocessing time: ${solver.solvingTime} (ns)")
@@ -91,6 +98,7 @@ object MATASolver extends App {
     val tag: String = tags.head.substring(1) // remove '-'
     tag match {
       case "v" => verbose = true
+      case "f" => socialRule = Flowtime
       case _ => false
     }
     nextOption(tags.tail)
@@ -101,6 +109,6 @@ object MATASolver extends App {
     * @param pb MATA
     */
   def selectSolver(pb: MATA): Solver = {
-    new LPSolver(pb)
+    new LPSolver(pb, socialRule)
   }
 }

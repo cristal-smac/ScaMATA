@@ -14,12 +14,17 @@ import com.typesafe.config.{Config, ConfigFactory}
   * Approximation algorithm for minimizing the makespan
   * @param pb to be solver
   */
-class LPSolver(pb : MATA) extends DualSolver(pb) {
+class LPSolver(pb : MATA, rule : SocialRule) extends DualSolver(pb, rule) {
 
   val config: Config = ConfigFactory.load()
   val inputPath: String =config.getString("path.scamata")+"/"+config.getString("path.input")
   val outputPath: String = config.getString("path.scamata")+"/"+config.getString("path.output")
-  var lpPath: String = config.getString("path.scamata")+"/"+config.getString("path.rcmax")
+  var lpPath: String = rule match {
+    case Cmax =>
+      config.getString("path.scamata")+"/"+config.getString("path.cmax")
+    case Flowtime =>
+      config.getString("path.scamata")+"/"+config.getString("path.flowtime")
+  }
 
   def solve(): Allocation = {
     // 1 - Reformulate the problem
