@@ -26,12 +26,5 @@ project/plugins/project/
 
 .cache-main
 
-README.md
-ScaMATA-assembly-0.1.jar
-build.sbt
-examples/
-experiments/
 project/build.properties
 project/project/
-src/main/opl/
-src/main/resources/
