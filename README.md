@@ -31,6 +31,7 @@ Usage:
     Usage: java -jar ScaMATA-assembly-X.Y.jar [-v] inputFilename outputFilename
     The following options are available:
     -v: verbose
+    -f: flowtime (Cmax by default)
 
 ## Installation
 
