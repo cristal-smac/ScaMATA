@@ -1,6 +1,8 @@
 // Copyright (C) Maxime MORGE 2018
 package org.scamata.util
 
+import scala.collection.SortedSet
+
 /**
   * Compare floating-point numbers in Scala
   *
@@ -34,5 +36,13 @@ object RandomUtils {
   def weight() : Double = {
     val number = r.nextDouble() // in [0.0;1.0[
     number*2-1
+  }
+
+  /**
+    * Return a random element in a set
+    */
+  def random[T](s: SortedSet[T]): T = {
+    val n = util.Random.nextInt(s.size)
+    s.iterator.drop(n).next
   }
 }

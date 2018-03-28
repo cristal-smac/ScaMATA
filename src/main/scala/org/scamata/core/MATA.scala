@@ -70,7 +70,6 @@ class MATA(val agents: SortedSet[Agent], val tasks: SortedSet[Task], val cost : 
     */
   def isFullySpecified: Boolean = cost.size == agents.size * tasks.size
 
-
 }
 
 /**

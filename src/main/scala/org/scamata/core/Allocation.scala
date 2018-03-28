@@ -1,6 +1,8 @@
 // Copyright (C) Maxime MORGE 2018
 package org.scamata.core
 
+import org.scamata.util.RandomUtils
+
 import scala.io.Source
 
 /**
@@ -28,6 +30,19 @@ class Allocation(val pb : MATA){
     * Returns the completion time of the last task to perform
     */
   def makespan() : Double = pb.agents.foldLeft(0.0)( (max, a) => math.max(max, workload(a)))
+
+
+  /**
+    * Returns a random allocation
+    */
+  def randomize() : Unit = {
+    val r = scala.util.Random
+    pb.tasks.foreach { t =>
+      val ra =RandomUtils.random[Agent](pb.agents)
+      bundle(ra) += t
+    }
+  }
+
 
 }
 
