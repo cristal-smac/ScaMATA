@@ -11,8 +11,9 @@ import java.io.File
 import com.typesafe.config.{Config, ConfigFactory}
 
 /**
-  * Approximation algorithm for minimizing the makespan
+  * Approximation algorithm for minimizing the makespan/flowtime
   * @param pb to be solver
+  * @param rule to be optimized
   */
 class LPSolver(pb : MATA, rule : SocialRule) extends DualSolver(pb, rule) {
 
