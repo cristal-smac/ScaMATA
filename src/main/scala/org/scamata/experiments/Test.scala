@@ -48,7 +48,7 @@ object Test {
             lpSolverPreTime += lpSolver.preSolvingTime
             lpSolverPostTime += lpSolver.postSolvingTime
           }
-          bw.write(s"$m,$n,${giftSolverRule/nbPb},${lpSolverRule/nbPb},${giftSolverTime/nbPb},${lpSolverTime/nbPb},${lpSolverTime/nbPb},${lpSolverPreTime/nbPb},${lpSolverPostTime/nbPb}\n")
+          bw.write(s"$m,$n,${giftSolverRule/nbPb},${lpSolverRule/nbPb},${giftSolverTime/nbPb},${lpSolverTime/nbPb},${lpSolverPreTime/nbPb},${lpSolverPostTime/nbPb}\n")
           bw.flush()
         }
       }
