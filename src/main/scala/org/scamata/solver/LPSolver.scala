@@ -27,9 +27,9 @@ class LPSolver(pb : MATA, rule : SocialRule) extends DualSolver(pb, rule) {
       config.getString("path.scamata")+"/"+config.getString("path.flowtime")
   }
 
-  def solve(): Allocation = {
+  override def solve(): Allocation = {
     // 1 - Reformulate the problem
-    var startingTime = System.nanoTime()
+    var startingTime: Long = System.nanoTime()
     val writer=new MATAWriter(inputPath ,pb)
     writer.write
     preSolvingTime = System.nanoTime() - startingTime
@@ -47,5 +47,19 @@ class LPSolver(pb : MATA, rule : SocialRule) extends DualSolver(pb, rule) {
     postSolvingTime = System.nanoTime() - startingTime
     allocation
   }
+}
+
+/**
+  * Companion object to test it
+  */
+object LPSolver extends App {
+  val debug = false
+  import org.scamata.example.toy4x4._
+  //val pb = MATA.randomProblem(2, 4)
+  println(pb)
+  val lpSolver = new LPSolver(pb,Cmax)
+  println(lpSolver.solve().toString)
+  val negotiationSolver = new GiftSolver(pb,Cmax)
+  println(negotiationSolver.solve().toString)
 
 }

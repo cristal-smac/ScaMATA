@@ -1,9 +1,8 @@
 // Copyright (C) Maxime MORGE 2018
 package org.scamata.core
 
+import scala.util.Random
 import scala.collection.SortedSet
-import org.scamata.solver._
-
 
 /**
   * Class representing a MultiAgent Task Allocation problem
@@ -73,12 +72,21 @@ class MATA(val agents: SortedSet[Agent], val tasks: SortedSet[Task], val cost : 
 }
 
 /**
-  * Companion object to test it
+  * Factory for [[org.scamata.core.MATA]] instances
   */
-object MATA extends App {
-  val debug = true
-  import org.scamata.example.toy4x4._
-  println(pb)
-  val solver = new LPSolver(pb,Cmax)
-  printf(solver.solve().toString)
+object MATA{
+
+  val debug = false
+
+  /**
+    * Returns a random MATA proble instance
+    * @param m number of agents
+    * @param n number of tasks
+    */
+  def randomProblem(m : Int, n : Int) : MATA = {
+    val agents: SortedSet[Agent] = collection.immutable.SortedSet[Agent]() ++ (for (k <- 0 until m) yield new Agent(name = s"${Random.alphanumeric take 10 mkString ""}"))
+    val tasks: SortedSet[Task] = collection.immutable.SortedSet[Task]() ++  (for (k <- 0 until n) yield new Task(name = s"${Random.alphanumeric take 10 mkString ""}"))
+    val cost : Map[(Agent, Task), Double] = (for(i <- 0 until m; j <- 0 until n) yield (agents.toList(i),tasks.toList(j)) -> Random.nextDouble()).toMap
+    new MATA(agents, tasks, cost)
+  }
 }

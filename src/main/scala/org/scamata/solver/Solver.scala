@@ -9,8 +9,8 @@ class SocialRule{
     * Returns a string representation of the social rule
     */
   override def toString: String = this match{
-    case Cmax => "Cmax"
-    case Flowtime => "Flowtime"
+    case Cmax => "cmax"
+    case Flowtime => "flowtime"
   }
 }
 case object Flowtime extends SocialRule
@@ -28,7 +28,7 @@ abstract class Solver(val pb : MATA, val rule : SocialRule) {
   /**
     * Returns an allocation
     */
-  def solve() : Allocation
+  protected def solve() : Allocation
 
   /**
     * Returns an allocation and update solving time

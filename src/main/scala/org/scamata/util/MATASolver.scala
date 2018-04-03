@@ -15,7 +15,7 @@ import akka.actor.ActorSystem
   */
 object MATASolver extends App {
 
-  val debug = true
+  val debug = false
   val system = ActorSystem("MATASolver") //The Actor system
   val usage =
     """

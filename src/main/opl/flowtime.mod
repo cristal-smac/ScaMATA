@@ -31,14 +31,11 @@ execute{
 	outputFile.writeln(cplex.getObjValue());//Flowtime
 	outputFile.writeln(processingTime);//T in millisecond
     for(a in thisOplModel.A){
-        var task = 0;
         for(t in thisOplModel.T){
             if (thisOplModel.X[a][t] == 1){
-                task = t;
-                outputFile.writeln(t);
+                outputFile.writeln(a);
             }
         }
-        if (task = 0) outputFile.writeln(task);
      }
 	outputFile.close();
 }
