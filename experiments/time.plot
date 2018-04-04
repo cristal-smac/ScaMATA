@@ -16,5 +16,5 @@ set output 'timeCmax.pdf'
 splot  "data/cmax.csv" using 1:2:($5)/1e9 with lines lc "blue" title 'Gift',\
        "data/cmax.csv" using 1:2:($6+$7+$8)/1e9 with lines lc "red" title 'LP'
 set output 'timeFlowtime.pdf'
-splot  "data/flowtime.csv" using 1:2:($5)/1e9 with lines lc "green" title 'Gift',\
-       "data/flowtime.csv" using 1:2:($6+$7+$8)/1e9 with lines lc "blue" title 'LP'
+splot  "data/flowtime.csv" using 1:2:($5)/1e9 with lines lc "blue" title 'Gift',\
+       "data/flowtime.csv" using 1:2:($6+$7+$8)/1e9 with lines lc "red" title 'LP'

@@ -17,5 +17,5 @@ splot  "data/cmax.csv" using 1:2:3 with lines lc "blue" title 'Gift',\
        "data/cmax.csv" using 1:2:4 with lines lc "red" title 'LP'
 set zlabel "Flowtime"
 set output 'ruleflowtime.pdf'
-splot  "data/flowtime.csv" using 1:2:3 with lines lc "green" title 'Gift',\
-       "data/flowtime.csv" using 1:2:4 with lines lc "blue" title 'LP'
+splot  "data/flowtime.csv" using 1:2:3 with lines lc "blue" title 'Gift',\
+       "data/flowtime.csv" using 1:2:4 with lines lc "red" title 'LP'
