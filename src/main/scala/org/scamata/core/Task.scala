@@ -11,7 +11,7 @@ class Task(val name : String) extends Ordered[Task]{
 
   override def equals(that: Any): Boolean =
     that match {
-      case that: Agent => that.canEqual(this) && this.name.equals(that.name)
+      case that: Worker => that.canEqual(this) && this.name.equals(that.name)
       case _ => false
     }
   def canEqual(a: Any): Boolean = a.isInstanceOf[Task]

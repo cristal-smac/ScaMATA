@@ -4,6 +4,7 @@ package org.scamata.core
 import org.scamata.deal.SingleGift
 import org.scamata.util.RandomUtils
 
+import scala.collection.SortedSet
 import scala.io.Source
 
 /**
@@ -12,20 +13,20 @@ import scala.io.Source
   */
 class Allocation(val pb : MATA) {
 
-  var bundle : Map[Agent, Set[Task]] = Map[Agent, Set[Task]]()
-  pb.agents.foreach(a => bundle += a -> Set[Task]())
+  var bundle : Map[Worker, SortedSet[Task]] = Map[Worker, SortedSet[Task]]()
+  pb.agents.foreach(a => bundle += a -> SortedSet[Task]())
 
   override def toString: String = pb.agents.toList.map( a => s"$a: "+bundle(a).toList.mkString(", ") ).mkString("\n")
 
   /**
-    * Returns the workload of the agent
+    * Returns the workload of the worker
     */
-  def workload(agent: Agent) : Double = bundle(agent).foldLeft(0.0)((acc : Double, t : Task) => acc + pb.cost(agent, t))
+  def workload(agent: Worker) : Double = bundle(agent).foldLeft(0.0)((acc : Double, t : Task) => acc + pb.cost(agent, t))
 
   /**
     * Returns he total costs incurred by the task allocation
     */
-  def flowtime() : Double = pb.agents.foldLeft(0.0)((acc : Double, a : Agent) => acc + workload(a))
+  def flowtime() : Double = pb.agents.foldLeft(0.0)((acc : Double, a : Worker) => acc + workload(a))
 
   /**
     * Returns the completion time of the last task to perform
@@ -36,14 +37,14 @@ class Allocation(val pb : MATA) {
   /**
     * Return the agents which are least loaded than the initiator
     */
-  def leastLoadedAgents(initiator : Agent) : Set[Agent] = pb.agents.filter(a => workload(a) < workload(initiator)).toSet
+  def leastLoadedAgents(initiator : Worker) : Set[Worker] = pb.agents.filter(a => workload(a) < workload(initiator)).toSet
 
   /**
     * Returns a copy
     */
     def copy(): Allocation = {
     val allocation = new Allocation(pb)
-    bundle.foreach{ case (a: Agent, t: Set[Task]) =>
+    bundle.foreach{ case (a: Worker, t: Set[Task]) =>
       allocation.bundle+= (a -> t)
     }
     allocation
@@ -106,8 +107,8 @@ object Allocation{
     val allocation = new Allocation(pb)
     val r = scala.util.Random
     pb.tasks.foreach { t =>
-      val ra =RandomUtils.random[Agent](pb.agents)
-      var b : Set[Task] = allocation.bundle(ra)
+      val ra =RandomUtils.random[Worker](pb.agents)
+      var b : SortedSet[Task] = allocation.bundle(ra)
       b+=t
       allocation.bundle += (ra -> b)
     }

@@ -1,6 +1,6 @@
 package org.scamata.example
 
-import org.scamata.core.{Agent, MATA, Task}
+import org.scamata.core.{Worker, MATA, Task}
 
 import scala.collection.SortedSet
 
@@ -8,10 +8,10 @@ import scala.collection.SortedSet
   * A toy MATA problem example
   */
 object toy4x4{
-  val a1 = new Agent("a1")
-  val a2 = new Agent("a2")
-  val a3 = new Agent("a3")
-  val a4 = new Agent("a4")
+  val a1 = new Worker("a1")
+  val a2 = new Worker("a2")
+  val a3 = new Worker("a3")
+  val a4 = new Worker("a4")
   val agents = SortedSet(a1, a2, a3, a4)
 
   val t1 = new Task("t1")
@@ -20,7 +20,7 @@ object toy4x4{
   val t4 = new Task("t4")
   val tasks = SortedSet(t1, t2, t3, t4)
 
-  var cost: Map[(Agent, Task), Double] = Map[(Agent,Task), Double]()
+  var cost: Map[(Worker, Task), Double] = Map[(Worker,Task), Double]()
   cost+= ((a1, t1) -> 2.0)
   cost+= ((a1, t2) -> 3.0)
   cost+= ((a1, t3) -> 2.0)

@@ -10,7 +10,7 @@ import scala.collection.SortedSet
   * @param tasks
   * @param cost Cost Matrix
   */
-class MATA(val agents: SortedSet[Agent], val tasks: SortedSet[Task], val cost : Map[(Agent, Task), Double]) {
+class MATA(val agents: SortedSet[Worker], val tasks: SortedSet[Task], val cost : Map[(Worker, Task), Double]) {
 
   /**
     * Returns a string describing the MATA problem
@@ -28,13 +28,23 @@ class MATA(val agents: SortedSet[Agent], val tasks: SortedSet[Task], val cost : 
   }
 
   /**
-    * Returns an agent
-    * @param name the name of the agent
+    * Returns the number of agents
     */
-  def getAgent(name: String) : Agent = {
+  def m() : Int = agents.size
+
+  /**
+    * Returns the number of tasks
+    */
+  def n() : Int = tasks.size
+
+  /**
+    * Returns an worker
+    * @param name the name of the worker
+    */
+  def getAgent(name: String) : Worker = {
     agents.find(a => a.name.equals(name)) match {
       case Some(s) => s
-      case None => throw new RuntimeException("No agent "+name+" has been found")
+      case None => throw new RuntimeException("No worker "+name+" has been found")
     }
   }
 
@@ -65,7 +75,7 @@ class MATA(val agents: SortedSet[Agent], val tasks: SortedSet[Task], val cost : 
   }
 
   /**
-    * Returns true if the cost of all tasks for all agents are specified
+    * Returns true if the cost of allActors tasks for allActors agents are specified
     */
   def isFullySpecified: Boolean = cost.size == agents.size * tasks.size
 
@@ -84,9 +94,9 @@ object MATA{
     * @param n number of tasks
     */
   def randomProblem(m : Int, n : Int) : MATA = {
-    val agents: SortedSet[Agent] = collection.immutable.SortedSet[Agent]() ++ (for (k <- 0 until m) yield new Agent(name = s"${Random.alphanumeric take 10 mkString ""}"))
+    val agents: SortedSet[Worker] = collection.immutable.SortedSet[Worker]() ++ (for (k <- 0 until m) yield new Worker(name = s"${Random.alphanumeric take 10 mkString ""}"))
     val tasks: SortedSet[Task] = collection.immutable.SortedSet[Task]() ++  (for (k <- 0 until n) yield new Task(name = s"${Random.alphanumeric take 10 mkString ""}"))
-    val cost : Map[(Agent, Task), Double] = (for(i <- 0 until m; j <- 0 until n) yield (agents.toList(i),tasks.toList(j)) -> Random.nextDouble()).toMap
+    val cost : Map[(Worker, Task), Double] = (for(i <- 0 until m; j <- 0 until n) yield (agents.toList(i),tasks.toList(j)) -> Random.nextDouble()).toMap
     new MATA(agents, tasks, cost)
   }
 }

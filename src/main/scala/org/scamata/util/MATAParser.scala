@@ -20,9 +20,9 @@ class MATAParser(val fileName: String ) {
 
   var m=0 // number of agents
   var n=0 // number of tasks
-  var agents: SortedSet[Agent] = SortedSet[Agent]()
+  var agents: SortedSet[Worker] = SortedSet[Worker]()
   var tasks: SortedSet[Task] = SortedSet[Task]()
-  var cost: Map[(Agent, Task), Double] = Map[(Agent,Task), Double]()
+  var cost: Map[(Worker, Task), Double] = Map[(Worker,Task), Double]()
   var pb : MATA = _
 
   /**
@@ -114,7 +114,7 @@ class MATAParser(val fileName: String ) {
     val array:Array[String]=names.split(", ").map(_.trim)
     array.foreach{ str: String =>
       if (debug) println(s"parseAgents: $str")
-      agents+= new Agent(str)
+      agents+= new Worker(str)
     }
   }
 
