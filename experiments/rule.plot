@@ -14,8 +14,11 @@ set ylabel "Number of tasks"
 set zlabel "Cmax"
 set output 'ruleCmax.pdf'
 splot  "data/cmax.csv" using 1:2:3 with lines lc "blue" title 'Gift',\
-       "data/cmax.csv" using 1:2:4 with lines lc "red" title 'LP'
+       "data/cmax.csv" using 1:2:4 with lines lc "green" title 'Dis. Gift',\
+       "data/cmax.csv" using 1:2:5 with lines lc "red" title 'LP'
+
 set zlabel "Flowtime"
 set output 'ruleflowtime.pdf'
 splot  "data/flowtime.csv" using 1:2:3 with lines lc "blue" title 'Gift',\
-       "data/flowtime.csv" using 1:2:4 with lines lc "red" title 'LP'
+       "data/flowtime.csv" using 1:2:4 with lines lc "red" title 'Dis. Gift',\
+       "data/flowtime.csv" using 1:2:5 with lines lc "red" title 'LP'
