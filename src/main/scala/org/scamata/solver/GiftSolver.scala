@@ -27,6 +27,7 @@ class GiftSolver(pb : MATA, rule : SocialRule) extends Solver(pb, rule) {
           case Cmax => allocation.makespan()
           case Flowtime => allocation.flowtime()
         }
+        var found = false
         var bestAllocation: Allocation = allocation
         var bestSingleGift: Gift = new Gift(initiator, initiator, Set[Task]())
         val potentialPartners: Set[Worker] = allocation.leastLoadedAgents(initiator)
@@ -49,11 +50,12 @@ class GiftSolver(pb : MATA, rule : SocialRule) extends Solver(pb, rule) {
                 bestGoal = currentGoal
                 bestAllocation = modifiedAllocation
                 bestSingleGift = gift
+                found = true
               }
             }
           }
           // Select the best gift if any
-          if (bestAllocation.equals(allocation)) {
+          if (!found) {
             if (debug) println(s"$initiator becomes inactive")
             activeAgents -= initiator
           } else {
