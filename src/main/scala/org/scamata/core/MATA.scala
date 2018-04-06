@@ -39,7 +39,7 @@ class MATA(val agents: SortedSet[Worker], val tasks: SortedSet[Task], val cost :
 
   /**
     * Returns an worker
-    * @param name the name of the worker
+    * @param name the worker of the worker
     */
   def getAgent(name: String) : Worker = {
     agents.find(a => a.name.equals(name)) match {
@@ -50,7 +50,7 @@ class MATA(val agents: SortedSet[Worker], val tasks: SortedSet[Task], val cost :
 
   /**
     * Returns a task
-    * @param name the name of the task
+    * @param name the worker of the task
     */
   def getTask(name: String) : Task= {
     tasks.find(t => t.name.equals(name)) match {

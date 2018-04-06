@@ -9,7 +9,7 @@ import org.scamata.core.Worker
   */
 class Directory {
   var adr = Map[Worker, ActorRef]()//Agents' references
-  var name = Map[ActorRef, Worker]()// Actors' worker
+  var worker = Map[ActorRef, Worker]()// Actors' worker
 
   /**
     * Add to the directory
@@ -17,13 +17,15 @@ class Directory {
     * @param ref
     */
   def add(agent: Worker, ref: ActorRef) : Unit = {
-    if ( ! adr.keySet.contains(agent) &&  ! name.keySet.contains(ref)) {
+    if ( ! adr.keySet.contains(agent) &&  ! worker.keySet.contains(ref)) {
       adr += (agent -> ref)
-      name += (ref -> agent)
+      worker += (ref -> agent)
     }
     else throw new RuntimeException(s"$agent and/or $ref already in the directory")
   }
 
   def allActors() : Iterable[ActorRef]  = adr.values
-  def allWorkers() : Iterable[Worker]  = name.values
+  def allWorkers() : Iterable[Worker]  = worker.values
+  override def toString: String = allWorkers().mkString("[",", ","]")
+
 }

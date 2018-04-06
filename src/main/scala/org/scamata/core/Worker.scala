@@ -14,7 +14,7 @@ class Worker(val name : String) extends Ordered[Worker]{
 
   override def equals(that: Any): Boolean =
     that match {
-      case that: Worker => that.canEqual(this) && this.name.equals(that.name)
+      case that: Worker => that.canEqual(this) && this.name == that.name
       case _ => false
     }
   def canEqual(a: Any) : Boolean = a.isInstanceOf[Worker]
@@ -23,13 +23,13 @@ class Worker(val name : String) extends Ordered[Worker]{
     * Returns 0 if the same negative if this < that, positive if this > that
     */
   def compare(that: Worker) : Int = {
-    if (this.name.equals(that.name)) return 0
+    if (this.name == that.name) return 0
     else if (this.name > that.name) return 1
     -1
   }
 
   /**
-    * Returns the workload of the worker with
+    * Returns the belief of the worker with
     * @param bundle allocated to the worker
     * @param cost matrix
     */

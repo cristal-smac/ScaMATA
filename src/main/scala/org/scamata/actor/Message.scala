@@ -9,7 +9,7 @@ import scala.collection.SortedSet
   *  All possible messages between the actors
   */
 class Message
-case object Trigger extends Message
+case object Start extends Message
 // Initiate the worker with the directory, the cost matrix and the individual bundle
 case class Initiate(directory : Directory, cost : Map[(Worker, Task), Double]) extends Message
 case class Give(bundle: SortedSet[Task]) extends Message// Give a bundle

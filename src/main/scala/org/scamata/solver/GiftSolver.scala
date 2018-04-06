@@ -66,3 +66,16 @@ class GiftSolver(pb : MATA, rule : SocialRule) extends Solver(pb, rule) {
     allocation
   }
 }
+
+/**
+  * Companion object to test it
+  */
+object GiftSolver extends App {
+  val debug = false
+  import org.scamata.example.toy4x4._
+  //val pb = MATA.randomProblem(2, 4)
+  println(pb)
+  val negotiationSolver = new GiftSolver(pb,Cmax)
+  println(negotiationSolver.run().toString)
+
+}

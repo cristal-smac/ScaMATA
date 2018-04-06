@@ -12,7 +12,6 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-
 /**
   * Distributed multiagent negotiation process for minimizing the rule
   *
@@ -22,8 +21,8 @@ import scala.language.postfixOps
   */
 class DistributedGiftSolver(pb : MATA, rule : SocialRule, system: ActorSystem) extends Solver(pb, rule) {
 
-  if (rule == Flowtime) throw new RuntimeException("DistributedGiftSolver does not support yet flowtime")
-  val TIMEOUTVALUE = 100 seconds
+  //if (rule == Flowtime) throw new RuntimeException("DistributedGiftSolver does not support yet flowtime")
+  val TIMEOUTVALUE  = 100 seconds
   // default timeout of a run
   implicit val timeout = Timeout(TIMEOUTVALUE)
 
@@ -34,9 +33,9 @@ class DistributedGiftSolver(pb : MATA, rule : SocialRule, system: ActorSystem) e
     // Launch a new supervisor
     DistributedGiftSolver.id+=1
     if (debug) system.eventStream.setLogLevel(akka.event.Logging.DebugLevel)
-    val supervisor = system.actorOf(Props(classOf[GiftSupervisor], pb, rule), name = "supervisor"+DistributedGiftSolver.id)
+    val supervisor = system.actorOf(Props(classOf[Supervisor], pb, rule), name = "supervisor"+DistributedGiftSolver.id)
     // The current thread is blocked and it waits for the supervisor to "complete" the Future with it's reply.
-    val future = supervisor ? Trigger
+    val future = supervisor ? Start
     val result = Await.result(future, timeout.duration).asInstanceOf[Result]
     result.allocation
   }
@@ -45,4 +44,15 @@ class DistributedGiftSolver(pb : MATA, rule : SocialRule, system: ActorSystem) e
 
 object DistributedGiftSolver{
   var id = 0
+  val debug = false
+  def main(args: Array[String]): Unit = {
+    import org.scamata.example.toy4x4._
+    //val pb = MATA.randomProblem(10, 50)
+    println(pb)
+    val r = scala.util.Random
+    val system = ActorSystem("DistributedGiftSolver" + r.nextInt.toString)
+    //The Actor system
+    val negotiationSolver = new DistributedGiftSolver(pb, Flowtime, system)
+    println(negotiationSolver.run().toString)
+  }
 }

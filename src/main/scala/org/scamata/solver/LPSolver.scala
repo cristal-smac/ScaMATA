@@ -5,7 +5,6 @@ import org.scamata.core.{Allocation, MATA}
 import org.scamata.util.MATAWriter
 
 import sys.process._
-import scala.io.Source
 import java.io.File
 
 import com.typesafe.config.{Config, ConfigFactory}
@@ -58,8 +57,5 @@ object LPSolver extends App {
   //val pb = MATA.randomProblem(2, 4)
   println(pb)
   val lpSolver = new LPSolver(pb,Cmax)
-  println(lpSolver.solve().toString)
-  val negotiationSolver = new GiftSolver(pb,Cmax)
-  println(negotiationSolver.solve().toString)
-
+  println(lpSolver.run().toString)
 }

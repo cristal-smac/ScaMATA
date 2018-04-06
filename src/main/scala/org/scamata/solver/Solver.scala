@@ -34,7 +34,7 @@ abstract class Solver(val pb : MATA, val rule : SocialRule) {
     * Returns an allocation and update solving time
     */
   def run() : Allocation = {
-    var startingTime = System.nanoTime()
+    val startingTime = System.nanoTime()
     val allocation = solve()
     solvingTime = System.nanoTime() - startingTime
     allocation

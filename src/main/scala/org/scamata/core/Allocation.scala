@@ -19,7 +19,7 @@ class Allocation(val pb : MATA) {
   override def toString: String = pb.agents.toList.map( a => s"$a: "+bundle(a).toList.mkString(", ") ).mkString("\n")
 
   /**
-    * Returns the workload of the worker
+    * Returns the belief of the worker
     */
   def workload(agent: Worker) : Double = bundle(agent).foldLeft(0.0)((acc : Double, t : Task) => acc + pb.cost(agent, t))
 
