@@ -31,9 +31,9 @@ class GiftSolver(pb : MATA, rule : SocialRule) extends Solver(pb, rule) {
         }
         val potentialPartners : SortedSet[Worker] = rule match {
           case Flowtime => // all the workers
-            pb.workers
+            pb.workers.filterNot(_ == initiator)
           case Cmax => // the workers with a smallest workload
-            pb.workers.filter(allocation.workload(_) < allocation.workload(initiator))
+            pb.workers.filterNot(_ == initiator).filter(allocation.workload(_) < allocation.workload(initiator))
         }
         if (debug) println(s"Potential partner: $potentialPartners")
         if (potentialPartners.isEmpty || allocation.bundle(initiator).isEmpty) {
@@ -46,9 +46,9 @@ class GiftSolver(pb : MATA, rule : SocialRule) extends Solver(pb, rule) {
           var bestSingleGift: Gift = new Gift(initiator, initiator, Set[Task]())
           potentialPartners.foreach { opponent =>
             allocation.bundle(initiator).foreach { task =>
-              // 4 - Foreach potential gift
+              // 4 - Foreach potential swap
               val gift = new SingleGift(initiator, opponent, task)
-              val modifiedAllocation = allocation.apply(gift)
+              val modifiedAllocation = allocation.gift(gift)
               val currentGoal = rule match { // Compute the new goal
               case Cmax => modifiedAllocation.makespan()
               case Flowtime => modifiedAllocation.flowtime()
@@ -61,7 +61,7 @@ class GiftSolver(pb : MATA, rule : SocialRule) extends Solver(pb, rule) {
               }
             }
           }
-          // Select the best gift if any
+          // Select the best swap if any
           if (!found) {
             if (debug) println(s"$initiator becomes inactive")
             activeWorkers -= initiator
@@ -82,8 +82,8 @@ class GiftSolver(pb : MATA, rule : SocialRule) extends Solver(pb, rule) {
   */
 object GiftSolver extends App {
   val debug = false
-  import org.scamata.example.toy4x4._
-  //val pb = MATA.randomProblem(2, 4)
+  //import org.scamata.example.toy4x4._
+  val pb = MATA.randomProblem(10, 100)
   println(pb)
   val negotiationSolver = new GiftSolver(pb,Cmax)
   println(negotiationSolver.run().toString)

@@ -19,7 +19,7 @@ case object Stop extends Message// Stop an agnet
 case class Inform(worker: Worker, workload: Double) extends Message
 
 case class Propose(task : Task, workload: Double) extends Message// Make a proposal
-case class CounterPropose(task : Task, workload: Double) extends Message// Reject a proposal
+case class CounterPropose(task : Task, counterpart : Task, workload: Double) extends Message// Make a counter-proposal
 case class Reject(task : Task, workload: Double) extends Message// Reject a proposal
 case class Accept(task : Task, workload: Double) extends Message// Accept a proposal
 case class Withdraw(task : Task, workload: Double) extends Message// Withdraw a deal

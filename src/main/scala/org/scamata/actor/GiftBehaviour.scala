@@ -13,7 +13,7 @@ import scala.collection.SortedSet
   * @param worker which is embedded
   * @param rule   to optimize
   */
-class Behaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Worker, rule: SocialRule) with FSM[State, StateOfMind] with Stash{
+class GiftBehaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Worker, rule: SocialRule) with FSM[State, StateOfMind] with Stash{
 
   /**
     * Initially the worker is in Pause with no bundle, no beliefs about the workloads
@@ -24,14 +24,14 @@ class Behaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Worker, 
     * Either the worker is in Pause
     */
   when(Pause) {
-    // If the agent is initiated
+    // If the worker is initiated
     case Event(Initiate(d, c), _) => // Initiate the directory and the cost matrix
       this.directory = d
       this.cost = c
       if (debug) println(s"$worker Cost Matrix:\n $cost")
       stay using new StateOfMind(SortedSet[Task](), directory.allWorkers().map(w => (w, 0.0)).toMap)
 
-    // If the agent is triggered
+    // If the worker is triggered
     case Event(Give(bundle), mind) =>
       if (debug) println(s"$worker receives $bundle in state pause")
       val workload = worker.workload(bundle, cost)
@@ -53,6 +53,7 @@ class Behaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Worker, 
         supervisor ! Stopped(bundle)
         stay using new StateOfMind(bundle, updatedBelief)
       } else { // Otherwise
+        var found = false
         var bestBundle = bundle
         var bestSingleGift: SingleGift = new SingleGift(worker, worker, bundle.head)
         var bestGoal = rule match { // The goal consists of
@@ -63,7 +64,7 @@ class Behaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Worker, 
         }
         potentialPartners.foreach { opponent =>
           bundle.foreach { task =>
-            // Foreach single gift
+            // Foreach single swap
             val gift = new SingleGift(worker, opponent, task)
             val giftBundle = bundle - task
             val giftWorkload = workload - cost(worker, task)
@@ -74,14 +75,15 @@ class Behaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Worker, 
               case Flowtime =>
                 flowtime - cost(worker, task) + cost(opponent, task)
             }
-            if (giftGoal < bestGoal) {
+            if (giftGoal <= bestGoal) { // Allow swap which does not undermine the goal
+              found = true
               bestGoal = giftWorkload
               bestSingleGift = gift
               bestBundle = giftBundle
             }
           }
         }
-        if (bestBundle.equals(bundle)) {
+        if (! found) {
           if (debug) println(s"$worker stays in Pause")
           supervisor ! Stopped(bundle)
           goto(Pause) using new StateOfMind(bundle, updatedBelief)

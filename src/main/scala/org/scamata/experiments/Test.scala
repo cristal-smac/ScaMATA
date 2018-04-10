@@ -22,42 +22,47 @@ object Test {
       val rule: SocialRule = criterion match {
         case "cmax" => Cmax
         case "flowtime" => Flowtime
-        case _ => throw new RuntimeException("The argument is not suppported")
+        case _ => throw new RuntimeException("The argument is not supported")
       }
       val file = s"experiments/data/$rule.csv"
       val bw = new BufferedWriter(new FileWriter(file))
-      bw.write(s"m,n,giftSolver$rule,distributedGiftSolver$rule,lpSolver$rule,giftSolverTime,distributedGiftSolverTime,lpSolverTime,lpSolverPreTime,lpSolverPostTime\n")
+      bw.write(s"m,n,giftSolver$rule,distributedGiftSolver$rule,swapSolver$rule,lpSolver$rule,giftSolverTime,distributedGiftSolverTime,swapSolverTime,lpSolverTime,lpSolverPreTime,lpSolverPostTime\n")
       for (m <- 2 to 10) {
         for (n <- 2 to 100) {
           if (debug) println(s"Test configuration with $m workers and $n tasks")
           val nbPb = 100
-          var (lpSolverRule, giftSolverRule, distributedGiftSolverRule, lpSolverTime, lpSolverPreTime, lpSolverPostTime, giftSolverTime, distributedGiftSolverTime) =
-            (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+          var (lpSolverRule, giftSolverRule, distributedGiftSolverRule, swapSolverRule, lpSolverTime, lpSolverPreTime, lpSolverPostTime, giftSolverTime, swapSolverTime, distributedGiftSolverTime) =
+            (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
           for (o <- 1 to nbPb) {
             val pb = MATA.randomProblem(m, n)
             val lpSolver : LPSolver  = new LPSolver(pb,rule)
             val giftSolver : GiftSolver  = new GiftSolver(pb,rule)
+            val swapSolver : SwapSolver  = new SwapSolver(pb,rule)
             val distributedGiftSolver : DistributedGiftSolver  = new DistributedGiftSolver(pb, rule, system)
             val lpAlloc =lpSolver.run()
             val giftAlloc = giftSolver.run()
+            val swapAlloc = swapSolver.run()
             val distributedGiftAlloc = distributedGiftSolver.run()
             rule match {
                 case Cmax =>
                   lpSolverRule += lpAlloc.makespan()
                   giftSolverRule += giftAlloc.makespan()
+                  swapSolverRule += swapAlloc.makespan()
                   distributedGiftSolverRule += distributedGiftAlloc.makespan()
                 case Flowtime =>
                   lpSolverRule += lpAlloc.flowtime()
                   giftSolverRule += giftAlloc.flowtime()
+                  swapSolverRule += swapAlloc.flowtime()
                   distributedGiftSolverRule += distributedGiftAlloc.flowtime()
             }
             giftSolverTime += giftSolver.solvingTime
+            swapSolverTime += swapSolver.solvingTime
             distributedGiftSolverTime += distributedGiftSolver.solvingTime
             lpSolverTime += lpSolver.solvingTime
             lpSolverPreTime += lpSolver.preSolvingTime
             lpSolverPostTime += lpSolver.postSolvingTime
           }
-          bw.write(s"$m,$n,${giftSolverRule/nbPb},${distributedGiftSolverRule/nbPb},${lpSolverRule/nbPb},${giftSolverTime/nbPb},${distributedGiftSolverTime/nbPb},${lpSolverTime/nbPb},${lpSolverPreTime/nbPb},${lpSolverPostTime/nbPb}\n")
+          bw.write(s"$m,$n,${giftSolverRule/nbPb},${distributedGiftSolverRule/nbPb},${swapSolverRule/nbPb},${lpSolverRule/nbPb},${giftSolverTime/nbPb},${distributedGiftSolverTime/nbPb},${swapSolverTime/nbPb},${lpSolverTime/nbPb},${lpSolverPreTime/nbPb},${lpSolverPostTime/nbPb}\n")
           bw.flush()
         }
       }

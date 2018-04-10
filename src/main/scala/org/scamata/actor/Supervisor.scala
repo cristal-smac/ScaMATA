@@ -29,7 +29,7 @@ class Supervisor(pb: MATA, rule: SocialRule) extends Actor {
   override def preStart(): Unit = {
     //Create the workers
     pb.workers.foreach{ worker : Worker =>
-      val actor =  context.actorOf(Props(classOf[Behaviour], worker, rule), worker.name)
+      val actor =  context.actorOf(Props(classOf[GiftBehaviour], worker, rule), worker.name)
       actors :+= actor
       directory.add(worker, actor)
     }

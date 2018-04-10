@@ -1,7 +1,7 @@
 // Copyright (C) Maxime MORGE 2018
 package org.scamata.core
 
-import org.scamata.deal.SingleGift
+import org.scamata.deal.{SingleGift, SingleSwap}
 import org.scamata.util.RandomUtils
 
 import scala.collection.SortedSet
@@ -21,7 +21,7 @@ class Allocation(val pb : MATA) {
   /**
     * Returns the belief of the worker
     */
-  def workload(agent: Worker) : Double = bundle(agent).foldLeft(0.0)((acc : Double, t : Task) => acc + pb.cost(agent, t))
+  def workload(worker: Worker) : Double = bundle(worker).foldLeft(0.0)((acc : Double, t : Task) => acc + pb.cost(worker, t))
 
   /**
     * Returns he total costs incurred by the task allocation
@@ -44,8 +44,8 @@ class Allocation(val pb : MATA) {
     */
     def copy(): Allocation = {
     val allocation = new Allocation(pb)
-    bundle.foreach{ case (a: Worker, t: Set[Task]) =>
-      allocation.bundle+= (a -> t)
+    this.bundle.foreach{ case (a: Worker, t: Set[Task]) =>
+      allocation.bundle = allocation.bundle.updated(a, t)
     }
     allocation
   }
@@ -53,12 +53,39 @@ class Allocation(val pb : MATA) {
   /**
     * The provider gives a task to the supplier
     */
-  def apply(gift: SingleGift) : Allocation = {
+  def gift(gift: SingleGift) : Allocation = {
     if (! bundle(gift.provider).contains(gift.task)) throw new RuntimeException(s"${gift.provider} cannot give ${gift.task}")
     val allocation = this.copy()
-    allocation.bundle += (gift.provider -> (allocation.bundle(gift.provider) - gift.task ))
-    allocation.bundle += (gift.supplier -> (allocation.bundle(gift.supplier) + gift.task ))
+    allocation.bundle= allocation.bundle.updated(gift.provider, allocation.bundle(gift.provider) - gift.task)
+    allocation.bundle= allocation.bundle.updated(gift.supplier, allocation.bundle(gift.supplier) + gift.task )
     allocation
+  }
+
+  /**
+    * Th
+    */
+  def swap(swap: SingleSwap) : Allocation = {
+    if (! bundle(swap.worker1).contains(swap.task1) || ! bundle(swap.worker2).contains(swap.task2)) throw new RuntimeException(s"${swap} cannot be performed on $this")
+    val allocation = this.copy()
+    allocation.bundle= allocation.bundle.updated(swap.worker1, allocation.bundle(swap.worker1) - swap.task1 + swap.task2)
+    allocation.bundle= allocation.bundle.updated(swap.worker2, allocation.bundle(swap.worker2) + swap.task1 - swap.task2)
+    allocation
+  }
+
+
+
+
+  /**
+    * Returns all the single swaps between two workers
+    */
+  def allSingleSwap(worker1 : Worker, worker2: Worker) : Set[SingleSwap]= {
+    var swaps =Set[SingleSwap]()
+    bundle(worker1).foreach{ t1 =>
+        bundle(worker2).foreach{ t2 =>
+          swaps += new SingleSwap(worker1, worker2, t1, t2)
+        }
+      }
+    swaps
   }
 
 }
