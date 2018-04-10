@@ -22,7 +22,7 @@ case object Proposer extends State
   * @param belief about the workloads
   */
 class StateOfMind(val bundle: SortedSet[Task], val belief: Map[Worker, Double])
-  extends Tuple3[SortedSet[Task], Map[Worker, Double]](bundle, belief)
+  extends Tuple2[SortedSet[Task], Map[Worker, Double]](bundle, belief)
 
 
 /**
