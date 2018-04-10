@@ -6,21 +6,21 @@ import scala.collection.SortedSet
 
 /**
   * Class representing a MultiAgent Task Allocation problem
-  * @param agents
+  * @param workers
   * @param tasks
   * @param cost Cost Matrix
   */
-class MATA(val agents: SortedSet[Worker], val tasks: SortedSet[Task], val cost : Map[(Worker, Task), Double]) {
+class MATA(val workers: SortedSet[Worker], val tasks: SortedSet[Task], val cost : Map[(Worker, Task), Double]) {
 
   /**
     * Returns a string describing the MATA problem
     */
   override def toString: String = {
-    "m: " +agents.size +"\n"+
+    "m: " +workers.size +"\n"+
       "n: " + tasks.size +"\n"+
-      "agents: " +agents.mkString(", ") +"\n"+
+      "workers: " +workers.mkString(", ") +"\n"+
       "tasks: " + tasks.mkString(", ") +"\n"+
-      agents.toList.map(a =>
+      workers.toList.map(a =>
         tasks.toList.map( t =>
           s"$a: $t ${cost(a,t)}"
           ).mkString("\n")
@@ -28,9 +28,9 @@ class MATA(val agents: SortedSet[Worker], val tasks: SortedSet[Task], val cost :
   }
 
   /**
-    * Returns the number of agents
+    * Returns the number of workers
     */
-  def m() : Int = agents.size
+  def m() : Int = workers.size
 
   /**
     * Returns the number of tasks
@@ -42,7 +42,7 @@ class MATA(val agents: SortedSet[Worker], val tasks: SortedSet[Task], val cost :
     * @param name the worker of the worker
     */
   def getAgent(name: String) : Worker = {
-    agents.find(a => a.name.equals(name)) match {
+    workers.find(a => a.name.equals(name)) match {
       case Some(s) => s
       case None => throw new RuntimeException("No worker "+name+" has been found")
     }
@@ -64,10 +64,10 @@ class MATA(val agents: SortedSet[Worker], val tasks: SortedSet[Task], val cost :
     * Return a string description of the MATA problem in the Opyimization Progamming language
     */
   def toOPL : String = {
-    "M = "+agents.size+"; \n"+
+    "M = "+workers.size+"; \n"+
     "N = "+tasks.size+"; \n"+
       "C = "+
-      agents.toList.map(a =>
+      workers.toList.map(a =>
         tasks.toList.map( t =>
           cost(a,t).toString
         ).mkString("[", ", ", "]")
@@ -75,9 +75,9 @@ class MATA(val agents: SortedSet[Worker], val tasks: SortedSet[Task], val cost :
   }
 
   /**
-    * Returns true if the cost of allActors tasks for allActors agents are specified
+    * Returns true if the cost of allActors tasks for allActors workers are specified
     */
-  def isFullySpecified: Boolean = cost.size == agents.size * tasks.size
+  def isFullySpecified: Boolean = cost.size == workers.size * tasks.size
 
 }
 
@@ -90,7 +90,7 @@ object MATA{
 
   /**
     * Returns a random MATA proble instance
-    * @param m number of agents
+    * @param m number of workers
     * @param n number of tasks
     */
   def randomProblem(m : Int, n : Int) : MATA = {

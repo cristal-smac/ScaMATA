@@ -16,35 +16,42 @@ import scala.collection.SortedSet
 class Behaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Worker, rule: SocialRule) with FSM[State, StateOfMind] with Stash{
 
   /**
-    * Initially the agent is in Pause with no bundle, all the acquaintances and no beliefs about the workloads
+    * Initially the worker is in Pause with no bundle, no beliefs about the workloads
     */
-  startWith(Pause, new StateOfMind(SortedSet[Task](), directory.allWorkers(), directory.allWorkers().map(w => (w, 0.0)).toMap))
+  startWith(Pause, new StateOfMind(SortedSet[Task](), Map[Worker, Double]()))
 
   /**
-    * Either the agent is in Pause
+    * Either the worker is in Pause
     */
   when(Pause) {
+    // If the agent is initiated
+    case Event(Initiate(d, c), _) => // Initiate the directory and the cost matrix
+      this.directory = d
+      this.cost = c
+      if (debug) println(s"$worker Cost Matrix:\n $cost")
+      stay using new StateOfMind(SortedSet[Task](), directory.allWorkers().map(w => (w, 0.0)).toMap)
+
     // If the agent is triggered
     case Event(Give(bundle), mind) =>
       if (debug) println(s"$worker receives $bundle in state pause")
       val workload = worker.workload(bundle, cost)
-      val flowtime = mind.workers.foldLeft(0.0)((a, w) => a + mind.belief(w))
+      val flowtime = directory.peers(worker).foldLeft(0.0)((acc, w) => acc + mind.belief(w))
       if (debug) println(s"$worker's workload: $workload")
       val updatedBelief = mind.belief + (worker -> workload)
       broadcastInform(workload)
       // The potential partners are
       val potentialPartners = rule match {
         case Flowtime => // all the workers
-          mind.workers
+          directory.peers(worker)
         case Cmax => // the workers with a smallest workload
-          mind.workers.filter(mind.belief(_) < workload)
+          directory.peers(worker).filter(mind.belief(_) < workload)
 
       }
       if (debug) println(s"$worker has potential partner: $potentialPartners")
       if (potentialPartners.isEmpty || mind.bundle.isEmpty) { // Either the worker has an empty bundle or no potential partners"
         if (debug) println(s"$worker stays in Pause since he has an empty bundle or no potential partners")
         supervisor ! Stopped(bundle)
-        stay using new StateOfMind(bundle, mind.workers, updatedBelief)
+        stay using new StateOfMind(bundle, updatedBelief)
       } else { // Otherwise
         var bestBundle = bundle
         var bestSingleGift: SingleGift = new SingleGift(worker, worker, bundle.head)
@@ -77,16 +84,16 @@ class Behaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Worker, 
         if (bestBundle.equals(bundle)) {
           if (debug) println(s"$worker stays in Pause")
           supervisor ! Stopped(bundle)
-          goto(Pause) using new StateOfMind(bundle, mind.workers, updatedBelief)
+          goto(Pause) using new StateOfMind(bundle, updatedBelief)
         } else {
           if (debug) println(s"$bestSingleGift is proposed")
           directory.adr(bestSingleGift.supplier) ! Propose(bestSingleGift.task, workload)
-          goto(Proposer) using new StateOfMind(bundle, mind.workers, updatedBelief)
+          goto(Proposer) using new StateOfMind(bundle, updatedBelief)
         }
       }
-    // If the agent receives a proposal
+    // If the worker receives a proposal
     case Event(Propose(task, w), mind) =>
-      val opponent = directory.worker(sender)
+      val opponent = directory.workers(sender)
       if (debug) println(s"$worker receives a proposal $task from $opponent in state pause")
       var updatedBelief = mind.belief + (opponent -> w)
       if (acceptable(task, opponent, worker, updatedBelief)) {
@@ -96,36 +103,36 @@ class Behaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Worker, 
         updatedBelief = mind.belief + (worker -> workload, opponent -> opponentWorkload )
         sender ! Accept(task, workload)
         self ! Give(updatedBundle)
-        goto(Pause) using new StateOfMind(updatedBundle, mind.workers, updatedBelief)
+        goto(Pause) using new StateOfMind(updatedBundle, updatedBelief)
       }else{
         val workload = mind.belief(worker)
         sender ! Reject(task, workload)
-        goto(Pause) using new StateOfMind(mind.bundle, mind.workers, updatedBelief)
+        goto(Pause) using new StateOfMind(mind.bundle, updatedBelief)
       }
   }
 
   /**
-    * Or the agent is a proposer
+    * Or the worker is a proposer
     */
   when(Proposer) {
     case Event(Reject(task, opponentWorkload), mind) =>
-      val opponent = directory.worker(sender)
+      val opponent = directory.workers(sender)
       if (debug) println(s"$worker receives a rejection of $task from $opponent in state Proposer")
       val updatedBelief = mind.belief +(opponent -> opponentWorkload)
       self ! Give(mind.bundle)
-      goto(Pause) using new StateOfMind(mind.bundle, mind.workers, updatedBelief)
+      goto(Pause) using new StateOfMind(mind.bundle, updatedBelief)
 
     case Event(Accept(task, opponentWorkload), mind) =>
-      val opponent = directory.worker(sender)
+      val opponent = directory.workers(sender)
       if (debug) println(s"$worker receives an acceptance of $task from $opponent in state Proposer")
       val updatedBundle = mind.bundle - task
       val workload = mind.belief(worker) - cost(worker, task)
       val updatedBelief = mind.belief + (worker -> workload, opponent -> opponentWorkload )
       self ! Give(updatedBundle)
-      goto(Pause) using new StateOfMind(updatedBundle, mind.workers, updatedBelief)
+      goto(Pause) using new StateOfMind(updatedBundle, updatedBelief)
 
     case Event(Propose(task, _), _) =>
-      val opponent = directory.worker(sender)
+      val opponent = directory.workers(sender)
       if (debug) println(s"$worker receives a propsal of $task from $opponent in state Proposer")
       stash
       stay
@@ -140,7 +147,7 @@ class Behaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Worker, 
     case Event (Inform (opponent, workload), s) =>
       if (debug) println(s"$worker receives an inform from $opponent in state $s")
       val belief = s.belief + (worker -> workload)
-      stay using new StateOfMind (s.bundle, s.workers, belief)
+      stay using new StateOfMind (s.bundle, belief)
     case Event (m: Message, _) =>
       defaultReceive(m)
       stay

@@ -29,7 +29,7 @@ object Test {
       bw.write(s"m,n,giftSolver$rule,distributedGiftSolver$rule,lpSolver$rule,giftSolverTime,distributedGiftSolverTime,lpSolverTime,lpSolverPreTime,lpSolverPostTime\n")
       for (m <- 2 to 10) {
         for (n <- 2 to 100) {
-          if (debug) println(s"Test configuration with $m agents and $n tasks")
+          if (debug) println(s"Test configuration with $m workers and $n tasks")
           val nbPb = 100
           var (lpSolverRule, giftSolverRule, distributedGiftSolverRule, lpSolverTime, lpSolverPreTime, lpSolverPostTime, giftSolverTime, distributedGiftSolverTime) =
             (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)

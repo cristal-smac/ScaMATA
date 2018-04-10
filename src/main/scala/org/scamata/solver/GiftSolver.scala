@@ -4,6 +4,8 @@ package org.scamata.solver
 import org.scamata.core._
 import org.scamata.deal._
 
+import scala.collection.SortedSet
+
 /**
   * Multiagent negotiation process for minimizing the rule
   * @param pb to be solver
@@ -18,25 +20,30 @@ class GiftSolver(pb : MATA, rule : SocialRule) extends Solver(pb, rule) {
   override def solve(): Allocation = {
     var allocation = Allocation.randomAllocation(pb)
     if (debug) println(s"Give with a random allocation:\n$allocation")
-    var activeAgents = pb.agents
-    if (debug) println("All agents are initally active")
-    while(activeAgents.nonEmpty){
-      activeAgents.foreach { initiator: Worker =>
+    var activeWorkers = pb.workers
+    if (debug) println("All workers are initially active")
+    while(activeWorkers.nonEmpty){
+      activeWorkers.foreach { initiator: Worker =>
         if (debug) println(s"$initiator tries to find a social rational gift")
         var bestGoal = rule match {
           case Cmax => allocation.makespan()
           case Flowtime => allocation.flowtime()
         }
-        var found = false
-        var bestAllocation: Allocation = allocation
-        var bestSingleGift: Gift = new Gift(initiator, initiator, Set[Task]())
-        val potentialPartners: Set[Worker] = allocation.leastLoadedAgents(initiator)
+        val potentialPartners : SortedSet[Worker] = rule match {
+          case Flowtime => // all the workers
+            pb.workers
+          case Cmax => // the workers with a smallest workload
+            pb.workers.filter(allocation.workload(_) < allocation.workload(initiator))
+        }
         if (debug) println(s"Potential partner: $potentialPartners")
-        if (potentialPartners.isEmpty) {
-          activeAgents -= initiator
+        if (potentialPartners.isEmpty || allocation.bundle(initiator).isEmpty) {
+          activeWorkers -= initiator
           if (debug) println(s"$initiator becomes inactive")
         }
         else {
+          var found = false
+          var bestAllocation: Allocation = allocation
+          var bestSingleGift: Gift = new Gift(initiator, initiator, Set[Task]())
           potentialPartners.foreach { opponent =>
             allocation.bundle(initiator).foreach { task =>
               // 4 - Foreach potential gift
@@ -57,10 +64,11 @@ class GiftSolver(pb : MATA, rule : SocialRule) extends Solver(pb, rule) {
           // Select the best gift if any
           if (!found) {
             if (debug) println(s"$initiator becomes inactive")
-            activeAgents -= initiator
+            activeWorkers -= initiator
           } else {
             if (debug) println(s"$bestSingleGift is performed")
             allocation = bestAllocation
+            activeWorkers += bestSingleGift.supplier
           }
         }
       }

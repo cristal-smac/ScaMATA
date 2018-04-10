@@ -5,27 +5,30 @@ import akka.actor.ActorRef
 import org.scamata.core.Worker
 
 /**
-  * Class representing an index of the names and addresses of agents
+  * Class representing an index of the names and addresses of workers
   */
 class Directory {
   var adr = Map[Worker, ActorRef]()//Agents' references
-  var worker = Map[ActorRef, Worker]()// Actors' worker
+  var workers = Map[ActorRef, Worker]()// Actors' worker
 
   /**
     * Add to the directory
-    * @param agent
+    * @param worker
     * @param ref
     */
-  def add(agent: Worker, ref: ActorRef) : Unit = {
-    if ( ! adr.keySet.contains(agent) &&  ! worker.keySet.contains(ref)) {
-      adr += (agent -> ref)
-      worker += (ref -> agent)
+  def add(worker: Worker, ref: ActorRef) : Unit = {
+    if ( ! adr.keySet.contains(worker) &&  ! workers.keySet.contains(ref)) {
+      adr += (worker -> ref)
+      workers += (ref -> worker)
     }
-    else throw new RuntimeException(s"$agent and/or $ref already in the directory")
+    else throw new RuntimeException(s"$worker and/or $ref already in the directory")
   }
 
   def allActors() : Iterable[ActorRef]  = adr.values
-  def allWorkers() : Iterable[Worker]  = worker.values
+  def allWorkers() : Iterable[Worker]  = workers.values
+  def peers(worker: Worker) : Iterable[Worker] = allWorkers().filterNot(_ ==worker)
+
   override def toString: String = allWorkers().mkString("[",", ","]")
+
 
 }

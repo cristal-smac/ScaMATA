@@ -17,8 +17,8 @@ class Supervisor(pb: MATA, rule: SocialRule) extends Actor {
   val debug=false
 
   var solver : ActorRef = context.parent
-  var actors : Seq[ActorRef]= Seq[ActorRef]()//References to the agents
-  var directory = new Directory()//White page for the agents
+  var actors : Seq[ActorRef]= Seq[ActorRef]()//References to the workers
+  var directory = new Directory()//White page for the workers
 
   val allocation : Allocation = Allocation.randomAllocation(pb)// Generate a random allocation
   var stoppedActor : Set[ActorRef] = Set[ActorRef]()
@@ -27,8 +27,8 @@ class Supervisor(pb: MATA, rule: SocialRule) extends Actor {
     * Method invoked after starting the actor
     */
   override def preStart(): Unit = {
-    //Create the agents
-    pb.agents.foreach{ worker : Worker =>
+    //Create the workers
+    pb.workers.foreach{ worker : Worker =>
       val actor =  context.actorOf(Props(classOf[Behaviour], worker, rule), worker.name)
       actors :+= actor
       directory.add(worker, actor)
@@ -43,25 +43,25 @@ class Supervisor(pb: MATA, rule: SocialRule) extends Actor {
     case Start =>
       solver = sender
       if (debug) println(s"Supervisor directory: $directory")
-      //Initiate the beliefs, distribute the initial allocation and start the agents
-      directory.allActors().foreach{ case actor: ActorRef =>
+      //Initiate the beliefs, distribute the initial allocation and start the workers
+      directory.allActors().foreach{ actor: ActorRef =>
         if (debug) println(s" Supervisor sends Initiate")
         actor ! Initiate(directory, pb.cost)
         if (debug) println(s" Supervisor sends Give")
-        actor ! Give(allocation.bundle(directory.worker(actor)))
+        actor ! Give(allocation.bundle(directory.workers(actor)))
       }
 
     //When an actor becomes active
     case ReStarted(bundle) =>
       stoppedActor -= sender
-      allocation.bundle += (directory.worker(sender) -> bundle)
-      if (debug) println(s"Supervisor: ${stoppedActor.size} paused agents since ${directory.worker(sender)} leaves pause state with bundle $bundle")
+      allocation.bundle += (directory.workers(sender) -> bundle)
+      if (debug) println(s"Supervisor: ${stoppedActor.size} paused workers since ${directory.workers(sender)} leaves pause state with bundle $bundle")
 
     // When an actor becomes inactive
     case Stopped(bundle) =>
       stoppedActor += sender
-      allocation.bundle += (directory.worker(sender) -> bundle)
-      if (debug) println(s"Supervisor: ${stoppedActor.size} paused agents since ${directory.worker(sender)} is in pause state with bundle $bundle")
+      allocation.bundle += (directory.workers(sender) -> bundle)
+      if (debug) println(s"Supervisor: ${stoppedActor.size} paused workers since ${directory.workers(sender)} is in pause state with bundle $bundle")
       if (stoppedActor.size == pb.m()){// When all the actors are in pause
         solver ! Result(allocation)// reports the allocation
         actors.foreach(a => a ! Stop)// stops the actors
