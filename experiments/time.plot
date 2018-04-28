@@ -13,14 +13,14 @@ set xlabel "Number of agents"
 set ylabel "Number of tasks"
 set zlabel "Time (s)"
 set output 'timeCmaxGiftVsDisGift.pdf'
-splot  "data/cmax.csv" using 1:2:($6)/1e9 with lines lc "blue" title 'Gift',\
-       "data/cmax.csv" using 1:2:($7)/1e9 with lines lc "green" title 'Dis. Gift'
+splot  "data/cmax.csv" using 1:2:($7)/1e9 with lines lc "blue" title 'Gift',\
+       "data/cmax.csv" using 1:2:($8)/1e9 with lines lc "green" title 'Dis. Gift'
 set output 'timeCmaxGiftVsLP.pdf'
-splot  "data/cmax.csv" using 1:2:($6)/1e9 with lines lc "blue" title 'Gift',\
-       "data/cmax.csv" using 1:2:($8+$9+$10)/1e9 with lines lc "red" title 'LP'
+splot  "data/cmax.csv" using 1:2:($7)/1e9 with lines lc "blue" title 'Gift',\
+       "data/cmax.csv" using 1:2:($9+$10+$11)/1e9 with lines lc "red" title 'LP'
 set output 'timeFlowtimeGiftVsDisGift.pdf'
-splot  "data/flowtime.csv" using 1:2:($6)/1e9 with lines lc "blue" title 'Gift',\
-       "data/flowtime.csv" using 1:2:($7)/1e9 with lines lc "green" title 'Dis. Gift'
+splot  "data/flowtime.csv" using 1:2:($7)/1e9 with lines lc "blue" title 'Gift',\
+       "data/flowtime.csv" using 1:2:($8)/1e9 with lines lc "green" title 'Dis. Gift'
 set output 'timeFlowtimeGiftVsLP.pdf'
-splot  "data/flowtime.csv" using 1:2:($6)/1e9 with lines lc "blue" title 'Gift',\
-       "data/flowtime.csv" using 1:2:($8+$9+$10)/1e9 with lines lc "red" title 'LP'
+splot  "data/flowtime.csv" using 1:2:($7)/1e9 with lines lc "blue" title 'Gift',\
+       "data/flowtime.csv" using 1:2:($9+$10+$11)/1e9 with lines lc "red" title 'LP'
