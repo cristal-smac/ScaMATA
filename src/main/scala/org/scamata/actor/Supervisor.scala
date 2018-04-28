@@ -1,18 +1,21 @@
 // Copyright (C) Maxime MORGE 2018
 package org.scamata.actor
 
-import org.scamata.core.{MATA, Allocation, Worker}
+import org.scamata.core.{Allocation, MATA, Task, Worker}
 import org.scamata.solver.SocialRule
+import akka.actor.{Actor, ActorRef, FSM, Props}
 
-import akka.actor.{Actor, ActorRef, Props}
+import scala.collection.SortedSet
 
+sealed trait SupervisorState
+case object DefaultSupervisorState extends SupervisorState
 
 /**
-  * Supervisor which starts and stop the computation of a matching
+  * Supervisor which starts and stops the computation of a matching
   * @param pb MATA problem instance
   * @param rule to apply (Cmax or Flowtime)
   * */
-class Supervisor(pb: MATA, rule: SocialRule) extends Actor {
+class Supervisor(pb: MATA, rule: SocialRule) extends Actor with FSM[SupervisorState,Set[ActorRef]] {
 
   val debug=false
 
@@ -21,7 +24,12 @@ class Supervisor(pb: MATA, rule: SocialRule) extends Actor {
   var directory = new Directory()//White page for the workers
 
   val allocation : Allocation = Allocation.randomAllocation(pb)// Generate a random allocation
-  var stoppedActor : Set[ActorRef] = Set[ActorRef]()
+
+  /**
+    * Initially all the worker are active
+    */
+  startWith(DefaultSupervisorState, Set[ActorRef]())
+
 
   /**
     * Method invoked after starting the actor
@@ -35,39 +43,46 @@ class Supervisor(pb: MATA, rule: SocialRule) extends Actor {
     }
   }
 
-  /**
-    * Method invoked when a message is received
-    */
-  def receive : PartialFunction[Any, Unit] = {
+
+  when(DefaultSupervisorState) {
     //When the works should be done
-    case Start =>
+    case Event(Start, stoppedActor) =>
       solver = sender
       if (debug) println(s"Supervisor directory: $directory")
       //Initiate the beliefs, distribute the initial allocation and start the workers
       directory.allActors().foreach{ actor: ActorRef =>
         if (debug) println(s" Supervisor sends Initiate")
-        actor ! Initiate(directory, pb.cost)
+        actor ! Initiate(directory, pb.cost) // allocation.workloads()
         if (debug) println(s" Supervisor sends Give")
         actor ! Give(allocation.bundle(directory.workers(actor)))
       }
+      stay using stoppedActor
 
     //When an actor becomes active
-    case ReStarted(bundle) =>
-      stoppedActor -= sender
-      allocation.bundle += (directory.workers(sender) -> bundle)
-      if (debug) println(s"Supervisor: ${stoppedActor.size} paused workers since ${directory.workers(sender)} leaves pause state with bundle $bundle")
+    case Event(ReStarted(bundle), alreadyStopped) =>
+      val stoppedActor = alreadyStopped - sender
+      allocation.bundle  =  allocation.bundle.updated(directory.workers(sender), bundle)
+      if (debug) println(s"Supervisor: ${stoppedActor.size} agent(s) in pause since ${directory.workers(sender)} leaves pause state with bundle $bundle")
+      stay using stoppedActor
+
 
     // When an actor becomes inactive
-    case Stopped(bundle) =>
-      stoppedActor += sender
-      allocation.bundle += (directory.workers(sender) -> bundle)
-      if (debug) println(s"Supervisor: ${stoppedActor.size} paused workers since ${directory.workers(sender)} is in pause state with bundle $bundle")
+    case Event(Stopped(bundle), alreadyStopped) =>
+      val stoppedActor = alreadyStopped + sender
+      allocation.bundle = allocation.bundle.updated(directory.workers(sender), bundle)
+      if (debug) println(s"Supervisor: ${stoppedActor.size} agent(s) in pause since ${directory.workers(sender)} enters in pause state with bundle $bundle")
       if (stoppedActor.size == pb.m()){// When all the actors are in pause
         solver ! Result(allocation)// reports the allocation
         actors.foreach(a => a ! Stop)// stops the actors
         context.stop(self)//stops the supervisor
       }
+      stay using stoppedActor
 
-    case msg@_ => println("Supervisor receives a message which was not expected: "+msg)
+    case Event(msg@_, stoppedActor) =>
+      println("Supervisor receives a message which was not expected: "+msg)
+      stay using stoppedActor
   }
+
+  // Finally Triggering it up using initialize, which performs the transition into the initial state and sets up timers (if required).
+  initialize()
 }

@@ -2,8 +2,7 @@
 package org.scamata.actor
 
 import org.scamata.core.{Task, Worker}
-import akka.actor.{Actor, ActorRef, FSM}
-import org.scamata.deal.{Gift, SingleGift}
+import akka.actor.{Actor, ActorRef}
 import org.scamata.solver.{Cmax, Flowtime, SocialRule}
 
 import scala.collection.SortedSet
@@ -12,17 +11,36 @@ import scala.collection.SortedSet
   * States of the worker
   */
 sealed trait State
-case object Pause extends State
 case object Proposer extends State
+case object Responder extends State
 
 /**
   * Internal immutable state of mind
   * @param bundle
-  * @param workers
   * @param belief about the workloads
   */
-class StateOfMind(val bundle: SortedSet[Task], val belief: Map[Worker, Double])
-  extends Tuple2[SortedSet[Task], Map[Worker, Double]](bundle, belief)
+class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double])
+  extends Tuple2[SortedSet[Task], Map[Worker, Double]](bundle, belief){
+
+  /**
+    * Update belief with a new workload
+    */
+  def updateBelief(worker: Worker, workload : Double) : StateOfMind= {
+    new StateOfMind(bundle, belief.updated(worker, workload))
+  }
+  /**
+    * Update bundle
+    */
+  def updateBundle(newBundle : SortedSet[Task]) : StateOfMind= {
+    new StateOfMind(newBundle, belief)
+  }
+
+  /**
+    * Return the belief about the flowtime
+    */
+  def flowtime() : Double = belief.values.sum
+
+}
 
 
 /**
@@ -31,7 +49,7 @@ class StateOfMind(val bundle: SortedSet[Task], val belief: Map[Worker, Double])
   * @param rule to optimize
   */
 abstract class Agent(val worker: Worker, val rule: SocialRule) extends Actor{
-  val debug=false
+  val debug = false
 
   var supervisor : ActorRef = context.parent
   var directory : Directory = new Directory()
@@ -41,7 +59,7 @@ abstract class Agent(val worker: Worker, val rule: SocialRule) extends Actor{
     * Broadcasts workload
     */
   def broadcastInform(workload: Double) : Unit = {
-    directory.allActors().foreach(_ ! Inform(worker, workload))
+    directory.peersActor(worker).foreach(_ ! Inform(worker, workload))
   }
 
   /**
@@ -57,17 +75,14 @@ abstract class Agent(val worker: Worker, val rule: SocialRule) extends Actor{
     * @param task to delegate
     * @param provider
     * @param supplier
-    * @param belief about the workload
     */
-  def acceptable(task : Task, provider : Worker, supplier : Worker, belief:  Map[Worker, Double]) : Boolean = {
+  def acceptable(task : Task, provider : Worker, supplier : Worker, mind : StateOfMind) : Boolean = {
     rule match {
       case Cmax => // The local Cmax must strictly decrease
-        Math.max( belief(provider), belief(supplier)) > Math.max( belief(provider)-cost(provider, task),  belief(supplier) + cost(supplier, task))
+        Math.max( mind.belief(provider), mind.belief(supplier)) > Math.max( mind.belief(provider)-cost(provider, task),  mind.belief(supplier) + cost(supplier, task))
       case Flowtime => // The local flowtime  must strictly decrease
         cost(provider, task) > cost(supplier, task)
     }
   }
-
-
 }
 

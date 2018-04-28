@@ -54,5 +54,6 @@ object DistributedGiftSolver{
     //The Actor system
     val negotiationSolver = new DistributedGiftSolver(pb, Flowtime, system)
     println(negotiationSolver.run().toString)
+    System.exit(1)
   }
 }

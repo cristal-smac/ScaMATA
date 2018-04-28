@@ -17,7 +17,7 @@ class Task(val name : String) extends Ordered[Task]{
   def canEqual(a: Any): Boolean = a.isInstanceOf[Task]
 
   /**
-    * Returns 0 if the same negative if this < that, positive if this > that
+    * Returns 0 if this and that are the same, negative if this < that, and positive otherwise
     */
   def compare(that: Task) : Int = {
     if (this.name == that.name) return 0

@@ -28,6 +28,8 @@ class Directory {
   def allWorkers() : Iterable[Worker]  = workers.values
   def peers(worker: Worker) : Iterable[Worker] = allWorkers().filterNot(_ ==worker)
 
+  def peersActor(worker: Worker) :  Iterable[ActorRef] = peers(worker: Worker).map(w => adr(w))
+
   override def toString: String = allWorkers().mkString("[",", ","]")
 
 

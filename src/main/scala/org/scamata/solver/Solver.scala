@@ -4,6 +4,9 @@ package org.scamata.solver
 import org.scamata.core.MATA
 import org.scamata.core.Allocation
 
+/**
+  * Class representing a social rule
+  */
 class SocialRule{
   /**
     * Returns a string representation of the social rule
@@ -37,7 +40,8 @@ abstract class Solver(val pb : MATA, val rule : SocialRule) {
     val startingTime = System.nanoTime()
     val allocation = solve()
     solvingTime = System.nanoTime() - startingTime
-    allocation
+    if (allocation.isComplete()) allocation
+    else throw new RuntimeException("Solver: the outcome is not complete")
   }
 
 }

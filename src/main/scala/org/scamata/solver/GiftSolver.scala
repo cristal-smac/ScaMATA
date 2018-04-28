@@ -25,10 +25,6 @@ class GiftSolver(pb : MATA, rule : SocialRule) extends Solver(pb, rule) {
     while(activeWorkers.nonEmpty){
       activeWorkers.foreach { initiator: Worker =>
         if (debug) println(s"$initiator tries to find a social rational gift")
-        var bestGoal = rule match {
-          case Cmax => allocation.makespan()
-          case Flowtime => allocation.flowtime()
-        }
         val potentialPartners : SortedSet[Worker] = rule match {
           case Flowtime => // all the workers
             pb.workers.filterNot(_ == initiator)
@@ -44,6 +40,10 @@ class GiftSolver(pb : MATA, rule : SocialRule) extends Solver(pb, rule) {
           var found = false
           var bestAllocation: Allocation = allocation
           var bestSingleGift: Gift = new Gift(initiator, initiator, Set[Task]())
+          var bestGoal = rule match {
+            case Cmax => allocation.makespan()
+            case Flowtime => allocation.flowtime()
+          }
           potentialPartners.foreach { opponent =>
             allocation.bundle(initiator).foreach { task =>
               // 4 - Foreach potential swap

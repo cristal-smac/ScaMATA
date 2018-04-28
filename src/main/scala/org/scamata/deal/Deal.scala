@@ -3,15 +3,12 @@ package org.scamata.deal
 
 import org.scamata.core._
 
-
 /**
   * Class representing a deal
   * @param contractors the workers involved
   * @param bundles task to exchange
   */
-class Deal(val contractors: List[Worker], val bundles: List[Set[Task]]) {
-
-}
+class Deal(val contractors: List[Worker], val bundles: List[Set[Task]])
 
 class Swap(val worker1: Worker, val worker2: Worker, val bundle1: Set[Task], val bundle2: Set[Task])
   extends Deal(List(worker1, worker2), List(bundle1, bundle2))

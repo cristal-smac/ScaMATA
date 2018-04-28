@@ -7,7 +7,6 @@ import akka.actor.ActorSystem
 import org.scamata.core._
 import org.scamata.solver._
 
-
 /**
   * Main app to test LPSolver and GiftSolver
   */

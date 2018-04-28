@@ -8,7 +8,7 @@ import scala.collection.SortedSet
   * Class representing a MultiAgent Task Allocation problem
   * @param workers
   * @param tasks
-  * @param cost Cost Matrix
+  * @param cost Matrix
   */
 class MATA(val workers: SortedSet[Worker], val tasks: SortedSet[Task], val cost : Map[(Worker, Task), Double]) {
 
@@ -39,7 +39,7 @@ class MATA(val workers: SortedSet[Worker], val tasks: SortedSet[Task], val cost 
 
   /**
     * Returns an worker
-    * @param name the worker of the worker
+    * @param name of the worker
     */
   def getAgent(name: String) : Worker = {
     workers.find(a => a.name.equals(name)) match {
@@ -59,9 +59,8 @@ class MATA(val workers: SortedSet[Worker], val tasks: SortedSet[Task], val cost 
     }
   }
 
-
   /**
-    * Return a string description of the MATA problem in the Opyimization Progamming language
+    * Return a string description of the MATA problem in the Optimization Programming language
     */
   def toOPL : String = {
     "M = "+workers.size+"; \n"+
@@ -78,7 +77,6 @@ class MATA(val workers: SortedSet[Worker], val tasks: SortedSet[Task], val cost 
     * Returns true if the cost of allActors tasks for allActors workers are specified
     */
   def isFullySpecified: Boolean = cost.size == workers.size * tasks.size
-
 }
 
 /**

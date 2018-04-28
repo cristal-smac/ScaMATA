@@ -14,17 +14,16 @@ import scala.collection.SortedSet
 class SwapSolver(pb : MATA, rule : SocialRule) extends Solver(pb, rule) {
 
   /**
-    * Returns a random allocation wit no more improving swap
+    * Returns a random allocation with no more improving swap
     */
   override protected def solve(): Allocation = {
     var allocation = Allocation.randomAllocation(pb)
     var activeWorkers = pb.workers
-
-    while(!activeWorkers.isEmpty){
+    while(activeWorkers.nonEmpty){
       activeWorkers.foreach{ initiator =>
-        val worload = allocation.workload(initiator)
+        val workload = allocation.workload(initiator)
         val potentialPartner = rule match {
-          case Cmax => pb.workers.filterNot(_ == initiator).filter( allocation.workload(_) < worload )
+          case Cmax => pb.workers.filterNot(_ == initiator).filter( allocation.workload(_) < workload )
           case Flowtime => pb.workers.filterNot(_ == initiator)
         }
         if (potentialPartner.isEmpty || allocation.bundle(initiator).isEmpty){
@@ -57,7 +56,6 @@ class SwapSolver(pb : MATA, rule : SocialRule) extends Solver(pb, rule) {
             activeWorkers += bestSwap.worker2
           }
         }
-
       }
     }
     allocation

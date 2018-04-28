@@ -5,7 +5,6 @@ import scala.collection.SortedSet
 
 /**
   * Class representing an worker
-  *
   * @param name of the worker
   */
 class Worker(val name : String) extends Ordered[Worker]{
@@ -20,7 +19,7 @@ class Worker(val name : String) extends Ordered[Worker]{
   def canEqual(a: Any) : Boolean = a.isInstanceOf[Worker]
 
   /**
-    * Returns 0 if the same negative if this < that, positive if this > that
+    * Returns 0 if this an that are the same,  negative if this < that, and positive otherwise
     */
   def compare(that: Worker) : Int = {
     if (this.name == that.name) return 0
@@ -29,13 +28,12 @@ class Worker(val name : String) extends Ordered[Worker]{
   }
 
   /**
-    * Returns the belief of the worker with
+    * Returns the workload of the worker with
     * @param bundle allocated to the worker
     * @param cost matrix
     */
   def workload(bundle: SortedSet[Task], cost : Map[(Worker, Task), Double]) : Double = {
     bundle.foldLeft(0.0)((acc : Double, t : Task) => acc + cost(this, t))
   }
-
 }
 

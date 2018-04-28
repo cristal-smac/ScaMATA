@@ -1,7 +1,10 @@
 // Copyright (C) Maxime MORGE 2018
 package org.scamata.actor
 
+import scala.concurrent.duration._
 import akka.actor.{FSM, Stash}
+import scala.language.postfixOps
+
 import org.scamata.core.{Task, Worker}
 import org.scamata.solver.{Cmax, Flowtime, SocialRule}
 import org.scamata.deal.SingleGift
@@ -16,66 +19,72 @@ import scala.collection.SortedSet
 class GiftBehaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Worker, rule: SocialRule) with FSM[State, StateOfMind] with Stash{
 
   /**
-    * Initially the worker is in Pause with no bundle, no beliefs about the workloads
+    * Initially the worker is in Responder with no bundle, no beliefs about the workloads
     */
-  startWith(Pause, new StateOfMind(SortedSet[Task](), Map[Worker, Double]()))
+  startWith(Responder, new StateOfMind(SortedSet[Task](), Map[Worker, Double]()))
 
   /**
-    * Either the worker is in Pause
+    * Either the worker is in Responder
     */
-  when(Pause) {
+  when(Responder) {
     // If the worker is initiated
     case Event(Initiate(d, c), _) => // Initiate the directory and the cost matrix
       this.directory = d
       this.cost = c
-      if (debug) println(s"$worker Cost Matrix:\n $cost")
+      //if (debug) println(s"$worker Cost Matrix:\n $cost")
       stay using new StateOfMind(SortedSet[Task](), directory.allWorkers().map(w => (w, 0.0)).toMap)
 
     // If the worker is triggered
     case Event(Give(bundle), mind) =>
-      if (debug) println(s"$worker receives $bundle in state pause")
-      val workload = worker.workload(bundle, cost)
-      val flowtime = directory.peers(worker).foldLeft(0.0)((acc, w) => acc + mind.belief(w))
-      if (debug) println(s"$worker's workload: $workload")
-      val updatedBelief = mind.belief + (worker -> workload)
+      if (debug) println(s"$worker receives $bundle in responder state")
+      var updatedMind = mind
+      if (mind.bundle.isEmpty) {
+        updatedMind = mind.updateBundle(bundle)
+      }
+      var workload = worker.workload(updatedMind.bundle, cost)
+      updatedMind = updatedMind.updateBelief(worker, workload)
       broadcastInform(workload)
+      //if (debug) println(s"$worker's workload: $workload")
+
       // The potential partners are
       val potentialPartners = rule match {
         case Flowtime => // all the workers
           directory.peers(worker)
         case Cmax => // the workers with a smallest workload
-          directory.peers(worker).filter(mind.belief(_) < workload)
-
+          directory.peers(worker).filter(updatedMind.belief(_) < workload)
       }
       if (debug) println(s"$worker has potential partner: $potentialPartners")
-      if (potentialPartners.isEmpty || mind.bundle.isEmpty) { // Either the worker has an empty bundle or no potential partners"
-        if (debug) println(s"$worker stays in Pause since he has an empty bundle or no potential partners")
-        supervisor ! Stopped(bundle)
-        stay using new StateOfMind(bundle, updatedBelief)
+
+      // Either the worker has an empty bundle or no potential partners
+      if (potentialPartners.isEmpty || updatedMind.bundle.isEmpty) {
+        if (debug) println(s"$worker stays in responder state since he has an empty bundle or no potential partners")
+        supervisor ! Stopped(updatedMind.bundle)
+        stay using updatedMind
+
       } else { // Otherwise
         var found = false
         var bestBundle = bundle
-        var bestSingleGift: SingleGift = new SingleGift(worker, worker, bundle.head)
+        var bestSingleGift: SingleGift = new SingleGift(worker, worker, updatedMind.bundle.head)
         var bestGoal = rule match { // The goal consists of
           case Cmax => //  decreasing the Cmax, i.e. its workload
             workload
           case Flowtime => // decreasing the flow time
-            flowtime
+            updatedMind.flowtime()
         }
         potentialPartners.foreach { opponent =>
-          bundle.foreach { task =>
+          updatedMind.bundle.foreach { task =>
             // Foreach single swap
             val gift = new SingleGift(worker, opponent, task)
-            val giftBundle = bundle - task
+            val giftBundle = updatedMind.bundle - task
             val giftWorkload = workload - cost(worker, task)
-            val giftOpponentWorkload = mind.belief(opponent)+cost(opponent, task)
+            val giftOpponentWorkload = updatedMind.belief(opponent) + cost(opponent, task)
             val giftGoal = rule match {
               case Cmax =>
                 Math.max( giftWorkload, giftOpponentWorkload )
               case Flowtime =>
-                flowtime - cost(worker, task) + cost(opponent, task)
+                updatedMind.flowtime - cost(worker, task) + cost(opponent, task)
             }
-            if (giftGoal <= bestGoal) { // Allow swap which does not undermine the goal
+            if (giftGoal < bestGoal) { // Allow swap which does not undermine the goal
               found = true
               bestGoal = giftWorkload
               bestSingleGift = gift
@@ -84,72 +93,91 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Work
           }
         }
         if (! found) {
-          if (debug) println(s"$worker stays in Pause")
-          supervisor ! Stopped(bundle)
-          goto(Pause) using new StateOfMind(bundle, updatedBelief)
+          if (debug) println(s"$worker stops in Responder")
+          supervisor ! Stopped(updatedMind.bundle)
+          goto(Responder) using updatedMind
         } else {
-          if (debug) println(s"$bestSingleGift is proposed")
-          directory.adr(bestSingleGift.supplier) ! Propose(bestSingleGift.task, workload)
-          goto(Proposer) using new StateOfMind(bundle, updatedBelief)
+          val opponent = directory.adr(bestSingleGift.supplier)
+          if (debug) println(s"$worker propose ${bestSingleGift.task} to ${bestSingleGift.supplier}")
+          supervisor ! ReStarted(updatedMind.bundle)
+          opponent ! Propose(bestSingleGift.task, workload)
+          goto(Proposer) using updatedMind
         }
       }
+
     // If the worker receives a proposal
-    case Event(Propose(task, w), mind) =>
+    case Event(Propose(task, opponentWorkload), mind) =>
       val opponent = directory.workers(sender)
-      if (debug) println(s"$worker receives a proposal $task from $opponent in state pause")
-      var updatedBelief = mind.belief + (opponent -> w)
-      if (acceptable(task, opponent, worker, updatedBelief)) {
-        val updatedBundle = mind.bundle + task
-        val workload = mind.belief(worker) + cost(worker, task)
-        val opponentWorkload= w - cost(opponent, task)
-        updatedBelief = mind.belief + (worker -> workload, opponent -> opponentWorkload )
-        sender ! Accept(task, workload)
-        self ! Give(updatedBundle)
-        goto(Pause) using new StateOfMind(updatedBundle, updatedBelief)
+      //if (debug) println(s"$worker receives the proposal $task from $opponent in responder state")
+      var updatedMind = mind.updateBelief(opponent, opponentWorkload)
+      if (acceptable(task, opponent, worker, updatedMind)) {
+        if (debug) println(s"$worker accepts $task from $opponent")
+        updatedMind = mind.updateBundle(mind.bundle + task)
+        updatedMind = updatedMind.updateBelief(worker, updatedMind.belief(worker) + cost(worker, task) )
+        updatedMind = updatedMind.updateBelief(opponent, opponentWorkload - cost(opponent, task) )
+        if (debug) println(s"$worker accepts the proposal $task from $opponent")
+        supervisor ! ReStarted(updatedMind.bundle)
+        sender ! Accept(task, updatedMind.belief(worker))
+        broadcastInform(updatedMind.belief(worker))
+        self ! Give(updatedMind.bundle)
+        goto(Responder) using updatedMind
       }else{
-        val workload = mind.belief(worker)
+        if (debug) println(s"$worker rejects $task from $opponent")
+        val workload = updatedMind.belief(worker)
         sender ! Reject(task, workload)
-        goto(Pause) using new StateOfMind(mind.bundle, updatedBelief)
+        goto(Responder) using updatedMind
       }
+    case Event(Reject(task, opponentWorkload), mind) =>
+      if (debug) println(s"$worker receives a deprecated reject")
+      stay using mind
+    case Event(Accept(task, opponentWorkload), mind) =>
+      if (debug) println(s"$worker receives a deprecated accept")
+      stay using mind
   }
 
   /**
     * Or the worker is a proposer
     */
-  when(Proposer) {
+  when(Proposer, stateTimeout = 300 nanosecond) {
+    case Event(StateTimeout, mind) =>
+      goto(Responder) using mind
+
     case Event(Reject(task, opponentWorkload), mind) =>
       val opponent = directory.workers(sender)
-      if (debug) println(s"$worker receives a rejection of $task from $opponent in state Proposer")
-      val updatedBelief = mind.belief +(opponent -> opponentWorkload)
-      self ! Give(mind.bundle)
-      goto(Pause) using new StateOfMind(mind.bundle, updatedBelief)
+      //if (debug) println(s"$worker receives a rejection of $task from $opponent in proposer state")
+      val updatedMind = mind.updateBelief(opponent, opponentWorkload)
+      self ! Give(updatedMind.bundle)
+      goto(Responder) using updatedMind
 
     case Event(Accept(task, opponentWorkload), mind) =>
       val opponent = directory.workers(sender)
-      if (debug) println(s"$worker receives an acceptance of $task from $opponent in state Proposer")
-      val updatedBundle = mind.bundle - task
+      //if (debug) println(s"$worker receives an acceptance of $task from $opponent in proposer state ")
       val workload = mind.belief(worker) - cost(worker, task)
-      val updatedBelief = mind.belief + (worker -> workload, opponent -> opponentWorkload )
-      self ! Give(updatedBundle)
-      goto(Pause) using new StateOfMind(updatedBundle, updatedBelief)
+      var updatedMind= mind.updateBundle(mind.bundle - task)
+      updatedMind = updatedMind.updateBelief(worker, workload)
+      updatedMind = updatedMind.updateBelief(opponent, opponentWorkload)
+      broadcastInform(workload)
+      self ! Give(updatedMind.bundle)
+      goto(Responder) using updatedMind
 
     case Event(Propose(task, _), _) =>
       val opponent = directory.workers(sender)
-      if (debug) println(s"$worker receives a propsal of $task from $opponent in state Proposer")
+      if (debug) println(s"$worker receives a proposal of $task from $opponent in proposer state")
+      stash
+      stay
+    case Event(Give(bundle), _) =>
       stash
       stay
   }
-
-
 
   /**
     * Whatever the state is
     **/
   whenUnhandled {
-    case Event (Inform (opponent, workload), s) =>
-      if (debug) println(s"$worker receives an inform from $opponent in state $s")
-      val belief = s.belief + (worker -> workload)
-      stay using new StateOfMind (s.bundle, belief)
+    case Event (Inform (opponent, workload), mind) =>
+      //if (debug) println(s"$worker receives an inform from $opponent in state $mind")
+      val updatedMind = mind.updateBelief(opponent, workload)
+      stay using updatedMind
     case Event (m: Message, _) =>
       defaultReceive(m)
       stay
@@ -162,14 +190,15 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Work
 
   //  Associates actions with a transition instead of with a state and even, e.g. debugging
   onTransition {
-    case Pause -> Pause => if (debug) println (s"$worker stay in pause")
-    case Proposer -> Pause =>
+    case Responder -> Responder =>
+      //if (debug) println (s"$worker stay in responder state")
+    case Proposer -> Responder =>
       unstashAll()
-      if (debug) println (s"$worker moves from proposer to stoppedActor")
-    case Pause -> Proposer => if (debug) println (s"$worker moves from stoppedActor to proposer")
+      //if (debug) println (s"$worker moves from Proposer to Responder")
+    case Responder -> Proposer =>
+      //if (debug) println (s"$worker moves from responder to proposer state")
   }
 
   // Finally Triggering it up using initialize, which performs the transition into the initial state and sets up timers (if required).
-  initialize ()
-
+  initialize()
 }
