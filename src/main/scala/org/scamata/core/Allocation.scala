@@ -55,6 +55,15 @@ class Allocation(val pb: MATA) {
   }
 
   /**
+    * Update an allocation for a worker with a new bundle
+    */
+  def update(worker: Worker, bundle : SortedSet[Task]) : Allocation = {
+    val allocation = this.copy()
+    allocation.bundle = allocation.bundle.updated(worker, bundle)
+    allocation
+  }
+
+  /**
     * The provider gives a task to the supplier
     */
   def gift(gift: SingleGift): Allocation = {

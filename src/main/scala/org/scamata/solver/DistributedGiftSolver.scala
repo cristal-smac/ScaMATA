@@ -2,7 +2,6 @@
 package org.scamata.solver
 
 import org.scamata.core.{Allocation, MATA}
-
 import org.scamata.actor._
 
 import akka.actor.{ActorSystem, Props}
@@ -21,9 +20,7 @@ import scala.language.postfixOps
   */
 class DistributedGiftSolver(pb : MATA, rule : SocialRule, system: ActorSystem) extends Solver(pb, rule) {
 
-  //if (rule == Flowtime) throw new RuntimeException("DistributedGiftSolver does not support yet flowtime")
-  val TIMEOUTVALUE  = 100 seconds
-  // default timeout of a run
+  val TIMEOUTVALUE  = 100 seconds // default timeout of a run
   implicit val timeout = Timeout(TIMEOUTVALUE)
 
   /**

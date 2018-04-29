@@ -2,13 +2,13 @@
 package org.scamata.actor
 
 import org.scamata.core.{Task, Worker}
-import akka.actor.{Actor, ActorRef}
 import org.scamata.solver.{Cmax, Flowtime, SocialRule}
 
 import scala.collection.SortedSet
+import akka.actor.{Actor, ActorRef}
 
 /**
-  * States of the worker
+  * States of the agent
   */
 sealed trait State
 case object Proposer extends State
@@ -20,7 +20,10 @@ case object Responder extends State
   * @param belief about the workloads
   */
 class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double])
-  extends Tuple2[SortedSet[Task], Map[Worker, Double]](bundle, belief){
+  extends Product2[SortedSet[Task], Map[Worker, Double]] {
+  override def _1: SortedSet[Task] = bundle
+  override def _2: Map[Worker, Double] = belief
+  override def canEqual(that: Any): Boolean = that.isInstanceOf[StateOfMind]
 
   /**
     * Update belief with a new workload
@@ -40,6 +43,7 @@ class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double])
     */
   def flowtime() : Double = belief.values.sum
 
+  override def toString: String = bundle.mkString("(",",",")")
 }
 
 
@@ -50,6 +54,7 @@ class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double])
   */
 abstract class Agent(val worker: Worker, val rule: SocialRule) extends Actor{
   val debug = false
+  val extraDebug = false
 
   var supervisor : ActorRef = context.parent
   var directory : Directory = new Directory()
@@ -59,6 +64,7 @@ abstract class Agent(val worker: Worker, val rule: SocialRule) extends Actor{
     * Broadcasts workload
     */
   def broadcastInform(workload: Double) : Unit = {
+    if (debug) println(s"$worker broadcast its workload: $workload")
     directory.peersActor(worker).foreach(_ ! Inform(worker, workload))
   }
 
