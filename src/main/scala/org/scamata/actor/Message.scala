@@ -12,6 +12,7 @@ class Message
 case object Start extends Message
 // Initiate the worker with the directory and the cost matrix
 case class Initiate(directory : Directory, cost : Map[(Worker, Task), Double]) extends Message
+case object Ready extends Message
 case class Give(bundle: SortedSet[Task]) extends Message// Give a bundle
 case class Result(allocation : Allocation) extends  Message// The supervisor returns an allocation
 case object Stop extends Message// Stop an agent
@@ -22,6 +23,7 @@ case class Propose(task : Task, workload: Double) extends Message// Make a propo
 case class CounterPropose(task : Task, counterpart : Task, workload: Double) extends Message// Make a counter-proposal
 case class Reject(task : Task, workload: Double) extends Message// Reject a proposal
 case class Accept(task : Task, workload: Double) extends Message// Accept a proposal
+case class Confirm(task : Task, workload: Double) extends Message// Confirm a deal
 case class Withdraw(task : Task, workload: Double) extends Message// Withdraw a deal
 
 case class Stopped(bundle: SortedSet[Task]) extends Message// Initiate the supervisor

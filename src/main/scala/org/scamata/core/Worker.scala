@@ -37,3 +37,4 @@ class Worker(val name : String) extends Ordered[Worker]{
   }
 }
 
+object NoWorker extends Worker("NoWorker")

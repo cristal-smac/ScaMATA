@@ -143,6 +143,6 @@ class MATAParser(val fileName: String ) {
   * Test MATAParser
   */
 object MATAParser extends App {
-  val parser =new MATAParser("examples/toy4x4.txt")
+  val parser =new MATAParser("examples/toy2x4.txt")
   println(parser.parse()) //Run main
 }

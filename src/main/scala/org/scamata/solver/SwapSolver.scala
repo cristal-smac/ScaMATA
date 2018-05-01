@@ -67,7 +67,7 @@ class SwapSolver(pb : MATA, rule : SocialRule) extends Solver(pb, rule) {
   */
 object SwapSolver extends App {
   val debug = false
-  //import org.scamata.example.toy4x4._
+  //import org.scamata.example.toy2x4._
   val pb = MATA.randomProblem(10, 100)
   println(pb)
   val negotiationSolver = new SwapSolver(pb,Flowtime)

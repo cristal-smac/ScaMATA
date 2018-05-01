@@ -13,29 +13,55 @@ import akka.actor.{Actor, ActorRef}
 sealed trait State
 case object Proposer extends State
 case object Responder extends State
+case object WaitConfirmation extends State
 
 /**
   * Internal immutable state of mind
   * @param bundle
   * @param belief about the workloads
+  * @param opponent which is under consideration
   */
-class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double])
-  extends Product2[SortedSet[Task], Map[Worker, Double]] {
+class StateOfMind(val bundle: SortedSet[Task], val belief: Map[Worker, Double], val opponent : Worker, val task : Task)
+  extends Product4[SortedSet[Task], Map[Worker, Double], Worker, Task] {
   override def _1: SortedSet[Task] = bundle
   override def _2: Map[Worker, Double] = belief
+  override def _3 : Worker = opponent
+  override def _4 : Task = task
   override def canEqual(that: Any): Boolean = that.isInstanceOf[StateOfMind]
 
   /**
     * Update belief with a new workload
     */
   def updateBelief(worker: Worker, workload : Double) : StateOfMind= {
-    new StateOfMind(bundle, belief.updated(worker, workload))
+    new StateOfMind(bundle, belief.updated(worker, workload), opponent, task)
   }
   /**
     * Update bundle
     */
   def updateBundle(newBundle : SortedSet[Task]) : StateOfMind= {
-    new StateOfMind(newBundle, belief)
+    new StateOfMind(bundle ++ newBundle, belief, opponent, task)
+  }
+
+  /**
+    * Add task
+    */
+  def add(task : Task) : StateOfMind = {
+    new StateOfMind(bundle + task, belief, opponent, task)
+  }
+
+  /**
+    * Add task
+    */
+  def remove(task : Task) : StateOfMind = {
+    new StateOfMind(bundle - task, belief, opponent, task)
+  }
+
+
+  /**
+    * Update opponent
+    */
+  def updateDelegation(newOpponent : Worker, newTask : Task) : StateOfMind= {
+    new StateOfMind(bundle, belief, newOpponent, newTask)
   }
 
   /**
@@ -64,7 +90,6 @@ abstract class Agent(val worker: Worker, val rule: SocialRule) extends Actor{
     * Broadcasts workload
     */
   def broadcastInform(workload: Double) : Unit = {
-    if (debug) println(s"$worker broadcast its workload: $workload")
     directory.peersActor(worker).foreach(_ ! Inform(worker, workload))
   }
 

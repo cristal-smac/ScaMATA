@@ -35,6 +35,7 @@ class Supervisor(pb: MATA, rule: SocialRule) extends Actor with FSM[SupervisorSt
   var solver : ActorRef = context.parent
   var actors : Seq[ActorRef]= Seq[ActorRef]()//References to the workers
   var directory = new Directory()//White page for the workers
+  var nbReady = 0
 
   /**
     * Initially all the worker are active and the allocation is random
@@ -67,8 +68,19 @@ class Supervisor(pb: MATA, rule: SocialRule) extends Actor with FSM[SupervisorSt
         val worker = directory.workers(actor)
         if (debug) println(s"Supervisor initiates $worker")
         actor ! Initiate(directory, pb.cost)
-        if (debug) println(s"Supervisor gives the initial bundle to $worker")
-        actor ! Give(status.allocation.bundle(worker))
+      }
+      stay using status
+
+    //When an actor becomes ready
+    case Event(Ready, status) =>
+      nbReady+=1
+      if (nbReady == pb.m()){
+        directory.allActors().foreach { actor: ActorRef =>
+          val worker = directory.workers(actor)
+          val bundle = status.allocation.bundle(worker)
+          if (debug) println(s"Supervisor gives $bundle to $worker")
+          actor ! Give(bundle)
+        }
       }
       stay using status
 

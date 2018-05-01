@@ -86,15 +86,16 @@ object MATA{
 
   val debug = false
 
+  val MAXCOST = 1000
   /**
     * Returns a random MATA proble instance
     * @param m number of workers
     * @param n number of tasks
     */
   def randomProblem(m : Int, n : Int) : MATA = {
-    val agents: SortedSet[Worker] = collection.immutable.SortedSet[Worker]() ++ (for (k <- 0 until m) yield new Worker(name = s"${Random.alphanumeric take 10 mkString ""}"))
-    val tasks: SortedSet[Task] = collection.immutable.SortedSet[Task]() ++  (for (k <- 0 until n) yield new Task(name = s"${Random.alphanumeric take 10 mkString ""}"))
-    val cost : Map[(Worker, Task), Double] = (for(i <- 0 until m; j <- 0 until n) yield (agents.toList(i),tasks.toList(j)) -> Random.nextDouble()).toMap
-    new MATA(agents, tasks, cost)
+    val workers: SortedSet[Worker] = collection.immutable.SortedSet[Worker]() ++ (for (k <- 1 until m+1) yield new Worker(name = s"w$k"))
+    val tasks: SortedSet[Task] = collection.immutable.SortedSet[Task]() ++  (for (k <- 1 until n+1) yield new Task(name = s"t$k"))
+    val cost : Map[(Worker, Task), Double] = (for(i <- 0 until m; j <- 0 until n) yield (workers.toList(i),tasks.toList(j)) -> (Random.nextDouble()*MAXCOST).toInt.toDouble ).toMap
+    new MATA(workers, tasks, cost)
   }
 }

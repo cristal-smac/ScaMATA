@@ -9,8 +9,8 @@ import akka.actor.ActorSystem
 
 /**
   * Solve a particular MATA Problem instance
-  * sbt "run org.scaia.util.MATASolver -v examples/toy4x4.txt examples/toy4x4Cmax.txt"
-  * java -jar ScaIA-assembly-X.Y.jar org.scaia.util.asia.MATASolver r -v examples/toy4x4.txt examples/toy4x4Cmax.txt
+  * sbt "run org.scaia.util.MATASolver -v examples/toy2x4.txt examples/toy4x4Cmax.txt"
+  * java -jar ScaIA-assembly-X.Y.jar org.scaia.util.asia.MATASolver r -v examples/toy2x4.txt examples/toy4x4Cmax.txt
   *
   */
 object MATASolver extends App {
