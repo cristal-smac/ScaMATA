@@ -39,7 +39,7 @@ class Allocation(val pb: MATA) {
   def makespan(): Double = pb.workers.foldLeft(0.0)((max, a) => math.max(max, workload(a)))
 
   /**
-    * Return the workers which are least loaded than the initiator
+    * Return the peers which are least loaded than the initiator
     */
   def leastLoadedAgents(initiator: Worker): Set[Worker] = pb.workers.filter(a => workload(a) < workload(initiator)).toSet
 
@@ -86,7 +86,7 @@ class Allocation(val pb: MATA) {
   }
 
   /**
-    * Returns all the single swaps between two workers
+    * Returns all the single swaps between two peers
     */
   def allSingleSwap(worker1: Worker, worker2: Worker): Set[SingleSwap] = {
     var swaps = Set[SingleSwap]()

@@ -21,7 +21,7 @@ case object WaitConfirmation extends State
   * @param belief about the workloads
   * @param opponent which is under consideration
   */
-class StateOfMind(val bundle: SortedSet[Task], val belief: Map[Worker, Double], val opponent : Worker, val task : Task)
+class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double], val opponent : Worker, val task : Task)
   extends Product4[SortedSet[Task], Map[Worker, Double], Worker, Task] {
   override def _1: SortedSet[Task] = bundle
   override def _2: Map[Worker, Double] = belief
@@ -29,10 +29,17 @@ class StateOfMind(val bundle: SortedSet[Task], val belief: Map[Worker, Double], 
   override def _4 : Task = task
   override def canEqual(that: Any): Boolean = that.isInstanceOf[StateOfMind]
 
+
+  def initBelief(newBundle :  SortedSet[Task], workers : Iterable[Worker]) : StateOfMind = {
+    workers.foreach{w =>
+      belief += w -> 0.0
+    }
+    new StateOfMind(bundle, belief, opponent, task)
+  }
   /**
     * Update belief with a new workload
     */
-  def updateBelief(worker: Worker, workload : Double) : StateOfMind= {
+  def updateBelief(worker: Worker, workload : Double) : StateOfMind = {
     new StateOfMind(bundle, belief.updated(worker, workload), opponent, task)
   }
   /**

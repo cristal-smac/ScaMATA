@@ -18,7 +18,7 @@ class MATAParser(val fileName: String ) {
 
   var lineNumber = 0
 
-  var m=0 // number of workers
+  var m=0 // number of peers
   var n=0 // number of tasks
   var agents: SortedSet[Worker] = SortedSet[Worker]()
   var tasks: SortedSet[Task] = SortedSet[Task]()
@@ -78,13 +78,13 @@ class MATAParser(val fileName: String ) {
   }
 
   /**
-    * Parse the entities (workers, tasks) of the MATA Problem
+    * Parse the entities (peers, tasks) of the MATA Problem
     * @param key of the line
     * @param value of the line
     */
   def parseEntities(key: String, value: String): Unit = key match {
     case "tasks" => parseTasks(value)
-    case "workers" => parseAgents(value)
+    case "peers" => parseAgents(value)
     case _ => throw new RuntimeException(s"ERROR parseEntities $fileName line$lineNumber: $key")
   }
 
@@ -107,7 +107,7 @@ class MATAParser(val fileName: String ) {
   }
 
   /**
-    * Parse the workers
+    * Parse the peers
     * @param names e.g. a string "a1, a2, a3"
     */
   def parseAgents(names: String): Unit={

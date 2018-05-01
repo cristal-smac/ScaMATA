@@ -33,8 +33,8 @@ class Supervisor(pb: MATA, rule: SocialRule) extends Actor with FSM[SupervisorSt
   val extraDebug = false
 
   var solver : ActorRef = context.parent
-  var actors : Seq[ActorRef]= Seq[ActorRef]()//References to the workers
-  var directory = new Directory()//White page for the workers
+  var actors : Seq[ActorRef]= Seq[ActorRef]()//References to the peers
+  var directory = new Directory()//White page for the peers
   var nbReady = 0
 
   /**
@@ -47,7 +47,7 @@ class Supervisor(pb: MATA, rule: SocialRule) extends Actor with FSM[SupervisorSt
     * Method invoked after starting the actor
     */
   override def preStart(): Unit = {
-    //Create the workers
+    //Create the peers
     pb.workers.foreach{ worker : Worker =>
       val actor =  context.actorOf(Props(classOf[GiftBehaviour], worker, rule), worker.name)
       actors :+= actor
@@ -63,11 +63,12 @@ class Supervisor(pb: MATA, rule: SocialRule) extends Actor with FSM[SupervisorSt
     case Event(Start, status) =>
       solver = sender
       if (extraDebug) println(s"Supervisor directory: $directory")
-      //Initiate the beliefs, distribute the initial allocation and start the workers
+      //Initiate the beliefs, distribute the initial allocation and start the peers
       directory.allActors().foreach{ actor: ActorRef =>
         val worker = directory.workers(actor)
-        if (debug) println(s"Supervisor initiates $worker")
-        actor ! Initiate(directory, pb.cost)
+        val bundle = status.allocation.bundle(worker)
+        if (debug) println(s"Supervisor initiates $worker with bundle $bundle")
+        actor ! Initiate(bundle, directory, pb.cost)
       }
       stay using status
 
@@ -76,10 +77,9 @@ class Supervisor(pb: MATA, rule: SocialRule) extends Actor with FSM[SupervisorSt
       nbReady+=1
       if (nbReady == pb.m()){
         directory.allActors().foreach { actor: ActorRef =>
-          val worker = directory.workers(actor)
-          val bundle = status.allocation.bundle(worker)
-          if (debug) println(s"Supervisor gives $bundle to $worker")
-          actor ! Give(bundle)
+          val worker = directory.workers(sender)
+          if (debug) println(s"Supervisor starts $worker")
+          actor ! Start
         }
       }
       stay using status

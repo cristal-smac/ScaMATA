@@ -10,10 +10,9 @@ import scala.collection.SortedSet
   */
 class Message
 case object Start extends Message
-// Initiate the worker with the directory and the cost matrix
-case class Initiate(directory : Directory, cost : Map[(Worker, Task), Double]) extends Message
+// Initiate the worker with the bundle the directory and the cost matrix
+case class Initiate(bundle: SortedSet[Task], directory : Directory, cost : Map[(Worker, Task), Double]) extends Message
 case object Ready extends Message
-case class Give(bundle: SortedSet[Task]) extends Message// Give a bundle
 case class Result(allocation : Allocation) extends  Message// The supervisor returns an allocation
 case object Stop extends Message// Stop an agent
 

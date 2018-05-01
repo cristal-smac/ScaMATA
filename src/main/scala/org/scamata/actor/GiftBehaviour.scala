@@ -26,30 +26,35 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Work
     */
   when(Responder) {
     // If the worker is initiated
-    case Event(Initiate(d, c), _) => // Initiate the directory and the cost matrix
+    case Event(Initiate(bundle, d, c), mind) => // Initiate the directory and the cost matrix
       this.directory = d
       this.cost = c
       this.supervisor = sender
-      if (extraDebug) println(s"$worker sends Ready to the supervisor")
+      if (extraDebug) println(s"$worker initiated by the supervisor")
+      var updatedMind = mind.initBelief(bundle, directory.allWorkers())
+      updatedMind = updatedMind.updateBundle(bundle)
+      val workload = worker.workload(bundle, cost)
+      updatedMind = updatedMind.updateBelief(worker, workload)
       sender ! Ready
-      stay using new StateOfMind(SortedSet[Task](), directory.allWorkers().map(w => (w, 0.0)).toMap, NoWorker, NoTask)
+      if (extraDebug) {
+        println(s"$worker belief")
+        for ((k,v) <- updatedMind.belief) printf("key: %s, value: %s\n", k, v)
+      }
+
+      stay using updatedMind
     // If the worker is triggered
-    case Event(Give(bundle), mind) =>
+    case Event(Start, mind) =>
       var updatedMind = mind
-      var workload = updatedMind.belief(worker)
+      val workload = updatedMind.belief(worker)
       if (sender == supervisor) {// If the agent is triggered by the supervisor
-        updatedMind = mind.updateBundle(bundle)
-        workload = worker.workload(updatedMind.bundle, cost)
-        updatedMind = updatedMind.updateBelief(worker, workload)
-        if (debug) println(s"$worker receives $updatedMind in responder state")
         if (extraDebug) println(s"$worker$updatedMind broadcast its updated workload")
         broadcastInform(workload)
       }
       // Otherwise the mind is up to date
       val potentialPartners = rule match { // The potential partners are
-        case Flowtime => // all the workers
+        case Flowtime => // all the peers
           directory.peers(worker)
-        case Cmax => // the workers with a smallest workload
+        case Cmax => // the peers with a smallest workload
           directory.peers(worker).filter(updatedMind.belief(_) < workload)
       }
       if (extraDebug) println(s"$worker$updatedMind has potential partner: $potentialPartners")
@@ -138,7 +143,7 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Work
   when(Proposer, stateTimeout = 300 nanosecond) {
     case Event(StateTimeout, mind) =>
       if (debug) println(s"$worker$mind proposal timeout")
-      self ! Give(mind.bundle)
+      self ! Start
       goto(Responder) using mind
     case Event(Reject(task, opponentWorkload), mind) =>
       val opponent = directory.workers(sender)
@@ -150,11 +155,11 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Work
         if (extraDebug) println(s"$worker$mind receives a rejection of $task from $opponent in proposer state")
         var updatedMind = mind.updateBelief(opponent, opponentWorkload)
         updatedMind = updatedMind.updateDelegation(NoWorker, NoTask)
-        self ! Give(updatedMind.bundle)
+        self ! Start
         goto(Responder) using updatedMind
       }
     case Event(Accept(task, opponentWorkload), mind) =>
-      var workload = mind.belief(worker)
+      val workload = mind.belief(worker)
       val opponent = directory.workers(sender)
       if (opponent != mind.opponent || task != mind.task) {
         if (extraDebug) println(s"$worker$mind receives a deprecated acceptance of $task from $opponent in proposer state ")
@@ -173,17 +178,17 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Work
         sender ! Confirm(task, workload)
         if (extraDebug) println(s"$worker$updatedMind broadcast its updated workload")
         broadcastInform(updatedMind.belief(worker))
-        self ! Give(updatedMind.bundle)
+        self ! Start
         goto(Responder) using updatedMind
       }
     case Event(Propose(task, _), mind) =>
       val opponent = directory.workers(sender)
       if (extraDebug) println(s"$worker$mind receives a proposal of $task from $opponent in proposer state")
       stash
-      stay
-    case Event(Give(_), _) =>
+      stay using mind
+    case Event(Start, mind) =>
       stash
-      stay
+      stay using mind
   }
 
   /**
@@ -197,12 +202,12 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Work
       updatedMind = updatedMind.updateBelief(opponent, updatedMind.belief(opponent) - cost(opponent, task) )
       if (extraDebug) println(s"$worker$updatedMind broadcast its updated workload")
       broadcastInform(updatedMind.belief(worker))
-      self ! Give(updatedMind.bundle)
+      self ! Start
       goto(Responder) using updatedMind
     case Event(Withdraw(task, opponentWorkload), mind) =>
       val opponent = directory.workers(sender)
       val updatedMind = mind.updateBelief(opponent, mind.belief(opponent))
-      self ! Give(updatedMind.bundle)
+      self ! Start
       goto(Responder) using updatedMind
     case Event(Reject(task, opponentWorkload), mind) =>
       if (extraDebug) println(s"$worker$mind receives a deprecated rejection")
@@ -221,28 +226,31 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Work
       val opponent = directory.workers(sender)
       if (debug) println(s"$worker$mind receives a proposal of $task from $opponent in proposer state")
       stash
-      stay
-    case Event(Give(_), _) =>
+      stay using mind
+    case Event(Start, mind) =>
       stash
-      stay
+      stay using mind
   }
 
   /**
     * Whatever the state is
     **/
   whenUnhandled {
-    case Event (Inform (opponent, workload), mind) =>
+    case Event(Inform(opponent, workload), mind) =>
       if (extraDebug) println(s"$worker$mind receives an inform from $opponent in state $mind")
+      if (rule == Cmax && workload < mind.belief(opponent)){
+        self ! Start
+      }
       val updatedMind = mind.updateBelief(opponent, workload)
       stay using updatedMind
-    case Event (m: Message, _) =>
+    case Event (m: Message, mind) =>
       defaultReceive(m)
-      stay
-    case Event (e, s) =>
+      stay using mind
+    case Event (e, mind) =>
       println (s"${
         worker
-      }: ERROR  unexpected event {} in state {}/{}", e, stateName, s)
-      stay
+      }: ERROR  unexpected event {} in state {}/{}", e, stateName, mind)
+      stay using mind
   }
 
   //  Associates actions with a transition instead of with a state and even, e.g. debugging

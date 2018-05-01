@@ -18,7 +18,7 @@ class MATA(val workers: SortedSet[Worker], val tasks: SortedSet[Task], val cost 
   override def toString: String = {
     "m: " +workers.size +"\n"+
       "n: " + tasks.size +"\n"+
-      "workers: " +workers.mkString(", ") +"\n"+
+      "peers: " +workers.mkString(", ") +"\n"+
       "tasks: " + tasks.mkString(", ") +"\n"+
       workers.toList.map(a =>
         tasks.toList.map( t =>
@@ -28,7 +28,7 @@ class MATA(val workers: SortedSet[Worker], val tasks: SortedSet[Task], val cost 
   }
 
   /**
-    * Returns the number of workers
+    * Returns the number of peers
     */
   def m() : Int = workers.size
 
@@ -74,7 +74,7 @@ class MATA(val workers: SortedSet[Worker], val tasks: SortedSet[Task], val cost 
   }
 
   /**
-    * Returns true if the cost of allActors tasks for allActors workers are specified
+    * Returns true if the cost of allActors tasks for allActors peers are specified
     */
   def isFullySpecified: Boolean = cost.size == workers.size * tasks.size
 }
@@ -89,7 +89,7 @@ object MATA{
   val MAXCOST = 1000
   /**
     * Returns a random MATA proble instance
-    * @param m number of workers
+    * @param m number of peers
     * @param n number of tasks
     */
   def randomProblem(m : Int, n : Int) : MATA = {

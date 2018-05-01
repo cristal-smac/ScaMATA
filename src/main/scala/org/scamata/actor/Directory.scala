@@ -5,7 +5,7 @@ import akka.actor.ActorRef
 import org.scamata.core.Worker
 
 /**
-  * Class representing an index of the names and addresses of workers
+  * Class representing an index of the names and addresses of peers
   */
 class Directory {
   var adr = Map[Worker, ActorRef]()//Agents' references

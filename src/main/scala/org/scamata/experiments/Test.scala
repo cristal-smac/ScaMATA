@@ -28,7 +28,7 @@ object Test {
       bw.write(s"m,n,giftSolver$rule,distributedGiftSolver$rule,swapSolver$rule,lpSolver$rule,giftSolverTime,distributedGiftSolverTime,swapSolverTime,lpSolverTime,lpSolverPreTime,lpSolverPostTime\n")
       for (m <- 2 to 10) {
         for (n <- 2*m to 10*m) {
-          if (debug) println(s"Test configuration with $m workers and $n tasks")
+          if (debug) println(s"Test configuration with $m peers and $n tasks")
           val nbPb = 100
           var (lpSolverRule, giftSolverRule, distributedGiftSolverRule, swapSolverRule, lpSolverTime, lpSolverPreTime, lpSolverPostTime, giftSolverTime, swapSolverTime, distributedGiftSolverTime) =
             (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)

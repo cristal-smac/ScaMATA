@@ -21,14 +21,14 @@ class GiftSolver(pb : MATA, rule : SocialRule) extends Solver(pb, rule) {
     var allocation = Allocation.randomAllocation(pb)
     if (debug) println(s"Give with a random allocation:\n$allocation")
     var activeWorkers = pb.workers
-    if (debug) println("All workers are initially active")
+    if (debug) println("All peers are initially active")
     while(activeWorkers.nonEmpty){
       activeWorkers.foreach { initiator: Worker =>
         if (debug) println(s"$initiator tries to find a social rational gift")
         val potentialPartners : SortedSet[Worker] = rule match {
-          case Flowtime => // all the workers
+          case Flowtime => // all the peers
             pb.workers.filterNot(_ == initiator)
-          case Cmax => // the workers with a smallest workload
+          case Cmax => // the peers with a smallest workload
             pb.workers.filterNot(_ == initiator).filter(allocation.workload(_) < allocation.workload(initiator))
         }
         if (debug) println(s"Potential partner: $potentialPartners")

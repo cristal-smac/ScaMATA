@@ -5,7 +5,7 @@ import org.scamata.core._
 
 /**
   * Class representing a deal
-  * @param contractors the workers involved
+  * @param contractors the peers involved
   * @param bundles task to exchange
   */
 class Deal(val contractors: List[Worker], val bundles: List[Set[Task]])
