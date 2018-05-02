@@ -91,7 +91,7 @@ class Supervisor(pb: MATA, rule: SocialRule) extends Actor with FSM[SupervisorSt
       val allocation = status.allocation.update(worker, bundle)
       if (debug) println(s"Supervisor: ${stoppedActor.size} agent(s) in pause since $worker stops with bundle $bundle")
       if (stoppedActor.size == pb.m()){// When all the actors are in pause
-        solver ! Result(allocation)// reports the allocation
+        solver ! Outcome(allocation)// reports the allocation
         directory.allActors().foreach(a => a ! Stop)// stops the actors
         context.stop(self)//stops the supervisor
       }

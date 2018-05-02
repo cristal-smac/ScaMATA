@@ -99,7 +99,7 @@ class Allocation(val pb: MATA) {
   }
 
   def isComplete(): Boolean = {
-    pb.n() == bundle.values.foldLeft(0)((acc, bundle) => acc + bundle.size)
+    pb.tasks == bundle.values.foldLeft(Set[Task]())((acc, bundle) => acc ++ bundle.toSet)
   }
 
 }

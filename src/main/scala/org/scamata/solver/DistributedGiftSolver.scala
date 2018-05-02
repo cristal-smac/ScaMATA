@@ -33,7 +33,7 @@ class DistributedGiftSolver(pb : MATA, rule : SocialRule, system: ActorSystem) e
     val supervisor = system.actorOf(Props(classOf[Supervisor], pb, rule), name = "supervisor"+DistributedGiftSolver.id)
     // The current thread is blocked and it waits for the supervisor to "complete" the Future with it's reply.
     val future = supervisor ? Start
-    val result = Await.result(future, timeout.duration).asInstanceOf[Result]
+    val result = Await.result(future, timeout.duration).asInstanceOf[Outcome]
     result.allocation
   }
 
