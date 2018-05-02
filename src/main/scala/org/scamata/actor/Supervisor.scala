@@ -32,10 +32,9 @@ class Supervisor(pb: MATA, rule: SocialRule) extends Actor with FSM[SupervisorSt
   val debug = false
   val extraDebug = false
 
-  var solver : ActorRef = context.parent
-  var actors : Seq[ActorRef]= Seq[ActorRef]()//References to the peers
+  var solver : ActorRef = context.parent//Reference to the distributed solver
   var directory = new Directory()//White page for the peers
-  var nbReady = 0
+  var nbReady = 0//Number of agents which are ready to negotiate
 
   /**
     * Initially all the worker are active and the allocation is random
@@ -47,11 +46,9 @@ class Supervisor(pb: MATA, rule: SocialRule) extends Actor with FSM[SupervisorSt
     * Method invoked after starting the actor
     */
   override def preStart(): Unit = {
-    //Create the peers
-    pb.workers.foreach{ worker : Worker =>
-      val actor =  context.actorOf(Props(classOf[GiftBehaviour], worker, rule), worker.name)
-      actors :+= actor
-      directory.add(worker, actor)
+    pb.workers.foreach{ worker : Worker => //For all workers
+      val actor =  context.actorOf(Props(classOf[GiftBehaviour], worker, rule), worker.name)//Create the agent
+      directory.add(worker, actor)//Add it to the directory
     }
   }
 
@@ -62,8 +59,7 @@ class Supervisor(pb: MATA, rule: SocialRule) extends Actor with FSM[SupervisorSt
     //When the works should be done
     case Event(Start, status) =>
       solver = sender
-      if (extraDebug) println(s"Supervisor directory: $directory")
-      //Initiate the beliefs, distribute the initial allocation and start the peers
+      //Distribute the initial allocation
       directory.allActors().foreach{ actor: ActorRef =>
         val worker = directory.workers(actor)
         val bundle = status.allocation.bundle(worker)
@@ -71,19 +67,16 @@ class Supervisor(pb: MATA, rule: SocialRule) extends Actor with FSM[SupervisorSt
         actor ! Initiate(bundle, directory, pb.cost)
       }
       stay using status
-
     //When an actor becomes ready
     case Event(Ready, status) =>
       nbReady+=1
-      if (nbReady == pb.m()){
-        directory.allActors().foreach { actor: ActorRef =>
-          val worker = directory.workers(sender)
-          if (debug) println(s"Supervisor starts $worker")
+      if (nbReady == pb.m()){//When all of them are ready
+        directory.allActors().foreach { actor: ActorRef => //Start them
+          if (debug) println(s"Supervisor starts ${directory.workers(sender)}")
           actor ! Start
         }
       }
       stay using status
-
     //When an actor becomes active
     case Event(ReStarted(bundle), status) =>
       val worker = directory.workers(sender)
@@ -91,8 +84,6 @@ class Supervisor(pb: MATA, rule: SocialRule) extends Actor with FSM[SupervisorSt
       val allocation =  status.allocation.update(worker, bundle)
       if (debug) println(s"Supervisor: ${stoppedActor.size} agent(s) in pause since $worker restarts with bundle $bundle")
       stay using new SupervisorStatus(stoppedActor, allocation)
-
-
     // When an actor becomes inactive
     case Event(Stopped(bundle), status) =>
       val worker = directory.workers(sender)
@@ -101,7 +92,7 @@ class Supervisor(pb: MATA, rule: SocialRule) extends Actor with FSM[SupervisorSt
       if (debug) println(s"Supervisor: ${stoppedActor.size} agent(s) in pause since $worker stops with bundle $bundle")
       if (stoppedActor.size == pb.m()){// When all the actors are in pause
         solver ! Result(allocation)// reports the allocation
-        actors.foreach(a => a ! Stop)// stops the actors
+        directory.allActors().foreach(a => a ! Stop)// stops the actors
         context.stop(self)//stops the supervisor
       }
       stay using new SupervisorStatus(stoppedActor, allocation)

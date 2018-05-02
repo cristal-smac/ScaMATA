@@ -7,6 +7,12 @@ import org.scamata.solver.{Cmax, Flowtime, SocialRule}
 import scala.collection.SortedSet
 import akka.actor.{Actor, ActorRef}
 
+import akka.util.Timeout
+import scala.concurrent.Await
+import scala.concurrent.duration._
+import scala.language.postfixOps
+
+
 /**
   * States of the agent
   */
@@ -20,6 +26,7 @@ case object WaitConfirmation extends State
   * @param bundle
   * @param belief about the workloads
   * @param opponent which is under consideration
+  * @param task to supply
   */
 class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double], val opponent : Worker, val task : Task)
   extends Product4[SortedSet[Task], Map[Worker, Double], Worker, Task] {
@@ -29,8 +36,10 @@ class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double], 
   override def _4 : Task = task
   override def canEqual(that: Any): Boolean = that.isInstanceOf[StateOfMind]
 
-
-  def initBelief(newBundle :  SortedSet[Task], workers : Iterable[Worker]) : StateOfMind = {
+  /**
+    * Init the belief with some workers with no workload* @return
+    */
+  def initBelief(workers : Iterable[Worker]) : StateOfMind = {
     workers.foreach{w =>
       belief += w -> 0.0
     }
@@ -43,21 +52,21 @@ class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double], 
     new StateOfMind(bundle, belief.updated(worker, workload), opponent, task)
   }
   /**
-    * Update bundle
+    * Update bundle by adding a new bundle
     */
   def updateBundle(newBundle : SortedSet[Task]) : StateOfMind= {
     new StateOfMind(bundle ++ newBundle, belief, opponent, task)
   }
 
   /**
-    * Add task
+    * Add a task to the bundler
     */
   def add(task : Task) : StateOfMind = {
     new StateOfMind(bundle + task, belief, opponent, task)
   }
 
   /**
-    * Add task
+    * Remove a task from the bundle
     */
   def remove(task : Task) : StateOfMind = {
     new StateOfMind(bundle - task, belief, opponent, task)
@@ -65,7 +74,7 @@ class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double], 
 
 
   /**
-    * Update opponent
+    * Update the potential supplier and the potential task to supply
     */
   def updateDelegation(newOpponent : Worker, newTask : Task) : StateOfMind= {
     new StateOfMind(bundle, belief, newOpponent, newTask)
@@ -87,11 +96,14 @@ class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double], 
   */
 abstract class Agent(val worker: Worker, val rule: SocialRule) extends Actor{
   val debug = false
-  val extraDebug = false
+  val receiveDebug = false
+  val stateDebug = false
 
   var supervisor : ActorRef = context.parent
   var directory : Directory = new Directory()
   var cost : Map[(Worker, Task), Double]= Map[(Worker, Task), Double]()
+
+  val proposalTimeout = 300 nanosecond
 
   /**
     * Broadcasts workload
@@ -101,8 +113,7 @@ abstract class Agent(val worker: Worker, val rule: SocialRule) extends Actor{
   }
 
   /**
-    * Handles management messages
-    * @param message
+    * Handle stop messages
     */
   def defaultReceive(message : Message) : Any = message match {
     case Stop => context.stop(self) // Stop the actor
