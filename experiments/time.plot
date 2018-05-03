@@ -9,7 +9,7 @@ set hidden3d
 set dgrid3d 50,50 qnorm 2
 set ticslevel 0
 set style data lines
-set xlabel "Number of agents"
+set xlabel "Number of workerss"
 set ylabel "Number of tasks"
 set zlabel "Time (s)"
 set output 'timeCmaxGiftVsDisGift.pdf'

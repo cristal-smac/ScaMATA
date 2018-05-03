@@ -20,7 +20,7 @@ import scala.language.postfixOps
   */
 class DistributedGiftSolver(pb : MATA, rule : SocialRule, system: ActorSystem) extends Solver(pb, rule) {
 
-  val TIMEOUTVALUE  = 100 seconds // default timeout of a run
+  val TIMEOUTVALUE  = 1000 seconds // default timeout of a run
   implicit val timeout = Timeout(TIMEOUTVALUE)
 
   /**
@@ -50,7 +50,7 @@ object DistributedGiftSolver{
     val r = scala.util.Random
     val system = ActorSystem("DistributedGiftSolver" + r.nextInt.toString)
     //The Actor system
-    val negotiationSolver = new DistributedGiftSolver(pb, Cmax, system)
+    val negotiationSolver = new DistributedGiftSolver(pb, Flowtime, system)
     println(negotiationSolver.run().toString)
     System.exit(1)
   }

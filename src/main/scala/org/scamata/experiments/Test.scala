@@ -26,22 +26,25 @@ object Test {
       val file = s"experiments/data/$rule.csv"
       val bw = new BufferedWriter(new FileWriter(file))
       bw.write(s"m,n,giftSolver$rule,distributedGiftSolver$rule,swapSolver$rule,lpSolver$rule,giftSolverTime,distributedGiftSolverTime,swapSolverTime,lpSolverTime,lpSolverPreTime,lpSolverPostTime\n")
-      for (m <- 2 to 10) {
-        for (n <- 2*m to 10*m) {
+      for (m <- 2 to 100) {
+        for (n <- 2*m to 2*m) {
           if (debug) println(s"Test configuration with $m peers and $n tasks")
           val nbPb = 100
           var (lpSolverRule, giftSolverRule, distributedGiftSolverRule, swapSolverRule, lpSolverTime, lpSolverPreTime, lpSolverPostTime, giftSolverTime, swapSolverTime, distributedGiftSolverTime) =
             (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
           for (o <- 1 to nbPb) {
             val pb = MATA.randomProblem(m, n)
+            if (debug) println(s"PB:\n$pb")
             val lpSolver : LPSolver  = new LPSolver(pb,rule)
             val giftSolver : GiftSolver  = new GiftSolver(pb,rule)
             val swapSolver : SwapSolver  = new SwapSolver(pb,rule)
             val distributedGiftSolver : DistributedGiftSolver  = new DistributedGiftSolver(pb, rule, system)
             val lpAlloc =lpSolver.run()
             val giftAlloc = giftSolver.run()
+            if (debug) println(s"GIFT:\n$giftAlloc")
             val swapAlloc = swapSolver.run()
             val distributedGiftAlloc = distributedGiftSolver.run()
+            if (debug) println(s"DISGIFT:\n$distributedGiftAlloc")
             rule match {
                 case Cmax =>
                   lpSolverRule += lpAlloc.makespan()

@@ -98,9 +98,10 @@ class Allocation(val pb: MATA) {
     swaps
   }
 
-  def isComplete(): Boolean = {
-    pb.tasks == bundle.values.foldLeft(Set[Task]())((acc, bundle) => acc ++ bundle.toSet)
-  }
+
+  def isSound: Boolean =
+    pb.tasks == bundle.values.foldLeft(Set[Task]())((acc, bundle) => acc ++ bundle.toSet) &&
+    bundle.values.forall( b1 =>  bundle.values.filter(_ != b1).forall( b2 => b2.toSet.intersect(b1.toSet).isEmpty))
 
 }
   /**
@@ -148,10 +149,10 @@ class Allocation(val pb: MATA) {
       val allocation = new Allocation(pb)
       val r = scala.util.Random
       pb.tasks.foreach { t =>
-        val ra = RandomUtils.random[Worker](pb.workers)
-        var b: SortedSet[Task] = allocation.bundle(ra)
-        b += t
-        allocation.bundle += (ra -> b)
+        val randomWorker = RandomUtils.random[Worker](pb.workers)
+        var newBundle: SortedSet[Task] = allocation.bundle(randomWorker)
+        newBundle += t
+        allocation.bundle += (randomWorker -> newBundle)
       }
       allocation
     }

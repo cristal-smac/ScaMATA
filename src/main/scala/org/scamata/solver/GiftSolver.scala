@@ -61,7 +61,7 @@ class GiftSolver(pb : MATA, rule : SocialRule) extends Solver(pb, rule) {
               }
             }
           }
-          // Select the best swap if any
+          // Select the best gift if any
           if (!found) {
             if (debug) println(s"$initiator becomes inactive")
             activeWorkers -= initiator
@@ -69,6 +69,10 @@ class GiftSolver(pb : MATA, rule : SocialRule) extends Solver(pb, rule) {
             if (debug) println(s"$bestSingleGift is performed")
             allocation = bestAllocation
             activeWorkers += bestSingleGift.supplier
+            if (rule == Cmax)
+            pb.workers.filter(worker => allocation.workload(worker) > allocation.workload(bestSingleGift.supplier)).foreach{ worker =>
+              activeWorkers += worker
+            }
           }
         }
       }

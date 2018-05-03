@@ -17,9 +17,8 @@ object DebugDistributedGiftSolver {
         println(s"DEBUG configuration with $m peers and $n tasks")
         val nbPb = 1000
         for (o <- 1 to nbPb) {
-          //import org.scamata.example.toy4x4._
           val pb =  MATA.randomProblem(m, n)
-          val distributedGiftSolver: DistributedGiftSolver = new DistributedGiftSolver(pb, Cmax, system)
+          val distributedGiftSolver: DistributedGiftSolver = new DistributedGiftSolver(pb, Flowtime, system)
           distributedGiftSolver.run()
           System.out.flush()
           println("----------------------------------------------------------------------------------")

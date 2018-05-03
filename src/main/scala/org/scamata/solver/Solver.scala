@@ -40,7 +40,7 @@ abstract class Solver(val pb : MATA, val rule : SocialRule) {
     val startingTime = System.nanoTime()
     val allocation = solve()
     solvingTime = System.nanoTime() - startingTime
-    if (allocation.isComplete()) allocation
+    if (allocation.isSound) allocation
     else throw new RuntimeException(s"Solver: the outcome\n $allocation\nis not complete for\n ${allocation.pb}")
   }
 
