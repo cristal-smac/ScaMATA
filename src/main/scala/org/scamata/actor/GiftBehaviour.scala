@@ -42,7 +42,7 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Work
       if (receiveDebug) println(s"$worker$mind is triggered")
       var updatedMind = mind
       val workload = updatedMind.belief(worker)
-      if (sender == supervisor) {// If the agent is triggered by the supervisor
+      if (sender == supervisor && rule == Cmax) {// If the agent is triggered by the supervisor and the rule us Cmax
         broadcastInform(workload)
       }
       // Otherwise the mind is up to date
@@ -175,7 +175,7 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Work
         if (debug) println(s"$worker$updatedMind confirms $task delegation to $opponent")
         sender ! Confirm(task, workload)
         if (receiveDebug) println(s"$worker$updatedMind broadcast its updated workload")
-        broadcastInform(updatedMind.belief(worker))
+        if (rule == Cmax) broadcastInform(updatedMind.belief(worker))
         self ! Start
         goto(Responder) using updatedMind
       }
@@ -201,7 +201,7 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Work
       var updatedMind = mind.add(task)
       updatedMind = updatedMind.updateBelief(worker,  updatedMind.belief(worker) + cost(worker, task) )
       updatedMind = updatedMind.updateBelief(opponent, updatedMind.belief(opponent) - cost(opponent, task) )
-      broadcastInform(updatedMind.belief(worker))
+      if (rule == Cmax) broadcastInform(updatedMind.belief(worker))
       self ! Start
       goto(Responder) using updatedMind
 
