@@ -13,8 +13,9 @@ case object Start extends Message
 // Initiate the worker with the bundle the directory and the cost matrix
 case class Initiate(bundle: SortedSet[Task], directory : Directory, cost : Map[(Worker, Task), Double]) extends Message
 case object Ready extends Message
-case class Outcome(allocation : Allocation) extends  Message// The supervisor returns an allocation
+case class Outcome(allocation : Allocation, nbDeal : Int) extends  Message// The supervisor returns an allocation
 case object Stop extends Message// Stop an agent
+case class Finish(nbDeal : Int) extends Message// Provide the number of delegation
 
 case class Inform(worker: Worker, workload: Double) extends Message
 
@@ -25,6 +26,8 @@ case class Accept(task : Task, workload: Double) extends Message// Accept a prop
 case class Confirm(task : Task, workload: Double) extends Message// Confirm a deal
 case class Withdraw(task : Task, workload: Double) extends Message// Withdraw a deal
 
+
+case object Query extends Message// Initiate the supervisor
 case class Stopped(bundle: SortedSet[Task]) extends Message// Initiate the supervisor
 case class ReStarted(bundle: SortedSet[Task]) extends Message// idem
 

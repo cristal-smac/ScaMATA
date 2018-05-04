@@ -25,13 +25,13 @@ object Test {
       }
       val file = s"experiments/data/$rule.csv"
       val bw = new BufferedWriter(new FileWriter(file))
-      bw.write(s"m,n,giftSolver$rule,distributedGiftSolver$rule,swapSolver$rule,lpSolver$rule,giftSolverTime,distributedGiftSolverTime,swapSolverTime,lpSolverTime,lpSolverPreTime,lpSolverPostTime\n")
+      bw.write(s"m,n,giftSolver$rule,distributedGiftSolver$rule,swapSolver$rule,lpSolver$rule,giftSolverTime,distributedGiftSolverTime,swapSolverTime,lpSolverTime,lpSolverPreTime,lpSolverPostTime,dealGift,disDisGift\n")
       for (m <- 2 to 100) {
         for (n <- 10*m to 10*m) {
           if (debug) println(s"Test configuration with $m peers and $n tasks")
           val nbPb = 100
-          var (lpSolverRule, giftSolverRule, distributedGiftSolverRule, swapSolverRule, lpSolverTime, lpSolverPreTime, lpSolverPostTime, giftSolverTime, swapSolverTime, distributedGiftSolverTime) =
-            (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+          var (lpSolverRule, giftSolverRule, distributedGiftSolverRule, swapSolverRule, lpSolverTime, lpSolverPreTime, lpSolverPostTime, giftSolverTime, swapSolverTime, distributedGiftSolverTime, deal, deaDis) =
+            (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
           for (o <- 1 to nbPb) {
             val pb = MATA.randomProblem(m, n)
             if (debug) println(s"PB:\n$pb")
@@ -41,9 +41,11 @@ object Test {
             val distributedGiftSolver : DistributedGiftSolver  = new DistributedGiftSolver(pb, rule, system)
             val lpAlloc =lpSolver.run()
             val giftAlloc = giftSolver.run()
+            deal += giftSolver.nbDeal
             if (debug) println(s"GIFT:\n$giftAlloc")
             val swapAlloc = swapSolver.run()
             val distributedGiftAlloc = distributedGiftSolver.run()
+            deaDis += distributedGiftSolver.nbDeal
             if (debug) println(s"DISGIFT:\n$distributedGiftAlloc")
             rule match {
                 case Cmax =>
@@ -64,7 +66,9 @@ object Test {
             lpSolverPreTime += lpSolver.preSolvingTime
             lpSolverPostTime += lpSolver.postSolvingTime
           }
-          bw.write(s"$m,$n,${giftSolverRule/nbPb},${distributedGiftSolverRule/nbPb},${swapSolverRule/nbPb},${lpSolverRule/nbPb},${giftSolverTime/nbPb},${distributedGiftSolverTime/nbPb},${swapSolverTime/nbPb},${lpSolverTime/nbPb},${lpSolverPreTime/nbPb},${lpSolverPostTime/nbPb}\n")
+          bw.write(s"$m,$n,${giftSolverRule/nbPb},${distributedGiftSolverRule/nbPb},${swapSolverRule/nbPb},${lpSolverRule/nbPb}," +
+            s"${giftSolverTime/nbPb},${distributedGiftSolverTime/nbPb},${swapSolverTime/nbPb},${lpSolverTime/nbPb},${lpSolverPreTime/nbPb},${lpSolverPostTime/nbPb}," +
+            s"${deal/nbPb},${deaDis/nbPb}\n")
           bw.flush()
         }
       }

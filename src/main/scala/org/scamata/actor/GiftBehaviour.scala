@@ -16,6 +16,8 @@ import scala.collection.SortedSet
   */
 class GiftBehaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Worker, rule: SocialRule) with FSM[State, StateOfMind] with Stash{
 
+  var stopped = false
+
   /**
     * Initially the worker is in responder state with no bundle, no beliefs about the workloads and no potential supplier/task
     */
@@ -27,7 +29,7 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Work
   when(Responder) {
     case Event(Initiate(bundle, d, c), mind) => // Initiate the bundle the directory and the cost matrix
       if (receiveDebug) println(s"$worker$mind is initiated")
-      this.supervisor = sender// I am you father, Luke
+      supervisor = sender// I am you father, Luke
       this.directory = d
       this.cost = c
       var updatedMind = mind.initBelief(directory.allWorkers())
@@ -55,6 +57,7 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Work
       // Either the worker has an empty bundle or no potential partners
       if (potentialPartners.isEmpty || updatedMind.bundle.isEmpty) {
         if (debug) println(s"$worker$updatedMind stops in responder state")
+        stopped = true
         supervisor ! Stopped(updatedMind.bundle)
         stay using updatedMind
       } else { // Otherwise
@@ -87,13 +90,15 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Work
         }
         if (! found) {
           if (debug) println(s"$worker$updatedMind stops in responder state")
+          stopped = true
           supervisor ! Stopped(updatedMind.bundle)
           goto(Responder) using updatedMind
         } else {
           val opponent = directory.adr(bestOpponent)
           updatedMind = updatedMind.updateDelegation(bestOpponent, bestTask)
-          if (receiveDebug)  println(s"$worker$updatedMind restarts in proposer state")
+          stopped = false
           supervisor ! ReStarted(updatedMind.bundle)
+          if (receiveDebug)  println(s"$worker$updatedMind restarts in proposer state")
           if (debug) println(s"$worker$updatedMind proposes $bestTask to $bestOpponent")
           opponent ! Propose(bestTask, workload)
           goto(Proposer) using updatedMind
@@ -105,8 +110,9 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Work
       if (receiveDebug) println(s"$worker$mind receives the proposal $task from $opponent in responder state")
       val updatedMind = mind.updateBelief(opponent, opponentWorkload)
       if (acceptable(task, provider = opponent, supplier = worker, updatedMind)) {
-        if (debug)  println(s"$worker$updatedMind restarts in proposer state")
+        stopped = false
         supervisor ! ReStarted(updatedMind.bundle)
+        if (debug)  println(s"$worker$updatedMind restarts in proposer state")
         if (debug) println(s"$worker$updatedMind accepts the proposal $task from $opponent")
         sender ! Accept(task, updatedMind.belief(worker))
         goto(WaitConfirmation) using updatedMind
@@ -174,6 +180,7 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Work
         updatedMind = updatedMind.updateDelegation(NoWorker, NoTask)
         if (debug) println(s"$worker$updatedMind confirms $task delegation to $opponent")
         sender ! Confirm(task, workload)
+        nbDeal +=1
         if (receiveDebug) println(s"$worker$updatedMind broadcast its updated workload")
         if (rule == Cmax) broadcastInform(updatedMind.belief(worker))
         self ! Start
@@ -247,10 +254,17 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Work
       if (receiveDebug) println(s"$worker$mind receives an inform from $opponent in state $mind")
       if (rule == Cmax && workload < mind.belief(opponent)){
         if (debug) println(s"$worker is triggered by the information of the workload $workload from $opponent")
+        stopped = false
+        supervisor ! ReStarted(mind.bundle)
+        if (debug)  println(s"$worker$mind restarts in proposer state")
         self ! Start
       }
       val updatedMind = mind.updateBelief(opponent, workload)
       stay using updatedMind
+
+    case Event(Query, mind) =>
+      if (stopped) sender ! Finish(nbDeal)
+      stay using mind
 
     case Event (m: Message, mind) =>
       defaultReceive(m)

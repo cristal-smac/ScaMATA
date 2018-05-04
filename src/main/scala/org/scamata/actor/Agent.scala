@@ -99,6 +99,8 @@ abstract class Agent(val worker: Worker, val rule: SocialRule) extends Actor{
   val receiveDebug = false
   val stateDebug = false
 
+  var nbDeal = 0 // number of deals
+
   var supervisor : ActorRef = context.parent
   var directory : Directory = new Directory()
   var cost : Map[(Worker, Task), Double]= Map[(Worker, Task), Double]()
@@ -116,7 +118,8 @@ abstract class Agent(val worker: Worker, val rule: SocialRule) extends Actor{
     * Handle stop messages
     */
   def defaultReceive(message : Message) : Any = message match {
-    case Stop => context.stop(self) // Stop the actor
+    case Stop =>
+      context.stop(self) // Stop the actor
   }
 
   /**

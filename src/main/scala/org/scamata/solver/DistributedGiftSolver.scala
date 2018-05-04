@@ -18,7 +18,7 @@ import scala.language.postfixOps
   * @param rule to be optimized
   * @param system of Actors
   */
-class DistributedGiftSolver(pb : MATA, rule : SocialRule, system: ActorSystem) extends Solver(pb, rule) {
+class DistributedGiftSolver(pb : MATA, rule : SocialRule, system: ActorSystem) extends DealSolver(pb, rule) {
 
   val TIMEOUTVALUE  = 1000 seconds // default timeout of a run
   implicit val timeout = Timeout(TIMEOUTVALUE)
@@ -34,6 +34,7 @@ class DistributedGiftSolver(pb : MATA, rule : SocialRule, system: ActorSystem) e
     // The current thread is blocked and it waits for the supervisor to "complete" the Future with it's reply.
     val future = supervisor ? Start
     val result = Await.result(future, timeout.duration).asInstanceOf[Outcome]
+    nbDeal = result.nbDeal
     result.allocation
   }
 

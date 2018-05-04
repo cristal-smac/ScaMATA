@@ -36,7 +36,14 @@ class Allocation(val pb: MATA) {
   /**
     * Returns the completion time of the last task to perform
     */
-  def makespan(): Double = pb.workers.foldLeft(0.0)((max, a) => math.max(max, workload(a)))
+  def makespan(): Double = {
+    var max = 0.0
+    pb.workers.foreach{ worker =>
+        max = Math.max(max, workload(worker))
+    }
+    max
+    //foldLeft(0.0)((max, a) => math.max(max, workload(a)))
+  }
 
   /**
     * Return the peers which are least loaded than the initiator

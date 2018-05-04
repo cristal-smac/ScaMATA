@@ -29,12 +29,15 @@ class SupervisorStatus(val stoppedActors: Set[ActorRef], val allocation: Allocat
   * */
 class Supervisor(pb: MATA, rule: SocialRule) extends Actor with FSM[SupervisorState,SupervisorStatus] {
 
-  val debug = false
+  var debug = false
   val extraDebug = false
 
   var solver : ActorRef = context.parent//Reference to the distributed solver
   var directory = new Directory()//White page for the peers
   var nbReady = 0//Number of agents which are ready to negotiate
+  var finishedActor = Set[ActorRef]()//Number of agents which are providen the number of deal
+
+  var nbDeal = 0
 
   /**
     * Initially all the worker are active and the allocation is random
@@ -60,7 +63,7 @@ class Supervisor(pb: MATA, rule: SocialRule) extends Actor with FSM[SupervisorSt
     case Event(Start, status) =>
       solver = sender
       //Distribute the initial allocation
-      directory.allActors().foreach{ actor: ActorRef =>
+      directory.allActors().foreach { actor: ActorRef =>
         val worker = directory.workers(actor)
         val bundle = status.allocation.bundle(worker)
         if (debug) println(s"Supervisor initiates $worker with bundle $bundle")
@@ -69,36 +72,49 @@ class Supervisor(pb: MATA, rule: SocialRule) extends Actor with FSM[SupervisorSt
       stay using status
     //When an actor becomes ready
     case Event(Ready, status) =>
-      nbReady+=1
-      if (nbReady == pb.m()){//When all of them are ready
+      nbReady += 1
+      if (nbReady == pb.m()) {
+        //When all of them are ready
         directory.allActors().foreach { actor: ActorRef => //Start them
           if (debug) println(s"Supervisor starts ${directory.workers(sender)}")
           actor ! Start
         }
       }
       stay using status
+
     //When an actor becomes active
     case Event(ReStarted(bundle), status) =>
       val worker = directory.workers(sender)
       val stoppedActor = status.stoppedActors - sender
-      val allocation =  status.allocation.update(worker, bundle)
+      val allocation = status.allocation.update(worker, bundle)
       if (debug) println(s"Supervisor: ${stoppedActor.size} agent(s) in pause since $worker restarts with bundle $bundle")
       stay using new SupervisorStatus(stoppedActor, allocation)
+
     // When an actor becomes inactive
     case Event(Stopped(bundle), status) =>
       val worker = directory.workers(sender)
       val stoppedActor = status.stoppedActors + sender
       val allocation = status.allocation.update(worker, bundle)
       if (debug) println(s"Supervisor: ${stoppedActor.size} agent(s) in pause since $worker stops with bundle $bundle")
-      if (stoppedActor.size == pb.m()){// When all the actors are in pause
-        solver ! Outcome(allocation)// reports the allocation
-        directory.allActors().foreach(a => a ! Stop)// stops the actors
-        context.stop(self)//stops the supervisor
+      if (stoppedActor.size == pb.m()) {
+        //debug = true
+        if (debug) println(s"Supervisor: all the actors are in pause")
+        directory.allActors().foreach(a => a ! Query) // stops the actors
       }
       stay using new SupervisorStatus(stoppedActor, allocation)
 
+    case Event(Finish(nb), status) =>
+      finishedActor += sender
+      nbDeal += nb
+      if (finishedActor.size  == pb.m() && status.stoppedActors.size  == pb.m()) {
+        solver ! Outcome(status.allocation, nbDeal) // reports the allocation
+        directory.allActors().foreach(a => a ! Stop) // stops the actors
+        context.stop(self) //stops the supervisor
+      }
+      stay using status
+
     case Event(msg@_, status) =>
-      println("Supervisor receives a message which was not expected: "+msg)
+      println("Supervisor receives a message which was not expected: " + msg)
       stay using status
   }
 

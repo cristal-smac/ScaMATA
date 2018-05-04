@@ -11,7 +11,7 @@ import scala.collection.SortedSet
   * @param pb to be solver
   * @param rule to be optimized
   */
-class GiftSolver(pb : MATA, rule : SocialRule) extends Solver(pb, rule) {
+class GiftSolver(pb : MATA, rule : SocialRule) extends DealSolver(pb, rule) {
   debug = false
 
   /**
@@ -67,11 +67,13 @@ class GiftSolver(pb : MATA, rule : SocialRule) extends Solver(pb, rule) {
             activeWorkers -= initiator
           } else {
             if (debug) println(s"$bestSingleGift is performed")
+            nbDeal += 1
             allocation = bestAllocation
             activeWorkers += bestSingleGift.supplier
-            if (rule == Cmax)
-            pb.workers.filter(worker => allocation.workload(worker) > allocation.workload(bestSingleGift.supplier)).foreach{ worker =>
-              activeWorkers += worker
+            if (rule == Cmax) {
+              pb.workers.filter(worker => allocation.workload(worker) > allocation.workload(bestSingleGift.supplier)).foreach { worker =>
+                activeWorkers += worker
+              }
             }
           }
         }
