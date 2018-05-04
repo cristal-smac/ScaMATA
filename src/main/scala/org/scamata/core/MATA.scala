@@ -98,4 +98,14 @@ object MATA{
     val cost : Map[(Worker, Task), Double] = (for(i <- 0 until m; j <- 0 until n) yield (workers.toList(i),tasks.toList(j)) -> (Random.nextDouble()*MAXCOST).toInt.toDouble ).toMap
     new MATA(workers, tasks, cost)
   }
+
+  def main(args: Array[String]): Unit = {
+    val pb = MATA.randomProblem(10, 100)
+    println(pb)
+    val allocation =Allocation.randomAllocation(pb)
+    println(allocation)
+    println(allocation.makespan())
+
+  }
 }
+

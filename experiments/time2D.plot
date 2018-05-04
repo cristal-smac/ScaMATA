@@ -6,7 +6,7 @@ set auto y
 set grid
 set ticslevel 0
 set style data lines
-set xlabel "m workers (2m tasks)"
+set xlabel "m workers (10m tasks)"
 set ylabel "Time (s)"
 set output 'time2DCmaxGiftVsDisGift.pdf'
 plot  "data/cmax.csv" using 1:($7)/1E9 with lines lc "blue" title 'Gift',\
