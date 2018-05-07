@@ -99,7 +99,12 @@ abstract class Agent(val worker: Worker, val rule: SocialRule) extends Actor{
   val receiveDebug = false
   val stateDebug = false
 
-  var nbDeal = 0 // number of deals
+  var nbPropose = 0
+  var nbAccept = 0
+  var nbReject = 0
+  var nbWithdraw = 0
+  var nbConfirm = 0
+  var nbInform = 0
 
   var supervisor : ActorRef = context.parent
   var directory : Directory = new Directory()

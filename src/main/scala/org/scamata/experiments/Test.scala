@@ -25,13 +25,28 @@ object Test {
       }
       val file = s"experiments/data/$rule.csv"
       val bw = new BufferedWriter(new FileWriter(file))
-      bw.write(s"m,n,giftSolver$rule,distributedGiftSolver$rule,swapSolver$rule,lpSolver$rule,giftSolverTime,distributedGiftSolverTime,swapSolverTime,lpSolverTime,lpSolverPreTime,lpSolverPostTime,dealGift,disDisGift\n")
+      bw.write(s"m,n," +
+        s"minGiftSolver$rule,openGiftSolver$rule,meanGiftSolver$rule,closedGiftSolver$rule,maxGiftSolver$rule," +
+        s"minDistributedGiftSolver$rule,openDistributedGiftSolver$rule,meanDistributedGiftSolver$rule,closedDistributedGiftSolver$rule,maxDistributedGiftSolver$rule," +
+        s"minSwapSolver$rule,openSwapSolver$rule,meanSwapSolver$rule,closedSwapSolver$rule,maxSolver$rule," +
+        s"minLpSolver$rule,openLpSolver$rule,meanLpSolver$rule,closedLpSolver$rule,maxLpSolver$rule," +
+        s"minGiftSolverTime,openGiftSolverTime,meanGiftSolverTime,closedGiftSolverTime,maxGiftSolverTime," +
+        s"minDistributedGiftSolverTime,openDistributedGiftSolverTime,meanDistributedGiftSolverTime,closedDistributedGiftSolverTime,maxDistributedGiftSolverTime," +
+        s"minSwapSolverTime,openSwapSolverTime,meanSwapSolverTime,closedSwapSolverTime,maxSwapSolverTime," +
+        s"minLpSolverTime,openLpSolverTime,meanLpSolverTime,closedLpSolverTime,maxLpSolverTime," +
+        s"minLpSolverPreTime,openLpSolverPreTime,meanLpSolverPreTime,closedSolverPreTime,maxLpSolverPreTime," +
+        s"minLpSolverPostTime,openLpSolverPostTime,meanLpSolverPostTime,closedLpSolverPostTime,maxLpSolverPostTime," +
+        s"dealGift,nbPropose,nbAccept,nbReject,nbWithdraw,nbConfirm,nbInform\n")
       for (m <- 2 to 100) {
         for (n <- 10*m to 10*m) {
           if (debug) println(s"Test configuration with $m peers and $n tasks")
-          val nbPb = 100
-          var (lpSolverRule, giftSolverRule, distributedGiftSolverRule, swapSolverRule, lpSolverTime, lpSolverPreTime, lpSolverPostTime, giftSolverTime, swapSolverTime, distributedGiftSolverTime, deal, deaDis) =
-            (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+          val nbPb = 100 // should be x*4
+          var (lpSolverRule, giftSolverRule, distributedGiftSolverRule, swapSolverRule,
+          lpSolverTime, lpSolverPreTime, lpSolverPostTime, giftSolverTime, swapSolverTime, distributedGiftSolverTime,
+          deal, nbPropose, nbAccept, nbReject, nbWithdraw, nbConfirm, nbInform) =
+            (List[Double](), List[Double](), List[Double](), List[Double](),
+              List[Double](), List[Double](), List[Double](), List[Double](), List[Double](), List[Double](),
+              0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
           for (o <- 1 to nbPb) {
             val pb = MATA.randomProblem(m, n)
             if (debug) println(s"PB:\n$pb")
@@ -41,34 +56,59 @@ object Test {
             val distributedGiftSolver : DistributedGiftSolver  = new DistributedGiftSolver(pb, rule, system)
             val lpAlloc =lpSolver.run()
             val giftAlloc = giftSolver.run()
-            deal += giftSolver.nbDeal
+            deal +=  giftSolver.nbConfirm
             if (debug) println(s"GIFT:\n$giftAlloc")
             val swapAlloc = swapSolver.run()
             val distributedGiftAlloc = distributedGiftSolver.run()
-            deaDis += distributedGiftSolver.nbDeal
+            nbPropose += distributedGiftSolver.nbPropose
+            nbAccept += distributedGiftSolver.nbAccept
+            nbReject += distributedGiftSolver.nbReject
+            nbWithdraw += distributedGiftSolver.nbWithdraw
+            nbConfirm += distributedGiftSolver.nbConfirm
+            nbInform += distributedGiftSolver.nbInform
             if (debug) println(s"DISGIFT:\n$distributedGiftAlloc")
             rule match {
                 case Cmax =>
-                  lpSolverRule += lpAlloc.makespan()
-                  giftSolverRule += giftAlloc.makespan()
-                  swapSolverRule += swapAlloc.makespan()
-                  distributedGiftSolverRule += distributedGiftAlloc.makespan()
+                  lpSolverRule ::=  lpAlloc.makespan()
+                  giftSolverRule ::= giftAlloc.makespan()
+                  swapSolverRule ::= swapAlloc.makespan()
+                  distributedGiftSolverRule ::= distributedGiftAlloc.makespan()
                 case Flowtime =>
-                  lpSolverRule += lpAlloc.flowtime()
-                  giftSolverRule += giftAlloc.flowtime()
-                  swapSolverRule += swapAlloc.flowtime()
-                  distributedGiftSolverRule += distributedGiftAlloc.flowtime()
+                  lpSolverRule ::= lpAlloc.flowtime()
+                  giftSolverRule ::= giftAlloc.flowtime()
+                  swapSolverRule ::= swapAlloc.flowtime()
+                  distributedGiftSolverRule ::= distributedGiftAlloc.flowtime()
             }
-            giftSolverTime += giftSolver.solvingTime
-            swapSolverTime += swapSolver.solvingTime
-            distributedGiftSolverTime += distributedGiftSolver.solvingTime
-            lpSolverTime += lpSolver.solvingTime
-            lpSolverPreTime += lpSolver.preSolvingTime
-            lpSolverPostTime += lpSolver.postSolvingTime
+            giftSolverTime ::= giftSolver.solvingTime
+            swapSolverTime ::= swapSolver.solvingTime
+            distributedGiftSolverTime ::= distributedGiftSolver.solvingTime
+            lpSolverTime ::= lpSolver.solvingTime
+            lpSolverPreTime ::= lpSolver.preSolvingTime
+            lpSolverPostTime ::= lpSolver.postSolvingTime
           }
-          bw.write(s"$m,$n,${giftSolverRule/nbPb},${distributedGiftSolverRule/nbPb},${swapSolverRule/nbPb},${lpSolverRule/nbPb}," +
-            s"${giftSolverTime/nbPb},${distributedGiftSolverTime/nbPb},${swapSolverTime/nbPb},${lpSolverTime/nbPb},${lpSolverPreTime/nbPb},${lpSolverPostTime/nbPb}," +
-            s"${deal/nbPb},${deaDis/nbPb}\n")
+          lpSolverRule = lpSolverRule.sortWith(_ < _)
+          giftSolverRule = giftSolverRule.sortWith(_ < _)
+          distributedGiftSolverRule = distributedGiftSolverRule.sortWith(_ < _)
+          swapSolverRule = swapSolverRule.sortWith(_ < _)
+          lpSolverTime = lpSolverTime.sortWith(_ < _)
+          lpSolverPreTime = lpSolverPreTime.sortWith(_ < _)
+          lpSolverPostTime = lpSolverPostTime.sortWith(_ < _)
+          giftSolverTime = giftSolverTime.sortWith(_ < _)
+          swapSolverTime = swapSolverTime.sortWith(_ < _)
+          distributedGiftSolverTime = distributedGiftSolverTime.sortWith(_ < _)
+          bw.write(
+            s"$m,$n,${giftSolverRule.min},${giftSolverRule(nbPb/4)},${giftSolverRule.sum/nbPb},${giftSolverRule(nbPb*3/4)},${giftSolverRule.max}" +
+            s"${distributedGiftSolverRule.min},${distributedGiftSolverRule(nbPb/4)},${distributedGiftSolverRule.sum/nbPb},${distributedGiftSolverRule(nbPb*3/4)},${distributedGiftSolverRule.max}" +
+            s"${swapSolverRule.min},${swapSolverRule(nbPb/4)},${swapSolverRule.sum/nbPb},${swapSolverRule(nbPb*3/4)},${swapSolverRule.max}" +
+            s"${lpSolverRule.min},${lpSolverRule(nbPb/4)},${lpSolverRule.sum/nbPb},${lpSolverRule(nbPb*3/4)},${lpSolverRule.max}" +
+            s"${giftSolverTime.min},${giftSolverTime(nbPb/4)},${giftSolverTime.sum/nbPb},${giftSolverTime(nbPb*3/4)},${giftSolverTime.max}" +
+            s"${distributedGiftSolverTime.min},${distributedGiftSolverTime(nbPb/4)},${distributedGiftSolverTime.sum/nbPb},${distributedGiftSolverTime(nbPb*3/4)},${distributedGiftSolverTime.max}" +
+            s"${swapSolverTime.min},${swapSolverTime(nbPb/4)},${swapSolverTime.sum/nbPb},${swapSolverTime(nbPb*3/4)},${swapSolverTime.max}" +
+            s"${lpSolverTime.min},${lpSolverTime(nbPb/4)},${lpSolverTime.sum/nbPb},${lpSolverTime(nbPb*3/4)},${lpSolverTime.max}" +
+            s"${lpSolverPreTime.min},${lpSolverPreTime(nbPb/4)},${lpSolverPreTime.sum/nbPb},${lpSolverPreTime(nbPb*3/4)},${lpSolverPreTime.max}" +
+            s"${lpSolverPostTime.min},${lpSolverPostTime(nbPb/4)},${lpSolverPostTime.sum/nbPb},${lpSolverPostTime(nbPb/4)},${lpSolverPostTime.max}" +
+            s"${deal/nbPb}," +
+            s"${nbPropose/nbPb}, ${nbAccept/nbPb}, ${nbReject/nbPb}, ${nbWithdraw/nbPb}, ${nbConfirm/nbPb}, ${nbInform/nbPb}")
           bw.flush()
         }
       }

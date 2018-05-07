@@ -37,8 +37,6 @@ class Supervisor(pb: MATA, rule: SocialRule) extends Actor with FSM[SupervisorSt
   var nbReady = 0//Number of agents which are ready to negotiate
   var finishedActor = Set[ActorRef]()//Number of agents which are providen the number of deal
 
-  var nbDeal = 0
-
   /**
     * Initially all the worker are active and the allocation is random
     */
@@ -103,11 +101,10 @@ class Supervisor(pb: MATA, rule: SocialRule) extends Actor with FSM[SupervisorSt
       }
       stay using new SupervisorStatus(stoppedActor, allocation)
 
-    case Event(Finish(nb), status) =>
+    case Event(Finish(nbPropose, nbAccept, nbReject, nbWithdraw, nbConfirm, nbInform), status) =>
       finishedActor += sender
-      nbDeal += nb
       if (finishedActor.size  == pb.m() && status.stoppedActors.size  == pb.m()) {
-        solver ! Outcome(status.allocation, nbDeal) // reports the allocation
+        solver ! Outcome(status.allocation, nbPropose, nbAccept, nbReject, nbWithdraw, nbConfirm, nbInform) // reports the allocation
         directory.allActors().foreach(a => a ! Stop) // stops the actors
         context.stop(self) //stops the supervisor
       }

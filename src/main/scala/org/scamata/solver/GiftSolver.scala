@@ -67,7 +67,7 @@ class GiftSolver(pb : MATA, rule : SocialRule) extends DealSolver(pb, rule) {
             activeWorkers -= initiator
           } else {
             if (debug) println(s"$bestSingleGift is performed")
-            nbDeal += 1
+            nbConfirm += 1
             allocation = bestAllocation
             activeWorkers += bestSingleGift.supplier
             if (rule == Cmax) {

@@ -3,10 +3,11 @@ package org.scamata.solver
 
 import org.scamata.core.{Allocation, MATA}
 import org.scamata.actor._
-
 import akka.actor.{ActorSystem, Props}
 import akka.pattern.ask
 import akka.util.Timeout
+import javax.naming.spi.DirStateFactory.Result
+
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
@@ -34,7 +35,12 @@ class DistributedGiftSolver(pb : MATA, rule : SocialRule, system: ActorSystem) e
     // The current thread is blocked and it waits for the supervisor to "complete" the Future with it's reply.
     val future = supervisor ? Start
     val result = Await.result(future, timeout.duration).asInstanceOf[Outcome]
-    nbDeal = result.nbDeal
+    nbPropose = result.nbPropose
+    nbAccept = result.nbAccept
+    nbReject = result.nbReject
+    nbWithdraw = result.nbWithdraw
+    nbConfirm = result.nbConfirm
+    nbInform = result.nbInform
     result.allocation
   }
 

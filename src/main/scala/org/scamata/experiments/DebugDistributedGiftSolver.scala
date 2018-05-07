@@ -23,9 +23,9 @@ object DebugDistributedGiftSolver {
           val distributedGiftSolver: DistributedGiftSolver = new DistributedGiftSolver(pb, Cmax, system)
           val giftSolver: GiftSolver = new GiftSolver(pb, Cmax)
           val outcome = giftSolver.run()
-          nbDeal += giftSolver.nbDeal
+          nbDeal += giftSolver.nbConfirm
           val disoutcome = distributedGiftSolver.run()
-          nbDealDis += distributedGiftSolver.nbDeal
+          nbDealDis += distributedGiftSolver.nbConfirm
           makespan += outcome.makespan()
           dismakespan +=disoutcome.makespan()
         }

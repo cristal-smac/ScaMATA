@@ -9,5 +9,10 @@ import org.scamata.core.MATA
   * @param rule
   */
 abstract class DealSolver(pb : MATA,rule : SocialRule) extends Solver(pb, rule){
-  var nbDeal = 0
+  var nbPropose = 0
+  var nbAccept = 0
+  var nbReject = 0
+  var nbWithdraw = 0
+  var nbConfirm = 0
+  var nbInform = 0
 }

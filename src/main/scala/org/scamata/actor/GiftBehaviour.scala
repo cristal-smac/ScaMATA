@@ -45,6 +45,7 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Work
       var updatedMind = mind
       val workload = updatedMind.belief(worker)
       if (sender == supervisor && rule == Cmax) {// If the agent is triggered by the supervisor and the rule us Cmax
+        nbInform +=1
         broadcastInform(workload)
       }
       // Otherwise the mind is up to date
@@ -101,6 +102,7 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Work
           if (receiveDebug)  println(s"$worker$updatedMind restarts in proposer state")
           if (debug) println(s"$worker$updatedMind proposes $bestTask to $bestOpponent")
           opponent ! Propose(bestTask, workload)
+          nbPropose += 1
           goto(Proposer) using updatedMind
         }
       }
@@ -115,11 +117,13 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Work
         if (debug)  println(s"$worker$updatedMind restarts in proposer state")
         if (debug) println(s"$worker$updatedMind accepts the proposal $task from $opponent")
         sender ! Accept(task, updatedMind.belief(worker))
+        nbAccept += 1
         goto(WaitConfirmation) using updatedMind
       }else{
         val workload = updatedMind.belief(worker)
         if (debug) println(s"$worker$updatedMind rejects $task from $opponent")
         sender ! Reject(task, workload)
+        nbReject +=1
         goto(Responder) using updatedMind
       }
 
@@ -136,6 +140,7 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Work
       val workload = worker.workload(updatedMind.bundle, cost)
       if (debug) println(s"$worker$mind withdraws $task delegation to $opponent")
       sender ! Withdraw(task, workload)
+      nbWithdraw +=1
       stay using updatedMind
   }
 
@@ -170,6 +175,7 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Work
         val updatedMind = mind.updateBelief(opponent, opponentWorkload)
         if (debug) println(s"$worker$mind withdraws $task delegation to $opponent")
         sender ! Withdraw(task, workload)
+        nbWithdraw +=1
         stay using updatedMind
       } else {
         if (receiveDebug) println(s"$worker$mind receives an acceptance of $task from $opponent in proposer state ")
@@ -180,9 +186,12 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Work
         updatedMind = updatedMind.updateDelegation(NoWorker, NoTask)
         if (debug) println(s"$worker$updatedMind confirms $task delegation to $opponent")
         sender ! Confirm(task, workload)
-        nbDeal +=1
+        nbConfirm +=1
         if (receiveDebug) println(s"$worker$updatedMind broadcast its updated workload")
-        if (rule == Cmax) broadcastInform(updatedMind.belief(worker))
+        if (rule == Cmax) {
+          broadcastInform(updatedMind.belief(worker))
+          nbInform += 1
+        }
         self ! Start
         goto(Responder) using updatedMind
       }
@@ -208,7 +217,10 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Work
       var updatedMind = mind.add(task)
       updatedMind = updatedMind.updateBelief(worker,  updatedMind.belief(worker) + cost(worker, task) )
       updatedMind = updatedMind.updateBelief(opponent, updatedMind.belief(opponent) - cost(opponent, task) )
-      if (rule == Cmax) broadcastInform(updatedMind.belief(worker))
+      if (rule == Cmax) {
+        broadcastInform(updatedMind.belief(worker))
+        nbInform +=1
+      }
       self ! Start
       goto(Responder) using updatedMind
 
@@ -232,6 +244,7 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Work
       val workload = worker.workload(updatedMind.bundle, cost)
       if (debug) println(s"$worker$mind withdraws $task delegation to $opponent")
       sender ! Withdraw(task, workload)
+      nbWithdraw += 1
       stay using updatedMind
 
     case Event(Propose(task, _), mind) =>
@@ -263,7 +276,7 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Work
       stay using updatedMind
 
     case Event(Query, mind) =>
-      if (stopped) sender ! Finish(nbDeal)
+      if (stopped) sender ! Finish(nbPropose, nbAccept, nbReject, nbWithdraw, nbConfirm, nbInform)
       stay using mind
 
     case Event (m: Message, mind) =>
