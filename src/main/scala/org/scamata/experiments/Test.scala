@@ -108,7 +108,7 @@ object Test {
             s"${lpSolverPreTime.min},${lpSolverPreTime(nbPb/4)},${lpSolverPreTime.sum/nbPb},${lpSolverPreTime(nbPb*3/4)},${lpSolverPreTime.max}" +
             s"${lpSolverPostTime.min},${lpSolverPostTime(nbPb/4)},${lpSolverPostTime.sum/nbPb},${lpSolverPostTime(nbPb/4)},${lpSolverPostTime.max}" +
             s"${deal/nbPb}," +
-            s"${nbPropose/nbPb}, ${nbAccept/nbPb}, ${nbReject/nbPb}, ${nbWithdraw/nbPb}, ${nbConfirm/nbPb}, ${nbInform/nbPb}/n")
+            s"${nbPropose/nbPb}, ${nbAccept/nbPb}, ${nbReject/nbPb}, ${nbWithdraw/nbPb}, ${nbConfirm/nbPb}, ${nbInform/nbPb}\n")
           bw.flush()
         }
       }
