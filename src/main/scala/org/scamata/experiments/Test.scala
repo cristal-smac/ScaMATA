@@ -8,7 +8,7 @@ import org.scamata.core._
 import org.scamata.solver._
 
 /**
-  * Main app to test LPSolver and GiftSolver
+  * Main app to test LPSolver and Dis/GiftSolver
   */
 object Test {
 
@@ -28,11 +28,11 @@ object Test {
       bw.write(s"m,n," +
         s"minGiftSolver$rule,openGiftSolver$rule,meanGiftSolver$rule,closedGiftSolver$rule,maxGiftSolver$rule," +
         s"minDistributedGiftSolver$rule,openDistributedGiftSolver$rule,meanDistributedGiftSolver$rule,closedDistributedGiftSolver$rule,maxDistributedGiftSolver$rule," +
-        s"minSwapSolver$rule,openSwapSolver$rule,meanSwapSolver$rule,closedSwapSolver$rule,maxSolver$rule," +
+        s"minExhauSolver$rule,openExhauSolver$rule,meanExhauSolver$rule,closedExhauSolver$rule,maxExhauSolver$rule," +
         s"minLpSolver$rule,openLpSolver$rule,meanLpSolver$rule,closedLpSolver$rule,maxLpSolver$rule," +
         s"minGiftSolverTime,openGiftSolverTime,meanGiftSolverTime,closedGiftSolverTime,maxGiftSolverTime," +
         s"minDistributedGiftSolverTime,openDistributedGiftSolverTime,meanDistributedGiftSolverTime,closedDistributedGiftSolverTime,maxDistributedGiftSolverTime," +
-        s"minSwapSolverTime,openSwapSolverTime,meanSwapSolverTime,closedSwapSolverTime,maxSwapSolverTime," +
+        s"minExhauSolverTime,openExhauSolverTime,meanExhauSolverTime,closedExhauSolverTime,maxExhauSolverTime," +
         s"minLpSolverTime,openLpSolverTime,meanLpSolverTime,closedLpSolverTime,maxLpSolverTime," +
         s"minLpSolverPreTime,openLpSolverPreTime,meanLpSolverPreTime,closedSolverPreTime,maxLpSolverPreTime," +
         s"minLpSolverPostTime,openLpSolverPostTime,meanLpSolverPostTime,closedLpSolverPostTime,maxLpSolverPostTime," +
@@ -41,8 +41,8 @@ object Test {
         for (n <- 10*m to 10*m) {
           if (debug) println(s"Test configuration with $m peers and $n tasks")
           val nbPb = 100 // should be x*4
-          var (lpSolverRule, giftSolverRule, distributedGiftSolverRule, swapSolverRule,
-          lpSolverTime, lpSolverPreTime, lpSolverPostTime, giftSolverTime, swapSolverTime, distributedGiftSolverTime,
+          var (lpSolverRule, giftSolverRule, distributedGiftSolverRule, exhauSolverRule,
+          lpSolverTime, lpSolverPreTime, lpSolverPostTime, giftSolverTime, exhauSolverTime, distributedGiftSolverTime,
           deal, nbPropose, nbAccept, nbReject, nbWithdraw, nbConfirm, nbInform) =
             (List[Double](), List[Double](), List[Double](), List[Double](),
               List[Double](), List[Double](), List[Double](), List[Double](), List[Double](), List[Double](),
@@ -52,13 +52,13 @@ object Test {
             if (debug) println(s"PB:\n$pb")
             val lpSolver : LPSolver  = new LPSolver(pb,rule)
             val giftSolver : GiftSolver  = new GiftSolver(pb,rule)
-            val swapSolver : SwapSolver  = new SwapSolver(pb,rule)
+            val exhauSolver : ExhaustiveSolver  = new ExhaustiveSolver(pb,rule)
             val distributedGiftSolver : DistributedGiftSolver  = new DistributedGiftSolver(pb, rule, system)
             val lpAlloc =lpSolver.run()
             val giftAlloc = giftSolver.run()
             deal +=  giftSolver.nbConfirm
             if (debug) println(s"GIFT:\n$giftAlloc")
-            val swapAlloc = swapSolver.run()
+            val exhauAlloc = exhauSolver.run()
             val distributedGiftAlloc = distributedGiftSolver.run()
             nbPropose += distributedGiftSolver.nbPropose
             nbAccept += distributedGiftSolver.nbAccept
@@ -71,16 +71,16 @@ object Test {
                 case Cmax =>
                   lpSolverRule ::=  lpAlloc.makespan()
                   giftSolverRule ::= giftAlloc.makespan()
-                  swapSolverRule ::= swapAlloc.makespan()
+                  exhauSolverRule ::= exhauAlloc.makespan()
                   distributedGiftSolverRule ::= distributedGiftAlloc.makespan()
                 case Flowtime =>
                   lpSolverRule ::= lpAlloc.flowtime()
                   giftSolverRule ::= giftAlloc.flowtime()
-                  swapSolverRule ::= swapAlloc.flowtime()
+                  exhauSolverRule ::= exhauAlloc.flowtime()
                   distributedGiftSolverRule ::= distributedGiftAlloc.flowtime()
             }
             giftSolverTime ::= giftSolver.solvingTime
-            swapSolverTime ::= swapSolver.solvingTime
+            exhauSolverTime ::= exhauSolver.solvingTime
             distributedGiftSolverTime ::= distributedGiftSolver.solvingTime
             lpSolverTime ::= lpSolver.solvingTime
             lpSolverPreTime ::= lpSolver.preSolvingTime
@@ -89,21 +89,21 @@ object Test {
           lpSolverRule = lpSolverRule.sortWith(_ < _)
           giftSolverRule = giftSolverRule.sortWith(_ < _)
           distributedGiftSolverRule = distributedGiftSolverRule.sortWith(_ < _)
-          swapSolverRule = swapSolverRule.sortWith(_ < _)
+          exhauSolverRule = exhauSolverRule.sortWith(_ < _)
           lpSolverTime = lpSolverTime.sortWith(_ < _)
           lpSolverPreTime = lpSolverPreTime.sortWith(_ < _)
           lpSolverPostTime = lpSolverPostTime.sortWith(_ < _)
           giftSolverTime = giftSolverTime.sortWith(_ < _)
-          swapSolverTime = swapSolverTime.sortWith(_ < _)
+          exhauSolverTime = exhauSolverTime.sortWith(_ < _)
           distributedGiftSolverTime = distributedGiftSolverTime.sortWith(_ < _)
           bw.write(
             s"$m,$n,${giftSolverRule.min},${giftSolverRule(nbPb/4)},${giftSolverRule(nbPb/2)},${giftSolverRule(nbPb*3/4)},${giftSolverRule.max}," +
             s"${distributedGiftSolverRule.min},${distributedGiftSolverRule(nbPb/4)},${distributedGiftSolverRule(nbPb/2)},${distributedGiftSolverRule(nbPb*3/4)},${distributedGiftSolverRule.max}," +
-            s"${swapSolverRule.min},${swapSolverRule(nbPb/4)},${swapSolverRule(nbPb/2)},${swapSolverRule(nbPb*3/4)},${swapSolverRule.max}," +
+            s"${exhauSolverRule.min},${exhauSolverRule(nbPb/4)},${exhauSolverRule(nbPb/2)},${exhauSolverRule(nbPb*3/4)},${exhauSolverRule.max}," +
             s"${lpSolverRule.min},${lpSolverRule(nbPb/4)},${lpSolverRule(nbPb/2)},${lpSolverRule(nbPb*3/4)},${lpSolverRule.max}," +
             s"${giftSolverTime.min},${giftSolverTime(nbPb/4)},${giftSolverTime(nbPb/2)},${giftSolverTime(nbPb*3/4)},${giftSolverTime.max}," +
             s"${distributedGiftSolverTime.min},${distributedGiftSolverTime(nbPb/4)},${distributedGiftSolverTime(nbPb/2)},${distributedGiftSolverTime(nbPb*3/4)},${distributedGiftSolverTime.max}," +
-            s"${swapSolverTime.min},${swapSolverTime(nbPb/4)},${swapSolverTime(nbPb/2)},${swapSolverTime(nbPb*3/4)},${swapSolverTime.max}," +
+            s"${exhauSolverTime.min},${exhauSolverTime(nbPb/4)},${exhauSolverTime(nbPb/2)},${exhauSolverTime(nbPb*3/4)},${exhauSolverTime.max}," +
             s"${lpSolverTime.min},${lpSolverTime(nbPb/4)},${lpSolverTime(nbPb/2)},${lpSolverTime(nbPb*3/4)},${lpSolverTime.max}," +
             s"${lpSolverPreTime.min},${lpSolverPreTime(nbPb/4)},${lpSolverPreTime(nbPb/2)},${lpSolverPreTime(nbPb*3/4)},${lpSolverPreTime.max}," +
             s"${lpSolverPostTime.min},${lpSolverPostTime(nbPb/4)},${lpSolverPostTime(nbPb/2)},${lpSolverPostTime(nbPb/4)},${lpSolverPostTime.max}," +
