@@ -38,7 +38,7 @@ object Test {
         s"minLpSolverPostTime,openLpSolverPostTime,meanLpSolverPostTime,closedLpSolverPostTime,maxLpSolverPostTime," +
         s"dealGift,nbPropose,nbAccept,nbReject,nbWithdraw,nbConfirm,nbInform\n")
       for (m <- 2 to 100) {
-        for (n <- 10*m to 10*m) {
+        for (n <- 2*m to 2*m) {
           if (debug) println(s"Test configuration with $m peers and $n tasks")
           val nbPb = 100 // should be x*4
           var (lpSolverRule, giftSolverRule, distributedGiftSolverRule, exhauSolverRule,
