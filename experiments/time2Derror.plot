@@ -16,7 +16,7 @@ plot "data/cmax.csv" using 1:($24)/1E9:($26)/1E9 with filledcurves lc "light-blu
      "data/cmax.csv" using 1:($39)/1E9:($41)/1E9 with filledcurves lc "light-red" notitle,\
      "data/cmax.csv" using 1:($40)/1E9 with lines lc "dark-red" title 'LP',\
      "data/cmax.csv" using 1:($34)/1E9:($36)/1E9 with filledcurves lc "plum" notitle,\
-     "data/cmax.csv" using 1:($35)/1E9 with lines lc "dark-plum" title 'Exhau.'
+     "data/cmax.csv" using 1:($35)/1E9 with lines lc "dark-plum" title 'Random'
 set output 'time2DerrorFlowtime.pdf'
 plot "data/flowtime.csv" using 1:($24)/1E9:($26)/1E9 with filledcurves lc "light-blue" notitle,\
      "data/flowtime.csv" using 1:($25)/1E9 with lines lc "dark-blue" title 'Gift',\
@@ -25,5 +25,5 @@ plot "data/flowtime.csv" using 1:($24)/1E9:($26)/1E9 with filledcurves lc "light
      "data/flowtime.csv" using 1:($39)/1E9:($41)/1E9 with filledcurves lc "light-red" notitle,\
      "data/flowtime.csv" using 1:($40)/1E9 with lines lc "dark-red" title 'LP',\
      "data/flowtime.csv" using 1:($34)/1E9:($36)/1E9 with filledcurves lc "plum" notitle,\
-     "data/flowtime.csv" using 1:($35)/1E9 with lines lc "dark-plum" title 'Exhau.'
+     "data/flowtime.csv" using 1:($35)/1E9 with lines lc "dark-plum" title 'Random'
 

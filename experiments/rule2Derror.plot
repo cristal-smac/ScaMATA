@@ -16,7 +16,7 @@ plot  "data/cmax.csv" using 1:4:6 with filledcurves lc "light-blue" notitle,\
       "data/cmax.csv" using 1:19:21 with filledcurves lc "light-red" notitle,\
       "data/cmax.csv" using 1:20 with lines lc "dark-red" title 'LP',\
       "data/cmax.csv" using 1:14:16 with filledcurves lc "plum" notitle,\
-      "data/cmax.csv" using 1:15 with lines lc "dark-plum" title 'Exhau.'
+      "data/cmax.csv" using 1:15 with lines lc "dark-plum" title 'Random'
 set ylabel "Flowtime"
 set output 'rule2DerrorFlowtime.pdf'
 plot  "data/flowtime.csv" using 1:4:6 with filledcurves lc "light-blue" notitle,\
@@ -26,4 +26,4 @@ plot  "data/flowtime.csv" using 1:4:6 with filledcurves lc "light-blue" notitle,
        "data/flowtime.csv" using 1:19:21 with filledcurves lc "light-red" notitle,\
        "data/flowtime.csv" using 1:20 with lines lc "dark-red" title 'LP',\
        "data/flowtime.csv" using 1:14:16 with filledcurves lc "plum" notitle,\
-       "data/flowtime.csv" using 1:15 with lines lc "dark-plum" title 'Exhau.'
+       "data/flowtime.csv" using 1:15 with lines lc "dark-plum" title 'Random'
