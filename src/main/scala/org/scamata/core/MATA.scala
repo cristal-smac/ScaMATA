@@ -16,59 +16,61 @@ class MATA(val workers: SortedSet[Worker], val tasks: SortedSet[Task], val cost 
     * Returns a string describing the MATA problem
     */
   override def toString: String = {
-    "m: " +workers.size +"\n"+
-      "n: " + tasks.size +"\n"+
-      "peers: " +workers.mkString(", ") +"\n"+
-      "tasks: " + tasks.mkString(", ") +"\n"+
+    "m: " + workers.size + "\n" +
+      "n: " + tasks.size + "\n" +
+      "peers: " + workers.mkString(", ") + "\n" +
+      "tasks: " + tasks.mkString(", ") + "\n" +
       workers.toList.map(a =>
-        tasks.toList.map( t =>
-          s"$a: $t ${cost(a,t)}"
-          ).mkString("\n")
+        tasks.toList.map(t =>
+          s"$a: $t ${cost(a, t)}"
+        ).mkString("\n")
       ).mkString("\n")
   }
 
   /**
     * Returns the number of peers
     */
-  def m() : Int = workers.size
+  def m(): Int = workers.size
 
   /**
     * Returns the number of tasks
     */
-  def n() : Int = tasks.size
+  def n(): Int = tasks.size
 
   /**
     * Returns an worker
+    *
     * @param name of the worker
     */
-  def getAgent(name: String) : Worker = {
+  def getAgent(name: String): Worker = {
     workers.find(a => a.name.equals(name)) match {
       case Some(s) => s
-      case None => throw new RuntimeException("No worker "+name+" has been found")
+      case None => throw new RuntimeException("No worker " + name + " has been found")
     }
   }
 
   /**
     * Returns a task
+    *
     * @param name the worker of the task
     */
-  def getTask(name: String) : Task= {
+  def getTask(name: String): Task = {
     tasks.find(t => t.name.equals(name)) match {
       case Some(s) => s
-      case None => throw new RuntimeException("No task "+name+" has been found")
+      case None => throw new RuntimeException("No task " + name + " has been found")
     }
   }
 
   /**
     * Return a string description of the MATA problem in the Optimization Programming language
     */
-  def toOPL : String = {
-    "M = "+workers.size+"; \n"+
-    "N = "+tasks.size+"; \n"+
-      "C = "+
+  def toOPL: String = {
+    "M = " + workers.size + "; \n" +
+      "N = " + tasks.size + "; \n" +
+      "C = " +
       workers.toList.map(a =>
-        tasks.toList.map( t =>
-          cost(a,t).toString
+        tasks.toList.map(t =>
+          cost(a, t).toString
         ).mkString("[", ", ", "]")
       ).mkString("[", ", ", "] ;\n")
   }
@@ -77,6 +79,38 @@ class MATA(val workers: SortedSet[Worker], val tasks: SortedSet[Task], val cost 
     * Returns true if the cost of allActors tasks for allActors peers are specified
     */
   def isFullySpecified: Boolean = cost.size == workers.size * tasks.size
+
+  /**
+    * Returns all the potential allocations
+    */
+  def allAllocation(): Set[Allocation] = allAllocation(workers, tasks)
+
+  /**
+    * Returns all the potential allocations
+    *
+    * @param workers
+    * @param tasks
+    */
+  def allAllocation(workers: SortedSet[Worker], tasks: SortedSet[Task]): Set[Allocation] = {
+    if (workers.size == 1) {
+      var allocation = new Allocation(this)
+      allocation = allocation.update(workers.head, tasks)
+      return Set(allocation) // returns allocation where workers has no task
+    }
+    var allocations = Set[Allocation]()
+    val worker = workers.head // Select one worker
+    val otherWorkers = workers - worker
+    tasks.subsets().foreach { bundle => // For each subset of tasks
+      var complementary = tasks -- bundle
+      val subAllocations = allAllocation(otherWorkers, complementary) // compute the suballocation of the complementary
+      // and allocate the current bundle to the worker
+      subAllocations.foreach { a =>
+        val newAllocation = a.update(worker, bundle)
+        allocations += newAllocation
+      }
+    }
+    allocations
+  }
 }
 
 /**
