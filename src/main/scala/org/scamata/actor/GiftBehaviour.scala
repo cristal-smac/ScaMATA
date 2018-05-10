@@ -72,7 +72,8 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Work
             0.0
         }
         potentialPartners.foreach { opponent =>
-          updatedMind.bundle.foreach { task => //foreach potential single swap
+          val bundle = updatedMind.bundle.toList.sortWith( cost(worker,_) > cost(worker,_) )
+          bundle.foreach { task => //foreach potential single swap
             val giftWorkload = workload - cost(worker, task)
             val giftOpponentWorkload = updatedMind.belief(opponent) + cost(opponent, task)
             val giftGoal = rule match{

@@ -103,13 +103,15 @@ class Supervisor(pb: MATA, rule: SocialRule) extends Actor with FSM[SupervisorSt
       stay using new SupervisorStatus(stoppedActor, allocation)
 
     case Event(Finish(nbP, nbA, nbR, nbW, nbC, nbI), status) =>
-      nbPropose += nbP
-      nbAccept += nbA
-      nbReject += nbR
-      nbWithdraw += nbW
-      nbConfirm += nbC
-      nbInform += nbI
-      finishedActor += sender
+      if (!finishedActor.contains(sender)) {
+        nbPropose += nbP
+        nbAccept += nbA
+        nbReject += nbR
+        nbWithdraw += nbW
+        nbConfirm += nbC
+        nbInform += nbI
+        finishedActor += sender
+      }
       if (finishedActor.size  == pb.m() && status.stoppedActors.size  == pb.m()) {
         solver ! Outcome(status.allocation, nbPropose, nbAccept, nbReject, nbWithdraw, nbConfirm, nbInform) // reports the allocation
         directory.allActors().foreach(a => a ! Stop) // stops the actors

@@ -52,13 +52,15 @@ object DistributedGiftSolver{
   def main(args: Array[String]): Unit = {
     import org.scamata.example.toy4x4._
     //import org.scamata.example.bug2x4
-    //val pb = MATA.randomProblem(4, 22)
+    val pb = MATA.randomProblem(20, 200)
     println(pb)
     val r = scala.util.Random
     val system = ActorSystem("DistributedGiftSolver" + r.nextInt.toString)
     //The Actor system
-    val negotiationSolver = new DistributedGiftSolver(pb, Flowtime, system)
-    println(negotiationSolver.run().toString)
+    val negotiationSolver = new DistributedGiftSolver(pb, Cmax, system)
+    val sol = negotiationSolver.run()
+    println(sol.toString)
+    println(sol.makespan())
     System.exit(1)
   }
 }

@@ -4,7 +4,8 @@ package org.scamata.solver
 import org.scamata.core._
 import org.scamata.deal._
 
-import scala.collection.SortedSet
+import scala.collection.{SortedSet, immutable}
+import scala.util.Random
 
 /**
   * Multiagent negotiation process for minimizing the rule
@@ -20,20 +21,21 @@ class GiftSolver(pb : MATA, rule : SocialRule) extends DealSolver(pb, rule) {
   override def solve(): Allocation = {
     var allocation = Allocation.randomAllocation(pb)
     if (debug) println(s"Give with a random allocation:\n$allocation")
-    var activeWorkers = pb.workers
+    var activeWorkers: List[Worker] = Random.shuffle(pb.workers.toList)
     if (debug) println("All peers are initially active")
     while(activeWorkers.nonEmpty){
       activeWorkers.foreach { initiator: Worker =>
         if (debug) println(s"$initiator tries to find a social rational gift")
-        val potentialPartners : SortedSet[Worker] = rule match {
+        val pp = rule match {
           case Flowtime => // all the peers
             pb.workers.filterNot(_ == initiator)
           case Cmax => // the peers with a smallest workload
             pb.workers.filterNot(_ == initiator).filter(allocation.workload(_) < allocation.workload(initiator))
         }
+        val potentialPartners = Random.shuffle(pp.toList)
         if (debug) println(s"Potential partner: $potentialPartners")
         if (potentialPartners.isEmpty || allocation.bundle(initiator).isEmpty) {
-          activeWorkers -= initiator
+          activeWorkers = activeWorkers.filter(_ != initiator)
           if (debug) println(s"$initiator becomes inactive")
         }
         else {
@@ -45,7 +47,8 @@ class GiftSolver(pb : MATA, rule : SocialRule) extends DealSolver(pb, rule) {
             case Flowtime => allocation.flowtime()
           }
           potentialPartners.foreach { opponent =>
-            allocation.bundle(initiator).foreach { task =>
+            val bundle = allocation.bundle(initiator).toList.sortWith( pb.cost(initiator,_) > pb.cost(initiator,_) )
+            bundle.foreach { task =>
               // 4 - Foreach potential swap
               val gift = new SingleGift(initiator, opponent, task)
               val modifiedAllocation = allocation.gift(gift)
@@ -64,16 +67,18 @@ class GiftSolver(pb : MATA, rule : SocialRule) extends DealSolver(pb, rule) {
           // Select the best gift if any
           if (!found) {
             if (debug) println(s"$initiator becomes inactive")
-            activeWorkers -= initiator
+            activeWorkers = activeWorkers.filter(_ != initiator)
           } else {
             if (debug) println(s"$bestSingleGift is performed")
             nbConfirm += 1
             allocation = bestAllocation
-            activeWorkers += bestSingleGift.supplier
+            if (! activeWorkers.contains(bestSingleGift.supplier))
+              activeWorkers = bestSingleGift.supplier :: activeWorkers
             if (rule == Cmax) {
-              pb.workers.filter(worker => allocation.workload(worker) > allocation.workload(bestSingleGift.supplier)).foreach { worker =>
-                activeWorkers += worker
+              pb.workers.filter(worker => allocation.workload(worker) > bestGoal &&  ! activeWorkers.contains(worker)).foreach { worker =>
+                activeWorkers = worker :: activeWorkers
               }
+              activeWorkers = Random.shuffle(activeWorkers)
             }
           }
         }
