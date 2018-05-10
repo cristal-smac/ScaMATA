@@ -11,7 +11,9 @@ set ylabel "Nb of gift"
 set log y
 set output 'nbDeal2DCmax.pdf'
 plot  "data/cmax.csv" using 1:53 with lines lc "dark-blue" title 'Gift',\
-       "data/cmax.csv" using 1:58 with lines lc "dark-green" title 'Dis. Gift'
+       "data/cmax.csv" using 1:58 with lines lc "dark-green" title 'Dis. Gift',\
+       "data/cmax.csv" using 1:($1)*($2)/5 with lines lc "dark-cyan" title 'mn/5',\
+       "data/cmax.csv" using 1:($2)*3 with lines lc "dark-red" title '3n'
 #       "data/cmax.csv" using 1:54 with lines lc "dark-turquoise" title 'Propose',\
 #       "data/cmax.csv" using 1:55 with lines lc "dark-cyan" title 'Accept',\
 #       "data/cmax.csv" using 1:56 with lines lc "dark-red" title 'Reject',\
