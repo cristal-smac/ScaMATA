@@ -47,8 +47,7 @@ class GiftSolver(pb : MATA, rule : SocialRule) extends DealSolver(pb, rule) {
             case Flowtime => allocation.flowtime()
           }
           potentialPartners.foreach { opponent =>
-            val bundle = allocation.bundle(initiator).toList.sortWith( pb.cost(initiator,_) > pb.cost(initiator,_) )
-            bundle.foreach { task =>
+            allocation.bundle(initiator).foreach { task =>
               // 4 - Foreach potential swap
               val gift = new SingleGift(initiator, opponent, task)
               val modifiedAllocation = allocation.gift(gift)

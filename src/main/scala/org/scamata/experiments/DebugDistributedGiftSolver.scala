@@ -10,26 +10,35 @@ import org.scamata.solver.{SocialRule, Cmax, Flowtime}
   */
 object DebugDistributedGiftSolver {
   def main(args: Array[String]): Unit = {
+    val rule : SocialRule= Flowtime
     val r = scala.util.Random
     val system = ActorSystem("Debug" + r.nextInt.toString) //The Actor system
     for (m <- 2 to 10) {
       for (n <- 10 * m to 10 * m) {
         println(s"DEBUG configuration with $m peers and $n tasks")
         val nbPb = 100
-        var (makespan, dismakespan) = (0.0,0.0)
+        var (goal, disGoal) = (0.0,0.0)
         var (nbDeal, nbDealDis) = (0.0, 0.0)
         for (o <- 1 to nbPb) {
+          println(s"DEBUG configuration $o")
           val pb =  MATA.randomProblem(m, n)
-          val distributedGiftSolver: DistributedGiftSolver = new DistributedGiftSolver(pb, Cmax, system)
+          val distributedGiftSolver: DistributedGiftSolver = new DistributedGiftSolver(pb, rule, system)
           val giftSolver: GiftSolver = new GiftSolver(pb, Cmax)
           val outcome = giftSolver.run()
           nbDeal += giftSolver.nbConfirm
           val disoutcome = distributedGiftSolver.run()
           nbDealDis += distributedGiftSolver.nbConfirm
-          makespan += outcome.makespan()
-          dismakespan +=disoutcome.makespan()
+          goal += (rule match {
+            case Cmax => outcome.makespan()
+            case Flowtime => outcome.flowtime()
+          })
+          disGoal += (rule match {
+            case Cmax =>
+              disoutcome.makespan()
+            case Flowtime => disoutcome.flowtime()
+          })
         }
-        println(s"$m  $n  ${makespan/nbPb}  ${dismakespan/nbPb} ${nbDeal/nbPb}  ${nbDealDis/nbPb}")
+        println(s"$m  $n  ${goal/nbPb}  ${disGoal/nbPb} ${nbDeal/nbPb}  ${nbDealDis/nbPb}")
       }
     }
   }

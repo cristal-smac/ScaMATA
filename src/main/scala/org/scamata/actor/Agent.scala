@@ -7,11 +7,9 @@ import org.scamata.solver.{Cmax, Flowtime, SocialRule}
 import scala.collection.SortedSet
 import akka.actor.{Actor, ActorRef}
 
-import akka.util.Timeout
-import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
-
+import scala.util.Random
 
 /**
   * States of the agent
@@ -25,15 +23,13 @@ case object WaitConfirmation extends State
   * Internal immutable state of mind
   * @param bundle
   * @param belief about the workloads
-  * @param opponent which is under consideration
-  * @param task to supply
+  * @param conversationId
   */
-class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double], val opponent : Worker, val task : Task)
-  extends Product4[SortedSet[Task], Map[Worker, Double], Worker, Task] {
+class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double], val conversationId : Int)
+  extends Product3[SortedSet[Task], Map[Worker, Double], Int] {
   override def _1: SortedSet[Task] = bundle
   override def _2: Map[Worker, Double] = belief
-  override def _3 : Worker = opponent
-  override def _4 : Task = task
+  override def _3 : Int = conversationId
   override def canEqual(that: Any): Boolean = that.isInstanceOf[StateOfMind]
 
   /**
@@ -43,41 +39,41 @@ class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double], 
     workers.foreach{w =>
       belief += w -> 0.0
     }
-    new StateOfMind(bundle, belief, opponent, task)
+    new StateOfMind(bundle, belief, conversationId)
   }
   /**
     * Update belief with a new workload
     */
   def updateBelief(worker: Worker, workload : Double) : StateOfMind = {
-    new StateOfMind(bundle, belief.updated(worker, workload), opponent, task)
+    new StateOfMind(bundle, belief.updated(worker, workload), conversationId)
   }
   /**
     * Update bundle by adding a new bundle
     */
   def updateBundle(newBundle : SortedSet[Task]) : StateOfMind= {
-    new StateOfMind(bundle ++ newBundle, belief, opponent, task)
+    new StateOfMind(bundle ++ newBundle, belief, conversationId)
   }
 
   /**
     * Add a task to the bundler
     */
   def add(task : Task) : StateOfMind = {
-    new StateOfMind(bundle + task, belief, opponent, task)
+    new StateOfMind(bundle + task, belief, conversationId)
   }
 
   /**
     * Remove a task from the bundle
     */
   def remove(task : Task) : StateOfMind = {
-    new StateOfMind(bundle - task, belief, opponent, task)
+    new StateOfMind(bundle - task, belief, conversationId)
   }
 
 
   /**
     * Update the potential supplier and the potential task to supply
     */
-  def updateDelegation(newOpponent : Worker, newTask : Task) : StateOfMind= {
-    new StateOfMind(bundle, belief, newOpponent, newTask)
+  def updateConversationId(conversationId : Int) : StateOfMind= {
+    new StateOfMind(bundle, belief, conversationId)
   }
 
   /**
@@ -98,6 +94,7 @@ abstract class Agent(val worker: Worker, val rule: SocialRule) extends Actor{
   val debug = false
   val receiveDebug = false
   val stateDebug = false
+  val confirmDebug = false
 
   var nbPropose = 0
   var nbAccept = 0
@@ -110,7 +107,8 @@ abstract class Agent(val worker: Worker, val rule: SocialRule) extends Actor{
   var directory : Directory = new Directory()
   var cost : Map[(Worker, Task), Double]= Map[(Worker, Task), Double]()
 
-  val proposalTimeout = 300 nanosecond
+  val rnd = new scala.util.Random(worker.name.hashCode)
+  def proposalTimeout() : FiniteDuration = (rnd.nextDouble() * 300).toInt nanosecond
 
   /**
     * Broadcasts workload

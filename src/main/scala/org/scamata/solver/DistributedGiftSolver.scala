@@ -21,7 +21,7 @@ import scala.language.postfixOps
   */
 class DistributedGiftSolver(pb : MATA, rule : SocialRule, system: ActorSystem) extends DealSolver(pb, rule) {
 
-  val TIMEOUTVALUE  = 1000 seconds // default timeout of a run
+  val TIMEOUTVALUE  = 100000 seconds // default timeout of a run
   implicit val timeout = Timeout(TIMEOUTVALUE)
 
   /**
@@ -50,14 +50,14 @@ object DistributedGiftSolver{
   var id = 0
   val debug = false
   def main(args: Array[String]): Unit = {
-    import org.scamata.example.toy4x4._
+    //import org.scamata.example.toy4x4._
     //import org.scamata.example.bug2x4
-    val pb = MATA.randomProblem(20, 200)
+    val pb = MATA.randomProblem(2, 20)
     println(pb)
     val r = scala.util.Random
     val system = ActorSystem("DistributedGiftSolver" + r.nextInt.toString)
     //The Actor system
-    val negotiationSolver = new DistributedGiftSolver(pb, Cmax, system)
+    val negotiationSolver = new DistributedGiftSolver(pb, Flowtime, system)
     val sol = negotiationSolver.run()
     println(sol.toString)
     println(sol.makespan())

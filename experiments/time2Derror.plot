@@ -8,6 +8,7 @@ set ticslevel 0
 set style data lines
 set xlabel "m workers (10m tasks)"
 set ylabel "Time (s)"
+set log y
 set output 'time2DerrorCmax.pdf'
 plot "data/cmax.csv" using 1:($24)/1E9:($26)/1E9 with filledcurves lc "light-blue" notitle,\
      "data/cmax.csv" using 1:($25)/1E9 with lines lc "dark-blue" title 'Gift',\
