@@ -12,7 +12,7 @@ import scala.util.Random
   * @param pb to be solver
   * @param rule to be optimized
   */
-class GiftSolver(pb : MATA, rule : SocialRule) extends DealSolver(pb, rule) {
+class GiftSolver(pb : MWTA, rule : SocialRule) extends DealSolver(pb, rule) {
   debug = false
 
   /**
@@ -93,7 +93,7 @@ class GiftSolver(pb : MATA, rule : SocialRule) extends DealSolver(pb, rule) {
 object GiftSolver extends App {
   val debug = false
   //import org.scamata.example.toy2x4._
-  val pb = MATA.randomProblem(10, 100)
+  val pb = MWTA.randomProblem(10, 100)
   println(pb)
   val negotiationSolver = new GiftSolver(pb,Cmax)
   println(negotiationSolver.run().toString)

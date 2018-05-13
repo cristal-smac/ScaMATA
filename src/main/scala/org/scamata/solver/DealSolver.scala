@@ -1,14 +1,14 @@
 // Copyright (C) Maxime MORGE 2018
 package org.scamata.solver
 
-import org.scamata.core.MATA
+import org.scamata.core.MWTA
 
 /**
   * Abstract solver based on deals (gifts/swaps)
   * @param pb to be solver
   * @param rule
   */
-abstract class DealSolver(pb : MATA,rule : SocialRule) extends Solver(pb, rule){
+abstract class DealSolver(pb : MWTA, rule : SocialRule) extends Solver(pb, rule){
   var nbPropose = 0
   var nbAccept = 0
   var nbReject = 0

@@ -1,7 +1,7 @@
 // Copyright (C) Maxime MORGE 2018
 package org.scamata.solver
 
-import org.scamata.core.{Allocation, MATA}
+import org.scamata.core.{Allocation, MWTA}
 import org.scamata.actor._
 import akka.actor.{ActorSystem, Props}
 import akka.pattern.ask
@@ -19,7 +19,7 @@ import scala.language.postfixOps
   * @param rule to be optimized
   * @param system of Actors
   */
-class DistributedGiftSolver(pb : MATA, rule : SocialRule, system: ActorSystem) extends DealSolver(pb, rule) {
+class DistributedGiftSolver(pb : MWTA, rule : SocialRule, system: ActorSystem) extends DealSolver(pb, rule) {
 
   val TIMEOUTVALUE  = 100000 seconds // default timeout of a run
   implicit val timeout = Timeout(TIMEOUTVALUE)
@@ -52,7 +52,7 @@ object DistributedGiftSolver{
   def main(args: Array[String]): Unit = {
     //import org.scamata.example.toy4x4._
     //import org.scamata.example.bug2x4
-    val pb = MATA.randomProblem(3, 30)
+    val pb = MWTA.randomProblem(3, 30)
     println(pb)
     val r = scala.util.Random
     val system = ActorSystem("DistributedGiftSolver" + r.nextInt.toString)

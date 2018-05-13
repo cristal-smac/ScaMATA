@@ -11,7 +11,7 @@ import scala.collection.SortedSet
   * @param pb to be solver
   * @param rule to be optimized
   */
-class SwapSolver(pb : MATA, rule : SocialRule) extends Solver(pb, rule) {
+class SwapSolver(pb : MWTA, rule : SocialRule) extends Solver(pb, rule) {
 
   /**
     * Returns a random allocation with no more improving swap
@@ -68,7 +68,7 @@ class SwapSolver(pb : MATA, rule : SocialRule) extends Solver(pb, rule) {
 object SwapSolver extends App {
   val debug = false
   //import org.scamata.example.toy2x4._
-  val pb = MATA.randomProblem(10, 100)
+  val pb = MWTA.randomProblem(10, 100)
   println(pb)
   val negotiationSolver = new SwapSolver(pb,Flowtime)
   println(negotiationSolver.run().toString)

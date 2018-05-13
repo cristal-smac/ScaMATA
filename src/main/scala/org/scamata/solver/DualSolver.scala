@@ -1,12 +1,12 @@
 // Copyright (C) Maxime MORGE 2018
 package org.scamata.solver
 
-import org.scamata.core.MATA
+import org.scamata.core.MWTA
 
 /**
-  * Abstract class for solving an MATA problem by translating the problem/outcome
+  * Abstract class for solving an MWTA problem by translating the problem/outcome
   */
-abstract class DualSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule){
+abstract class DualSolver(pb: MWTA, rule: SocialRule) extends Solver(pb, rule){
 
   var preSolvingTime : Long = 0
 

@@ -1,7 +1,7 @@
 // Copyright (C) Maxime MORGE 2018
 package org.scamata.solver
 
-import org.scamata.core.{MATA, Allocation}
+import org.scamata.core.{MWTA, Allocation}
 import org.scamata.deal._
 
 import scala.collection.SortedSet
@@ -12,7 +12,7 @@ import scala.collection.SortedSet
   * @param pb   to be solver
   * @param rule to be optimized
   */
-class ExhaustiveSolver(pb: MATA, rule: SocialRule) extends DealSolver(pb, rule) {
+class ExhaustiveSolver(pb: MWTA, rule: SocialRule) extends DealSolver(pb, rule) {
   debug = false
 
   /**
@@ -45,7 +45,7 @@ class ExhaustiveSolver(pb: MATA, rule: SocialRule) extends DealSolver(pb, rule) 
 object ExhaustiveSolver extends App {
   val debug = false
   //import org.scamata.example.toy2x4._
-  val pb = MATA.randomProblem(2, 20)
+  val pb = MWTA.randomProblem(2, 20)
   println(pb)
   val solver = new ExhaustiveSolver(pb,Cmax)
   println(solver.run().toString)

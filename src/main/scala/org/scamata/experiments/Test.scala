@@ -48,7 +48,7 @@ object Test {
               List[Double](), List[Double](), List[Double](), List[Double](), List[Double](), List[Double](),
               0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
           for (o <- 1 to nbPb) {
-            val pb = MATA.randomProblem(m, n)
+            val pb = MWTA.randomProblem(m, n)
             if (debug) println(s"PB:\n$pb")
             val lpSolver : LPSolver  = new LPSolver(pb,rule)
             val giftSolver : GiftSolver  = new GiftSolver(pb,rule)

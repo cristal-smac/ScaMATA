@@ -4,14 +4,14 @@ package org.scamata.util
 import java.io.{BufferedWriter, File, FileWriter}
 
 import com.typesafe.config.ConfigFactory
-import org.scamata.core.MATA
+import org.scamata.core.MWTA
 
 /**
-  * Class to write a MATA pb to a text file
+  * Class to write a MWTA pb to a text file
   * @param pathName the output filename
-  * @param pb is a MATA Problem
+  * @param pb is a MWTA Problem
   */
-class MATAWriter(pathName: String, pb : MATA){
+class MATAWriter(pathName: String, pb : MWTA){
   val debug = false
 
   val file = new File(pathName)

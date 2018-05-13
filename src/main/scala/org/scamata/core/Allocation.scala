@@ -9,9 +9,9 @@ import scala.io.Source
 
 /**
   * Class representing a task allocation
-  * @param pb MATA
+  * @param pb MWTA
   */
-class Allocation(val pb: MATA) {
+class Allocation(val pb: MWTA) {
 
   var bundle: Map[Worker, SortedSet[Task]] = Map[Worker, SortedSet[Task]]()
   pb.workers.foreach(a => bundle += a -> SortedSet[Task]())
@@ -121,9 +121,9 @@ class Allocation(val pb: MATA) {
       * Build an allocation
       *
       * @param path of the OPL output
-      * @param pb   MATA
+      * @param pb   MWTA
       */
-    def apply(path: String, pb: MATA): Allocation = {
+    def apply(path: String, pb: MWTA): Allocation = {
       val allocation = new Allocation(pb)
       val bufferedSource = Source.fromFile(path)
       var linenumber = 0
@@ -152,7 +152,7 @@ class Allocation(val pb: MATA) {
     /**
       * Generate a random allocation
       */
-    def randomAllocation(pb: MATA): Allocation = {
+    def randomAllocation(pb: MWTA): Allocation = {
       val allocation = new Allocation(pb)
       val r = scala.util.Random
       pb.tasks.foreach { t =>

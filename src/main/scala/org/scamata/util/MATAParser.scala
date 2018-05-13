@@ -9,8 +9,8 @@ import scala.collection.SortedSet
 import scala.io.Source
 
 /**
-  * Build a MATA Problem object from a text file
-  * @param fileName of the MATA Problem
+  * Build a MWTA Problem object from a text file
+  * @param fileName of the MWTA Problem
   *
   */
 class MATAParser(val fileName: String ) {
@@ -23,12 +23,12 @@ class MATAParser(val fileName: String ) {
   var agents: SortedSet[Worker] = SortedSet[Worker]()
   var tasks: SortedSet[Task] = SortedSet[Task]()
   var cost: Map[(Worker, Task), Double] = Map[(Worker,Task), Double]()
-  var pb : MATA = _
+  var pb : MWTA = _
 
   /**
     * Parse file
     */
-  def parse(): MATA = {
+  def parse(): MWTA = {
     val bufferedSource = Source.fromFile(fileName)
     for (line <- bufferedSource.getLines) {
       lineNumber += 1
@@ -38,7 +38,7 @@ class MATAParser(val fileName: String ) {
       } else parseLine(line)
     }
     bufferedSource.close()
-    val pb = new MATA(agents, tasks, cost)
+    val pb = new MWTA(agents, tasks, cost)
     if (pb.isFullySpecified) pb
     else throw new RuntimeException(s"ERROR parse incomplete preferences")
   }
@@ -60,14 +60,14 @@ class MATAParser(val fileName: String ) {
         parseEntities(key, value)
       }
       else if (tasks.nonEmpty && agents.nonEmpty){
-        pb = new MATA(agents, tasks, cost)
+        pb = new MWTA(agents, tasks, cost)
         parseCosts(key, value)
       }
     }
   }
 
   /**
-    * Parse the size of the MATA Problem (m,n)
+    * Parse the size of the MWTA Problem (m,n)
     * @param key of the line
     * @param value of the line
     */
@@ -78,7 +78,7 @@ class MATAParser(val fileName: String ) {
   }
 
   /**
-    * Parse the entities (peers, tasks) of the MATA Problem
+    * Parse the entities (peers, tasks) of the MWTA Problem
     * @param key of the line
     * @param value of the line
     */

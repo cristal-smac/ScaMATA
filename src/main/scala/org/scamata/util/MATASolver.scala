@@ -8,7 +8,7 @@ import java.nio.file.{Files, Paths}
 import akka.actor.ActorSystem
 
 /**
-  * Solve a particular MATA Problem instance
+  * Solve a particular MWTA Problem instance
   * sbt "run org.scaia.util.MATASolver -v examples/toy2x4.txt examples/toy4x4Cmax.txt"
   * java -jar ScaIA-assembly-X.Y.jar org.scaia.util.asia.MATASolver r -v examples/toy2x4.txt examples/toy4x4Cmax.txt
   *
@@ -106,9 +106,9 @@ object MATASolver extends App {
 
   /**
     * Returns the solver
-    * @param pb MATA
+    * @param pb MWTA
     */
-  def selectSolver(pb: MATA): Solver = {
+  def selectSolver(pb: MWTA): Solver = {
     new LPSolver(pb, socialRule)
   }
 }

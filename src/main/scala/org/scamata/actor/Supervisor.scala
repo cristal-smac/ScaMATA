@@ -1,7 +1,7 @@
 // Copyright (C) Maxime MORGE 2018
 package org.scamata.actor
 
-import org.scamata.core.{Allocation, MATA, Worker}
+import org.scamata.core.{Allocation, MWTA, Worker}
 import org.scamata.solver.SocialRule
 
 import akka.actor.{Actor, ActorRef, FSM, Props}
@@ -24,10 +24,10 @@ class SupervisorStatus(val stoppedActors: Set[ActorRef], val allocation: Allocat
 
 /**
   * Supervisor which starts and stops the computation of an allocation
-  * @param pb MATA problem instance
+  * @param pb MWTA problem instance
   * @param rule to apply (Cmax or Flowtime)
   * */
-class Supervisor(pb: MATA, rule: SocialRule) extends Actor with FSM[SupervisorState,SupervisorStatus] {
+class Supervisor(pb: MWTA, rule: SocialRule) extends Actor with FSM[SupervisorState,SupervisorStatus] {
 
   var debug = false
   val extraDebug = false

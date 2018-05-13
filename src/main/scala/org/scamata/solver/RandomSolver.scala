@@ -1,7 +1,7 @@
 // Copyright (C) Maxime MORGE 2018
 package org.scamata.solver
 
-import org.scamata.core.{Allocation, MATA}
+import org.scamata.core.{Allocation, MWTA}
 
 /**
   * Multiagent negotiation process for minimizing the rule
@@ -9,7 +9,7 @@ import org.scamata.core.{Allocation, MATA}
   * @param pb   to be solver
   * @param rule to be optimized
   */
-class RandomSolver(pb: MATA, rule: SocialRule) extends DealSolver(pb, rule) {
+class RandomSolver(pb: MWTA, rule: SocialRule) extends DealSolver(pb, rule) {
   debug = false
 
   /**

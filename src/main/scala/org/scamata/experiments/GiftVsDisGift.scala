@@ -40,7 +40,7 @@ object GiftVsDisGift {
             (List[Double](), List[Double](), List[Double](), List[Double](),
               0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
           for (o <- 1 to nbPb) {
-            val pb = MATA.randomProblem(m, n)
+            val pb = MWTA.randomProblem(m, n)
             val giftSolver : GiftSolver  = new GiftSolver(pb,rule)
             val distributedGiftSolver : DistributedGiftSolver  = new DistributedGiftSolver(pb, rule, system)
             val giftAlloc = giftSolver.run()

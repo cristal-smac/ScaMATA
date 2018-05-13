@@ -10,10 +10,10 @@ import scala.collection.SortedSet
   * @param tasks
   * @param cost Matrix
   */
-class MATA(val workers: SortedSet[Worker], val tasks: SortedSet[Task], val cost : Map[(Worker, Task), Double]) {
+class MWTA(val workers: SortedSet[Worker], val tasks: SortedSet[Task], val cost : Map[(Worker, Task), Double]) {
 
   /**
-    * Returns a string describing the MATA problem
+    * Returns a string describing the MWTA problem
     */
   override def toString: String = {
     "m: " + workers.size + "\n" +
@@ -62,7 +62,7 @@ class MATA(val workers: SortedSet[Worker], val tasks: SortedSet[Task], val cost 
   }
 
   /**
-    * Return a string description of the MATA problem in the Optimization Programming language
+    * Return a string description of the MWTA problem in the Optimization Programming language
     */
   def toOPL: String = {
     "M = " + workers.size + "; \n" +
@@ -114,27 +114,27 @@ class MATA(val workers: SortedSet[Worker], val tasks: SortedSet[Task], val cost 
 }
 
 /**
-  * Factory for [[org.scamata.core.MATA]] instances
+  * Factory for [[org.scamata.core.MWTA]] instances
   */
-object MATA{
+object MWTA{
 
   val debug = false
 
   val MAXCOST = 1000
   /**
-    * Returns a random MATA proble instance
+    * Returns a random MWTA proble instance
     * @param m number of peers
     * @param n number of tasks
     */
-  def randomProblem(m : Int, n : Int) : MATA = {
+  def randomProblem(m : Int, n : Int) : MWTA = {
     val workers: SortedSet[Worker] = collection.immutable.SortedSet[Worker]() ++ (for (k <- 1 until m+1) yield new Worker(name = s"w$k"))
     val tasks: SortedSet[Task] = collection.immutable.SortedSet[Task]() ++  (for (k <- 1 until n+1) yield new Task(name = s"t$k"))
     val cost : Map[(Worker, Task), Double] = (for(i <- 0 until m; j <- 0 until n) yield (workers.toList(i),tasks.toList(j)) -> (Random.nextDouble()*MAXCOST).toInt.toDouble ).toMap
-    new MATA(workers, tasks, cost)
+    new MWTA(workers, tasks, cost)
   }
 
   def main(args: Array[String]): Unit = {
-    val pb = MATA.randomProblem(10, 100)
+    val pb = MWTA.randomProblem(10, 100)
     println(pb)
     val allocation =Allocation.randomAllocation(pb)
     println(allocation)

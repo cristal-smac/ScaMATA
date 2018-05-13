@@ -2,7 +2,7 @@
 package org.scamata.experiments
 
 import akka.actor.ActorSystem
-import org.scamata.core.MATA
+import org.scamata.core.MWTA
 import org.scamata.solver.{DistributedGiftSolver,GiftSolver}
 import org.scamata.solver.{SocialRule, Cmax, Flowtime}
 /**
@@ -21,7 +21,7 @@ object DebugDistributedGiftSolver {
         var (nbDeal, nbDealDis) = (0.0, 0.0)
         for (o <- 1 to nbPb) {
           println(s"DEBUG configuration $o")
-          val pb =  MATA.randomProblem(m, n)
+          val pb =  MWTA.randomProblem(m, n)
           val distributedGiftSolver: DistributedGiftSolver = new DistributedGiftSolver(pb, rule, system)
           val giftSolver: GiftSolver = new GiftSolver(pb, Cmax)
           val outcome = giftSolver.run()

@@ -1,7 +1,7 @@
 // Copyright (C) Maxime MORGE 2018
 package org.scamata.solver
 
-import org.scamata.core.{Allocation, MATA}
+import org.scamata.core.{Allocation, MWTA}
 import org.scamata.util.MATAWriter
 
 import sys.process._
@@ -14,7 +14,7 @@ import com.typesafe.config.{Config, ConfigFactory}
   * @param pb to be solver
   * @param rule to be optimized
   */
-class LPSolver(pb : MATA, rule : SocialRule) extends DualSolver(pb, rule) {
+class LPSolver(pb : MWTA, rule : SocialRule) extends DualSolver(pb, rule) {
 
   val config: Config = ConfigFactory.load()
   val inputPath: String =config.getString("path.scamata")+"/"+config.getString("path.input")
@@ -54,7 +54,7 @@ class LPSolver(pb : MATA, rule : SocialRule) extends DualSolver(pb, rule) {
 object LPSolver extends App {
   val debug = false
   import org.scamata.example.toy4x4._
-  //val pb = MATA.randomProblem(2, 4)
+  //val pb = MWTA.randomProblem(2, 4)
   println(pb)
   val lpSolver = new LPSolver(pb,Cmax)
   println(lpSolver.run().toString)
