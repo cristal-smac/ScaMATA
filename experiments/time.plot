@@ -9,18 +9,12 @@ set hidden3d
 set dgrid3d 50,50 qnorm 2
 set ticslevel 0
 set style data lines
-set xlabel "Number of workerss"
+set xlabel "Number of workers"
 set ylabel "Number of tasks"
 set zlabel "Time (s)"
 set output 'timeCmaxGiftVsDisGift.pdf'
-splot  "data/cmax.csv" using 1:2:($7)/1e9 with lines lc "blue" title 'Gift',\
-       "data/cmax.csv" using 1:2:($8)/1e9 with lines lc "green" title 'Dis. Gift'
-set output 'timeCmaxGiftVsLP.pdf'
-splot  "data/cmax.csv" using 1:2:($7)/1e9 with lines lc "blue" title 'Gift',\
-       "data/cmax.csv" using 1:2:($9+$10+$11)/1e9 with lines lc "red" title 'LP'
+splot  "data/cmaxGiftVsDisGift.csv" using 1:2:($15)/1e9 with lines lc "blue" title 'Gift',\
+       "data/cmaxGiftVsDisGift.csv" using 1:2:($20)/1e9 with lines lc "green" title 'Dis. Gift'
 set output 'timeFlowtimeGiftVsDisGift.pdf'
-splot  "data/flowtime.csv" using 1:2:($7)/1e9 with lines lc "blue" title 'Gift',\
-       "data/flowtime.csv" using 1:2:($8)/1e9 with lines lc "green" title 'Dis. Gift'
-set output 'timeFlowtimeGiftVsLP.pdf'
-splot  "data/flowtime.csv" using 1:2:($7)/1e9 with lines lc "blue" title 'Gift',\
-       "data/flowtime.csv" using 1:2:($9+$10+$11)/1e9 with lines lc "red" title 'LP'
+splot  "data/flowtimeGiftVsDisGift.csv" using 1:2:($15)/1e9 with lines lc "blue" title 'Gift',\
+       "data/flowtimeGiftVsDisGift.csv" using 1:2:($20)/1e9 with lines lc "green" title 'Dis. Gift'

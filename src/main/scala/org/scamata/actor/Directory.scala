@@ -26,7 +26,7 @@ class Directory {
 
   def allActors() : Iterable[ActorRef]  = adr.values
   def allWorkers() : Iterable[Worker]  = workers.values
-  def peers(worker: Worker) : Iterable[Worker] = allWorkers().filterNot(_ ==worker)
+  def peers(worker: Worker) : Set[Worker] = allWorkers().filterNot(_ ==worker).toSet
 
   def peersActor(worker: Worker) :  Iterable[ActorRef] = peers(worker: Worker).map(w => adr(w))
 

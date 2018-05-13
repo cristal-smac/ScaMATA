@@ -9,7 +9,7 @@ import scala.collection.SortedSet
   *  All possible messages between the actors
   */
 class Message
-case object Start extends Message
+case object Trigger extends Message
 // Initiate the worker with the bundle the directory and the cost matrix
 case class Initiate(bundle: SortedSet[Task], directory : Directory, cost : Map[(Worker, Task), Double]) extends Message
 case object Ready extends Message
@@ -24,6 +24,7 @@ case class Reject(task : Task, workload: Double, id: Int) extends Message// Reje
 case class Accept(task : Task, workload: Double, id : Int) extends Message// Accept a proposal
 case class Confirm(task : Task, workload: Double, id : Int) extends Message// Confirm a deal
 case class Withdraw(task : Task, workload: Double, id : Int) extends Message// Withdraw a deal
+case class Cancel(task : Task, workload: Double, id : Int) extends Message// Cancel a deal
 
 
 case object Query extends Message// Initiate the supervisor

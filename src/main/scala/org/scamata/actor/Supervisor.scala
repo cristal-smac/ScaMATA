@@ -59,7 +59,7 @@ class Supervisor(pb: MATA, rule: SocialRule) extends Actor with FSM[SupervisorSt
     */
   when(DefaultSupervisorState) {
     //When the works should be done
-    case Event(Start, status) =>
+    case Event(Trigger, status) =>
       solver = sender
       //Distribute the initial allocation
       directory.allActors().foreach { actor: ActorRef =>
@@ -74,9 +74,9 @@ class Supervisor(pb: MATA, rule: SocialRule) extends Actor with FSM[SupervisorSt
       nbReady += 1
       if (nbReady == pb.m()) {
         //When all of them are ready
-        directory.allActors().foreach { actor: ActorRef => //Start them
+        directory.allActors().foreach { actor: ActorRef => //Trigger them
           if (debug) println(s"Supervisor starts ${directory.workers(sender)}")
-          actor ! Start
+          actor ! Trigger
         }
       }
       stay using status

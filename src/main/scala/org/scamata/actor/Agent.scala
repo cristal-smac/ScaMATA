@@ -48,10 +48,11 @@ class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double], 
     new StateOfMind(bundle, belief.updated(worker, workload), conversationId)
   }
   /**
-    * Update bundle by adding a new bundle
+    * Adding to the bundle
+    * @param tasks to be added
     */
-  def updateBundle(newBundle : SortedSet[Task]) : StateOfMind= {
-    new StateOfMind(bundle ++ newBundle, belief, conversationId)
+  def addBundle(tasks : SortedSet[Task]) : StateOfMind= {
+    new StateOfMind(bundle ++ tasks, belief, conversationId)
   }
 
   /**
@@ -91,16 +92,15 @@ class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double], 
   * @param rule to optimize
   */
 abstract class Agent(val worker: Worker, val rule: SocialRule) extends Actor{
-  val debug = false
-  val receiveDebug = false
+  val debug = true
   val stateDebug = false
-  val confirmDebug = false
 
   var nbPropose = 0
   var nbAccept = 0
   var nbReject = 0
   var nbWithdraw = 0
   var nbConfirm = 0
+  var nbCancel = 0
   var nbInform = 0
 
   var supervisor : ActorRef = context.parent
@@ -108,7 +108,7 @@ abstract class Agent(val worker: Worker, val rule: SocialRule) extends Actor{
   var cost : Map[(Worker, Task), Double]= Map[(Worker, Task), Double]()
 
   val rnd = new scala.util.Random(worker.name.hashCode)
-  def proposalTimeout() : FiniteDuration = (rnd.nextDouble() * 300).toInt nanosecond
+  def randomTimeout : FiniteDuration = Random.nextInt(10000000) nanosecond
 
   /**
     * Broadcasts workload

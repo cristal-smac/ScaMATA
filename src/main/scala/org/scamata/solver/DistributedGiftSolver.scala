@@ -33,7 +33,7 @@ class DistributedGiftSolver(pb : MATA, rule : SocialRule, system: ActorSystem) e
     if (debug) system.eventStream.setLogLevel(akka.event.Logging.DebugLevel)
     val supervisor = system.actorOf(Props(classOf[Supervisor], pb, rule), name = "supervisor"+DistributedGiftSolver.id)
     // The current thread is blocked and it waits for the supervisor to "complete" the Future with it's reply.
-    val future = supervisor ? Start
+    val future = supervisor ? Trigger
     val result = Await.result(future, timeout.duration).asInstanceOf[Outcome]
     nbPropose = result.nbPropose
     nbAccept = result.nbAccept
@@ -52,13 +52,17 @@ object DistributedGiftSolver{
   def main(args: Array[String]): Unit = {
     //import org.scamata.example.toy4x4._
     //import org.scamata.example.bug2x4
-    val pb = MATA.randomProblem(2, 20)
+    val pb = MATA.randomProblem(3, 30)
     println(pb)
     val r = scala.util.Random
     val system = ActorSystem("DistributedGiftSolver" + r.nextInt.toString)
     //The Actor system
     val negotiationSolver = new DistributedGiftSolver(pb, Flowtime, system)
+    println("@startuml")
+    println("entity Supervisor")
+    for (i<- 1 to pb.m) println(s"entity w$i")
     val sol = negotiationSolver.run()
+    println("@enduml")
     println(sol.toString)
     println(sol.makespan())
     System.exit(1)
