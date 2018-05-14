@@ -20,7 +20,7 @@ class ExhaustiveFlowtimeSolver(pb: MWTA, rule: SocialRule) extends DealSolver(pb
     var bestAllocation = new Allocation(pb)
     pb.tasks.foreach{ task =>
       val worker = pb.faster(task)
-      bestAllocation = bestAllocation.update(worker, SortedSet(task))
+      bestAllocation = bestAllocation.update(worker, bestAllocation.bundle(worker)+task)
     }
     bestAllocation
   }
