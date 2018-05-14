@@ -17,7 +17,7 @@ object GiftVsDisGift {
     def main(args: Array[String]): Unit = {
       val criterion = args(0)
       val r = scala.util.Random
-      val system = ActorSystem("Test"+criterion+r.nextInt.toString)//The Actor system
+      val system = ActorSystem("TestCmax"+criterion+r.nextInt.toString)//The Actor system
       val rule: SocialRule = criterion match {
         case "cmax" => Cmax
         case "flowtime" => Flowtime
@@ -33,7 +33,7 @@ object GiftVsDisGift {
         s"dealGift,nbPropose,nbAccept,nbReject,nbWithdraw,nbConfirm,nbInform\n")
       for (m <- 2 to 100) {
         for (n <- 2*m to 10*m) {
-          if (debug) println(s"Test configuration with $m peers and $n tasks")
+          if (debug) println(s"TestCmax configuration with $m peers and $n tasks")
           val nbPb = 100 // should be x*4
           var (giftSolverRule, distributedGiftSolverRule, giftSolverTime, distributedGiftSolverTime,
           deal, nbPropose, nbAccept, nbReject, nbWithdraw, nbConfirm, nbInform) =

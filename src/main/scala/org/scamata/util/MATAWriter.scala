@@ -24,7 +24,7 @@ class MATAWriter(pathName: String, pb : MWTA){
 }
 
 /**
-  * Test MATAWriter
+  * TestCmax MATAWriter
   */
 object MATAWriter extends App{
   val config = ConfigFactory.load()

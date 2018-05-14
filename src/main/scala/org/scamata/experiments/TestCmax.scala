@@ -10,14 +10,14 @@ import org.scamata.solver._
 /**
   * Main app to test LPSolver and Dis/GiftSolver
   */
-object Test {
+object TestCmax {
 
   val debug= false
 
     def main(args: Array[String]): Unit = {
       val criterion = args(0)
       val r = scala.util.Random
-      val system = ActorSystem("Test"+criterion+r.nextInt.toString)//The Actor system
+      val system = ActorSystem("TestCmax"+criterion+r.nextInt.toString)//The Actor system
       val rule: SocialRule = criterion match {
         case "cmax" => Cmax
         case "flowtime" => Flowtime
@@ -39,7 +39,7 @@ object Test {
         s"dealGift,nbPropose,nbAccept,nbReject,nbWithdraw,nbConfirm,nbInform\n")
       for (m <- 2 to 100) {
         for (n <- 10*m to 10*m) {
-          if (debug) println(s"Test configuration with $m peers and $n tasks")
+          if (debug) println(s"TestCmax configuration with $m peers and $n tasks")
           val nbPb = 100 // should be x*4
           var (lpSolverRule, giftSolverRule, distributedGiftSolverRule, randomSolverRule,
           lpSolverTime, lpSolverPreTime, lpSolverPostTime, giftSolverTime, randomSolverTime, distributedGiftSolverTime,
@@ -66,7 +66,6 @@ object Test {
             nbWithdraw += distributedGiftSolver.nbWithdraw
             nbConfirm += distributedGiftSolver.nbConfirm
             nbInform += distributedGiftSolver.nbInform
-            if (debug) println(s"DISGIFT:\n$distributedGiftAlloc")
             rule match {
                 case Cmax =>
                   lpSolverRule ::=  lpAlloc.makespan()
@@ -98,11 +97,12 @@ object Test {
           distributedGiftSolverTime = distributedGiftSolverTime.sortWith(_ < _)
           bw.write(
             s"$m,$n,${giftSolverRule.min},${giftSolverRule(nbPb/4)},${giftSolverRule(nbPb/2)},${giftSolverRule(nbPb*3/4)},${giftSolverRule.max}," +
-            s"${distributedGiftSolverRule.min},${distributedGiftSolverRule(nbPb/4)},${distributedGiftSolverRule(nbPb/2)},${distributedGiftSolverRule(nbPb*3/4)},${distributedGiftSolverRule.max}," +
+              s"${lpSolverRule.min},${lpSolverRule(nbPb/4)},${lpSolverRule(nbPb/2)},${lpSolverRule(nbPb*3/4)},${lpSolverRule.max}," +
+              s"${distributedGiftSolverRule.min},${distributedGiftSolverRule(nbPb/4)},${distributedGiftSolverRule(nbPb/2)},${distributedGiftSolverRule(nbPb*3/4)},${distributedGiftSolverRule.max}," +
             s"${randomSolverRule.min},${randomSolverRule(nbPb/4)},${randomSolverRule(nbPb/2)},${randomSolverRule(nbPb*3/4)},${randomSolverRule.max}," +
             s"${lpSolverRule.min},${lpSolverRule(nbPb/4)},${lpSolverRule(nbPb/2)},${lpSolverRule(nbPb*3/4)},${lpSolverRule.max}," +
-            s"${giftSolverTime.min},${giftSolverTime(nbPb/4)},${giftSolverTime(nbPb/2)},${giftSolverTime(nbPb*3/4)},${giftSolverTime.max}," +
-            s"${distributedGiftSolverTime.min},${distributedGiftSolverTime(nbPb/4)},${distributedGiftSolverTime(nbPb/2)},${distributedGiftSolverTime(nbPb*3/4)},${distributedGiftSolverTime.max}," +
+            s"${giftSolverTime.min},${giftSolverTime(nbPb/4)},${giftSolverTime(nbPb/2)},${giftSolverTime(nbPb*3/4)},${giftSolverTime.max}," + s"${giftSolverTime.min},${giftSolverTime(nbPb/4)},${giftSolverTime(nbPb/2)},${giftSolverTime(nbPb*3/4)},${giftSolverTime.max}," +
+              s"${distributedGiftSolverTime.min},${distributedGiftSolverTime(nbPb/4)},${distributedGiftSolverTime(nbPb/2)},${distributedGiftSolverTime(nbPb*3/4)},${distributedGiftSolverTime.max}," +
             s"${randomSolverTime.min},${randomSolverTime(nbPb/4)},${randomSolverTime(nbPb/2)},${randomSolverTime(nbPb*3/4)},${randomSolverTime.max}," +
             s"${lpSolverTime.min},${lpSolverTime(nbPb/4)},${lpSolverTime(nbPb/2)},${lpSolverTime(nbPb*3/4)},${lpSolverTime.max}," +
             s"${lpSolverPreTime.min},${lpSolverPreTime(nbPb/4)},${lpSolverPreTime(nbPb/2)},${lpSolverPreTime(nbPb*3/4)},${lpSolverPreTime.max}," +

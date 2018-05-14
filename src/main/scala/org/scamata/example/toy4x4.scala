@@ -1,6 +1,6 @@
 package org.scamata.example
 
-import org.scamata.core.{MATA, Task, Worker}
+import org.scamata.core.{MWTA, Task, Worker}
 
 import scala.collection.SortedSet
 
@@ -37,5 +37,5 @@ object toy4x4{
   cost+= ((a4, t2) -> 4.0)
   cost+= ((a4, t3) -> 3.0)
   cost+= ((a4, t4) -> 2.0)
-  val pb = new MATA(agents, tasks, cost)
+  val pb = new MWTA(agents, tasks, cost)
 }

@@ -38,6 +38,22 @@ class MWTA(val workers: SortedSet[Worker], val tasks: SortedSet[Task], val cost 
   def n(): Int = tasks.size
 
   /**
+    * Returns the faster worker for a task
+    */
+  def faster(task : Task) : Worker = {
+    var best : Worker = NoWorker
+    var minCost = Double.MaxValue
+    workers.foreach{ worker =>
+      val c = cost(worker, task)
+      if (c < minCost) {
+        best = worker
+        minCost = c
+      }
+    }
+    best
+  }
+
+  /**
     * Returns an worker
     *
     * @param name of the worker

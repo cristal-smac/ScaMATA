@@ -23,7 +23,7 @@ class AllocationWriter(pathName: String, allocation : Allocation) {
 }
 
 /**
-  * Test AllocationWriter
+  * TestCmax AllocationWriter
   */
 object AllocationWriter extends App {
   val config = ConfigFactory.load()

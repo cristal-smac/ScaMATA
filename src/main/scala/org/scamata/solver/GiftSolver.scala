@@ -26,13 +26,12 @@ class GiftSolver(pb : MWTA, rule : SocialRule) extends DealSolver(pb, rule) {
     while(activeWorkers.nonEmpty){
       activeWorkers.foreach { initiator: Worker =>
         if (debug) println(s"$initiator tries to find a social rational gift")
-        val pp = rule match {
+        val potentialPartners = rule match {
           case Flowtime => // all the peers
             pb.workers.filterNot(_ == initiator)
           case Cmax => // the peers with a smallest workload
             pb.workers.filterNot(_ == initiator).filter(allocation.workload(_) < allocation.workload(initiator))
         }
-        val potentialPartners = Random.shuffle(pp.toList)
         if (debug) println(s"Potential partner: $potentialPartners")
         if (potentialPartners.isEmpty || allocation.bundle(initiator).isEmpty) {
           activeWorkers = activeWorkers.filter(_ != initiator)
@@ -71,7 +70,7 @@ class GiftSolver(pb : MWTA, rule : SocialRule) extends DealSolver(pb, rule) {
             if (debug) println(s"$bestSingleGift is performed")
             nbConfirm += 1
             allocation = bestAllocation
-            if (! activeWorkers.contains(bestSingleGift.supplier))
+            if (rule == Cmax && ! activeWorkers.contains(bestSingleGift.supplier))
               activeWorkers = bestSingleGift.supplier :: activeWorkers
             if (rule == Cmax) {
               pb.workers.filter(worker => allocation.workload(worker) > bestGoal &&  ! activeWorkers.contains(worker)).foreach { worker =>
