@@ -92,7 +92,6 @@ object TestCmax {
           distributedGiftSolverTime = distributedGiftSolverTime.sortWith(_ < _)
           bw.write(
             s"$m,$n,${giftSolverRule.min},${giftSolverRule(nbPb/4)},${giftSolverRule(nbPb/2)},${giftSolverRule(nbPb*3/4)},${giftSolverRule.max}," +
-              s"${lpSolverRule.min},${lpSolverRule(nbPb/4)},${lpSolverRule(nbPb/2)},${lpSolverRule(nbPb*3/4)},${lpSolverRule.max}," +
               s"${distributedGiftSolverRule.min},${distributedGiftSolverRule(nbPb/4)},${distributedGiftSolverRule(nbPb/2)},${distributedGiftSolverRule(nbPb*3/4)},${distributedGiftSolverRule.max}," +
             s"${randomSolverRule.min},${randomSolverRule(nbPb/4)},${randomSolverRule(nbPb/2)},${randomSolverRule(nbPb*3/4)},${randomSolverRule.max}," +
             s"${lpSolverRule.min},${lpSolverRule(nbPb/4)},${lpSolverRule(nbPb/2)},${lpSolverRule(nbPb*3/4)},${lpSolverRule.max}," +
