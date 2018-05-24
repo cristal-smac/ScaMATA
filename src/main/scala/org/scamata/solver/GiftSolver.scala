@@ -14,13 +14,22 @@ import scala.util.Random
   */
 class GiftSolver(pb : MWTA, rule : SocialRule) extends DealSolver(pb, rule) {
   debug = false
+  val trace = false
 
   /**
     * Returns an allocation
     */
   override def solve(): Allocation = {
-    var allocation = Allocation.randomAllocation(pb)
+    val allocation = Allocation.randomAllocation(pb)
     if (debug) println(s"Give with a random allocation:\n$allocation")
+    reallocate(allocation)
+  }
+
+    /**
+    * Reallocate
+    */
+  def reallocate(initialAllocation: Allocation): Allocation = {
+    var allocation = initialAllocation
     var activeWorkers: List[Worker] = Random.shuffle(pb.workers.toList)
     if (debug) println("All peers are initially active")
     while(activeWorkers.nonEmpty){
@@ -42,7 +51,7 @@ class GiftSolver(pb : MWTA, rule : SocialRule) extends DealSolver(pb, rule) {
           var bestAllocation: Allocation = allocation
           var bestSingleGift: Gift = new Gift(initiator, initiator, Set[Task]())
           var bestGoal = rule match {
-            case Cmax => allocation.makespan()
+            case Cmax => allocation.workload(initiator)//allocation.makespan()
             case Flowtime => allocation.flowtime()
           }
           potentialPartners.foreach { opponent =>
@@ -51,7 +60,7 @@ class GiftSolver(pb : MWTA, rule : SocialRule) extends DealSolver(pb, rule) {
               val gift = new SingleGift(initiator, opponent, task)
               val modifiedAllocation = allocation.gift(gift)
               val currentGoal = rule match { // Compute the new goal
-              case Cmax => modifiedAllocation.makespan()
+              case Cmax => Math.max(modifiedAllocation.workload(initiator), modifiedAllocation.workload(opponent))//modifiedAllocation.makespan()
               case Flowtime => modifiedAllocation.flowtime()
             }
               if (currentGoal < bestGoal) {
@@ -67,11 +76,12 @@ class GiftSolver(pb : MWTA, rule : SocialRule) extends DealSolver(pb, rule) {
             if (debug) println(s"$initiator becomes inactive")
             activeWorkers = activeWorkers.filter(_ != initiator)
           } else {
-            if (debug) println(s"$bestSingleGift is performed")
+            if (debug || trace) println(s"$bestSingleGift")
             nbConfirm += 1
             allocation = bestAllocation
-            if (rule == Cmax && ! activeWorkers.contains(bestSingleGift.supplier))
+            if (rule == Cmax && ! activeWorkers.contains(bestSingleGift.supplier)) {
               activeWorkers = bestSingleGift.supplier :: activeWorkers
+            }
             if (rule == Cmax) {
               pb.workers.filter(worker => allocation.workload(worker) > bestGoal &&  ! activeWorkers.contains(worker)).foreach { worker =>
                 activeWorkers = worker :: activeWorkers
@@ -91,10 +101,15 @@ class GiftSolver(pb : MWTA, rule : SocialRule) extends DealSolver(pb, rule) {
   */
 object GiftSolver extends App {
   val debug = false
-  //import org.scamata.example.toy2x4._
-  val pb = MWTA.randomProblem(10, 100)
+  import org.scamata.example.toy4x4._
   println(pb)
   val negotiationSolver = new GiftSolver(pb,Cmax)
-  println(negotiationSolver.run().toString)
+  var allocation = new Allocation(pb)
+  allocation = allocation.update(a1, SortedSet(t4))
+  allocation = allocation.update(a2, SortedSet(t3))
+  allocation = allocation.update(a3, SortedSet(t1))
+  allocation = allocation.update(a4, SortedSet(t2))
+  println(allocation)
+  println(negotiationSolver.reallocate(allocation).toString)
 
 }

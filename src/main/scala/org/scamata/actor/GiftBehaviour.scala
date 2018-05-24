@@ -97,7 +97,8 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Work
           if (debug) println(s"$worker -> Supervisor : ReStart(...)")
           supervisor ! ReStarted(updatedMind.bundle)
           updatedMind = updatedMind.updateConversationId(updatedMind.conversationId+1)
-          if (debug) println(s"$worker -> $bestOpponent : Propose($bestTask)")
+          if (debug) println(s"$worker -> $bestOpponent : Propose($bestTask) " +
+            s"since max($workload -  ${cost(worker, bestTask)}, ${updatedMind.belief(bestOpponent)} + ${cost(bestOpponent, bestTask)}) > max($workload, ${updatedMind.belief(bestOpponent)})")
           opponent ! Propose(bestTask, workload, updatedMind.conversationId)
           nbPropose += 1
           goto(Proposer) forMax randomTimeout using updatedMind
@@ -111,7 +112,8 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends Agent(worker: Work
         deseperated = false
         if (debug) println(s"$worker -> Supervisor : ReStart(...)")
         supervisor ! ReStarted(updatedMind.bundle)
-        if (debug) println(s"$worker -> $opponent : Accept($task)")
+        if (debug) println(s"$worker -> $opponent : Accept($task) " +
+          s"since max(${updatedMind.belief(worker)} + ${cost(worker, task)} , $opponentWorkload - ${cost(opponent, task)}) < max(${updatedMind.belief(worker)} , $opponentWorkload")
         updatedMind = updatedMind.updateConversationId(updatedMind.conversationId+1)
         sender ! Accept(task, updatedMind.belief(worker), id)
         nbAccept += 1

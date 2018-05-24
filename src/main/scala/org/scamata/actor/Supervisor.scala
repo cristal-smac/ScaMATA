@@ -27,7 +27,7 @@ class SupervisorStatus(val stoppedActors: Set[ActorRef], val allocation: Allocat
   * @param pb MWTA problem instance
   * @param rule to apply (Cmax or Flowtime)
   * */
-class Supervisor(pb: MWTA, rule: SocialRule) extends Actor with FSM[SupervisorState,SupervisorStatus] {
+class Supervisor(pb: MWTA, rule: SocialRule, initialAllocation : Allocation) extends Actor with FSM[SupervisorState,SupervisorStatus] {
 
   var debug = false
   val extraDebug = false
@@ -41,7 +41,7 @@ class Supervisor(pb: MWTA, rule: SocialRule) extends Actor with FSM[SupervisorSt
   /**
     * Initially all the worker are active and the allocation is random
     */
-  startWith(DefaultSupervisorState, new SupervisorStatus(Set[ActorRef](), Allocation.randomAllocation(pb)))
+  startWith(DefaultSupervisorState, new SupervisorStatus(Set[ActorRef](), initialAllocation))
 
 
   /**

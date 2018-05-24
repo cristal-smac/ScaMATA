@@ -92,7 +92,7 @@ class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double], 
   * @param rule to optimize
   */
 abstract class Agent(val worker: Worker, val rule: SocialRule) extends Actor{
-  val debug = true
+  val debug = false
   val stateDebug = false
 
   var nbPropose = 0
