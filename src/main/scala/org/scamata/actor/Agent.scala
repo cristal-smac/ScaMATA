@@ -7,10 +7,6 @@ import org.scamata.solver.{Cmax, Flowtime, SocialRule}
 import scala.collection.SortedSet
 import akka.actor.{Actor, ActorRef}
 
-import scala.concurrent.duration._
-import scala.language.postfixOps
-import scala.util.Random
-
 /**
   * States of the agent
   */
@@ -23,58 +19,56 @@ case object WaitConfirmation extends State
   * Internal immutable state of mind
   * @param bundle
   * @param belief about the workloads
-  * @param conversationId
+  * @param opponent which is under consideration
   */
-class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double], val conversationId : Int)
-  extends Product3[SortedSet[Task], Map[Worker, Double], Int] {
+class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double], val opponent : Worker, val task : Task)
+  extends Product4[SortedSet[Task], Map[Worker, Double], Worker, Task] {
   override def _1: SortedSet[Task] = bundle
   override def _2: Map[Worker, Double] = belief
-  override def _3 : Int = conversationId
+  override def _3 : Worker = opponent
+  override def _4 : Task = task
   override def canEqual(that: Any): Boolean = that.isInstanceOf[StateOfMind]
 
-  /**
-    * Init the belief with some workers with no workload* @return
-    */
-  def initBelief(workers : Iterable[Worker]) : StateOfMind = {
+
+  def initBelief(newBundle :  SortedSet[Task], workers : Iterable[Worker]) : StateOfMind = {
     workers.foreach{w =>
       belief += w -> 0.0
     }
-    new StateOfMind(bundle, belief, conversationId)
+    new StateOfMind(bundle, belief, opponent, task)
   }
   /**
     * Update belief with a new workload
     */
   def updateBelief(worker: Worker, workload : Double) : StateOfMind = {
-    new StateOfMind(bundle, belief.updated(worker, workload), conversationId)
+    new StateOfMind(bundle, belief.updated(worker, workload), opponent, task)
   }
   /**
-    * Adding to the bundle
-    * @param tasks to be added
+    * Update bundle
     */
-  def addBundle(tasks : SortedSet[Task]) : StateOfMind= {
-    new StateOfMind(bundle ++ tasks, belief, conversationId)
+  def updateBundle(newBundle : SortedSet[Task]) : StateOfMind= {
+    new StateOfMind(bundle ++ newBundle, belief, opponent, task)
   }
 
   /**
-    * Add a task to the bundle
+    * Add task
     */
   def add(task : Task) : StateOfMind = {
-    new StateOfMind(bundle + task, belief, conversationId)
+    new StateOfMind(bundle + task, belief, opponent, task)
   }
 
   /**
-    * Remove a task from the bundle
+    * Add task
     */
   def remove(task : Task) : StateOfMind = {
-    new StateOfMind(bundle - task, belief, conversationId)
+    new StateOfMind(bundle - task, belief, opponent, task)
   }
 
 
   /**
-    * Update the potential supplier and the potential task to supply
+    * Update opponent
     */
-  def updateConversationId() : StateOfMind= {
-    new StateOfMind(bundle, belief, conversationId+1)
+  def updateDelegation(newOpponent : Worker, newTask : Task) : StateOfMind= {
+    new StateOfMind(bundle, belief, newOpponent, newTask)
   }
 
   /**
@@ -92,8 +86,8 @@ class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double], 
   * @param rule to optimize
   */
 abstract class Agent(val worker: Worker, val rule: SocialRule) extends Actor{
-  val debug = true
-  val stateDebug = false
+  val debug = false
+  val extraDebug = false
 
   var nbPropose = 0
   var nbAccept = 0
@@ -107,9 +101,6 @@ abstract class Agent(val worker: Worker, val rule: SocialRule) extends Actor{
   var directory : Directory = new Directory()
   var cost : Map[(Worker, Task), Double]= Map[(Worker, Task), Double]()
 
-  val rnd = new scala.util.Random(worker.name.hashCode)
-  def randomTimeout : FiniteDuration = Random.nextInt(10000000) nanosecond
-
   /**
     * Broadcasts workload
     */
@@ -118,11 +109,11 @@ abstract class Agent(val worker: Worker, val rule: SocialRule) extends Actor{
   }
 
   /**
-    * Handle stop messages
+    * Handles management messages
+    * @param message
     */
   def defaultReceive(message : Message) : Any = message match {
-    case Stop =>
-      context.stop(self) // Stop the actor
+    case Stop => context.stop(self) // Stop the actor
   }
 
   /**

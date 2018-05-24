@@ -18,13 +18,13 @@ case object Stop extends Message// Stop an agent
 case class Finish(nbPropose : Int, nbAccept : Int, nbReject : Int, nbWithdraw : Int, nbConfirm : Int, nbInform : Int) extends Message// Provide the number of delegation
 case class Inform(worker: Worker, workload: Double) extends Message
 
-case class Propose(task : Task, workload: Double, id: Int) extends Message// Make a proposal
+case class Propose(task : Task, workload: Double) extends Message// Make a proposal
 case class CounterPropose(task : Task, counterpart : Task, workload: Double, id : Int) extends Message// Make a counter-proposal
-case class Reject(task : Task, workload: Double, id: Int) extends Message// Reject a proposal
-case class Accept(task : Task, workload: Double, id : Int) extends Message// Accept a proposal
-case class Confirm(task : Task, workload: Double, id : Int) extends Message// Confirm a deal
-case class Withdraw(task : Task, workload: Double, id : Int) extends Message// Withdraw a deal
-case class Cancel(task : Task, workload: Double, id : Int) extends Message// Cancel a deal
+case class Reject(task : Task, workload: Double) extends Message// Reject a proposal
+case class Accept(task : Task, workload: Double) extends Message// Accept a proposal
+case class Confirm(task : Task, workload: Double) extends Message// Confirm a deal
+case class Withdraw(task : Task, workload: Double) extends Message// Withdraw a deal
+case class Cancel(task : Task, workload: Double) extends Message// Cancel a deal
 
 
 case object Query extends Message// Initiate the supervisor

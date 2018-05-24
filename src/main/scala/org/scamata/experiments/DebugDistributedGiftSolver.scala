@@ -10,11 +10,11 @@ import org.scamata.solver.{SocialRule, Cmax, Flowtime}
   */
 object DebugDistributedGiftSolver {
   def main(args: Array[String]): Unit = {
-    val rule : SocialRule= Flowtime
+    val rule : SocialRule=Cmax
     val r = scala.util.Random
     val system = ActorSystem("Debug" + r.nextInt.toString) //The Actor system
-    for (m <- 2 to 10) {
-      for (n <- 10 * m to 10 * m) {
+    for (m <- 3 to 10) {
+      for (n <- 2 * m to 10 * m) {
         println(s"DEBUG configuration with $m peers and $n tasks")
         val nbPb = 100
         var (goal, disGoal) = (0.0,0.0)

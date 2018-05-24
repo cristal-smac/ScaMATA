@@ -15,14 +15,9 @@ object TestCmax {
   val debug= false
 
     def main(args: Array[String]): Unit = {
-      val criterion = args(0)
+      val rule: SocialRule = Cmax
       val r = scala.util.Random
-      val system = ActorSystem("TestCmax"+criterion+r.nextInt.toString)//The Actor system
-      val rule: SocialRule = criterion match {
-        case "cmax" => Cmax
-        case "flowtime" => Flowtime
-        case _ => throw new RuntimeException("The argument is not supported")
-      }
+      val system = ActorSystem("TestCmax"+rule+r.nextInt.toString)//The Actor system
       val file = s"experiments/data/$rule.csv"
       val bw = new BufferedWriter(new FileWriter(file))
       bw.write(s"m,n," +
