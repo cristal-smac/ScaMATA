@@ -56,7 +56,7 @@ class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double], 
   }
 
   /**
-    * Add a task to the bundler
+    * Add a task to the bundle
     */
   def add(task : Task) : StateOfMind = {
     new StateOfMind(bundle + task, belief, conversationId)
@@ -73,8 +73,8 @@ class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double], 
   /**
     * Update the potential supplier and the potential task to supply
     */
-  def updateConversationId(conversationId : Int) : StateOfMind= {
-    new StateOfMind(bundle, belief, conversationId)
+  def updateConversationId() : StateOfMind= {
+    new StateOfMind(bundle, belief, conversationId+1)
   }
 
   /**
@@ -92,7 +92,7 @@ class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double], 
   * @param rule to optimize
   */
 abstract class Agent(val worker: Worker, val rule: SocialRule) extends Actor{
-  val debug = false
+  val debug = true
   val stateDebug = false
 
   var nbPropose = 0
