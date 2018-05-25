@@ -1,6 +1,7 @@
 set terminal pdf
 set datafile separator ","
 set style fill solid border rgb "black"
+set style fill transparent solid 0.5 noborder
 set auto x
 set auto y
 set grid
