@@ -22,7 +22,7 @@ object ComputeCmax {
       val bw = new BufferedWriter(new FileWriter(file))
       bw.write(s"m,n," +
         s"minexhaustiveSolver$rule,openexhaustiveSolver$rule,meanexhaustiveSolver$rule,closedexhaustiveSolver$rule,maxexhaustiveSolver$rule," +
-      "mingiftSolver$rule,opengiftSolver$rule,meangiftSolver$rule,closedgiftSolver$rule,maxgiftSolver$rule,\n")
+      s"mingiftSolver$rule,opengiftSolver$rule,meangiftSolver$rule,closedgiftSolver$rule,maxgiftSolver$rule,\n")
       for (m <- 2 to 100) {
         for (n <- 2*m to 2*m) {
           if (debug) println(s"TestCmax configuration with $m peers and $n tasks")
@@ -47,10 +47,10 @@ object ComputeCmax {
           giftSolverTime = giftSolverTime.sortWith(_ < _)
           bw.write(
             s"$m,$n,"+
-              "${exhaustiveSolverRule.min},${exhaustiveSolverRule(nbPb/4)},${exhaustiveSolverRule(nbPb/2)},${exhaustiveSolverRule(nbPb*3/4)},${exhaustiveSolverRule.max}," +
-              "${giftSolverRule.min},${giftSolverRule(nbPb/4)},${giftSolverRule(nbPb/2)},${giftSolverRule(nbPb*3/4)},${giftSolverRule.max}," +
-              "${exhaustiveSolverTime.min},${exhaustiveSolverTime(nbPb/4)},${exhaustiveSolverTime(nbPb/2)},${exhaustiveSolverTime(nbPb*3/4)},${exhaustiveSolverTime.max}," +
-              "${giftSolverTime.min},${giftSolverTime(nbPb/4)},${giftSolverTime(nbPb/2)},${giftSolverTime(nbPb*3/4)},${giftSolverTime.max}\n")
+              s"${exhaustiveSolverRule.min},${exhaustiveSolverRule(nbPb/4)},${exhaustiveSolverRule(nbPb/2)},${exhaustiveSolverRule(nbPb*3/4)},${exhaustiveSolverRule.max}," +
+              s"${giftSolverRule.min},${giftSolverRule(nbPb/4)},${giftSolverRule(nbPb/2)},${giftSolverRule(nbPb*3/4)},${giftSolverRule.max}," +
+              s"${exhaustiveSolverTime.min},${exhaustiveSolverTime(nbPb/4)},${exhaustiveSolverTime(nbPb/2)},${exhaustiveSolverTime(nbPb*3/4)},${exhaustiveSolverTime.max}," +
+              s"${giftSolverTime.min},${giftSolverTime(nbPb/4)},${giftSolverTime(nbPb/2)},${giftSolverTime(nbPb*3/4)},${giftSolverTime.max}\n")
           bw.flush()
         }
       }
