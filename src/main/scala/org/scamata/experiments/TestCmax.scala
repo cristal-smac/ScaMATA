@@ -33,7 +33,7 @@ object TestCmax {
         s"minLpSolverPostTime,openLpSolverPostTime,meanLpSolverPostTime,closedLpSolverPostTime,maxLpSolverPostTime," +
         s"dealGift,nbPropose,nbAccept,nbReject,nbWithdraw,nbConfirm,nbInform\n")
       for (m <- 2 to 100) {
-        for (n <- 10*m to 10*m) {
+        for (n <- 5*m to 5*m) {
           if (debug) println(s"TestCmax configuration with $m peers and $n tasks")
           val nbPb = 100 // should be x*4
           var (lpSolverRule, giftSolverRule, distributedGiftSolverRule, randomSolverRule,
@@ -95,7 +95,7 @@ object TestCmax {
               s"${distributedGiftSolverRule.min},${distributedGiftSolverRule(nbPb/4)},${distributedGiftSolverRule(nbPb/2)},${distributedGiftSolverRule(nbPb*3/4)},${distributedGiftSolverRule.max}," +
             s"${randomSolverRule.min},${randomSolverRule(nbPb/4)},${randomSolverRule(nbPb/2)},${randomSolverRule(nbPb*3/4)},${randomSolverRule.max}," +
             s"${lpSolverRule.min},${lpSolverRule(nbPb/4)},${lpSolverRule(nbPb/2)},${lpSolverRule(nbPb*3/4)},${lpSolverRule.max}," +
-            s"${giftSolverTime.min},${giftSolverTime(nbPb/4)},${giftSolverTime(nbPb/2)},${giftSolverTime(nbPb*3/4)},${giftSolverTime.max}," + s"${giftSolverTime.min},${giftSolverTime(nbPb/4)},${giftSolverTime(nbPb/2)},${giftSolverTime(nbPb*3/4)},${giftSolverTime.max}," +
+            s"${giftSolverTime.min},${giftSolverTime(nbPb/4)},${giftSolverTime(nbPb/2)},${giftSolverTime(nbPb*3/4)},${giftSolverTime.max}," +
               s"${distributedGiftSolverTime.min},${distributedGiftSolverTime(nbPb/4)},${distributedGiftSolverTime(nbPb/2)},${distributedGiftSolverTime(nbPb*3/4)},${distributedGiftSolverTime.max}," +
             s"${randomSolverTime.min},${randomSolverTime(nbPb/4)},${randomSolverTime(nbPb/2)},${randomSolverTime(nbPb*3/4)},${randomSolverTime.max}," +
             s"${lpSolverTime.min},${lpSolverTime(nbPb/4)},${lpSolverTime(nbPb/2)},${lpSolverTime(nbPb*3/4)},${lpSolverTime.max}," +
