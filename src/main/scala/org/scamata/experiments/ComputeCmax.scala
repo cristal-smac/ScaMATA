@@ -12,7 +12,7 @@ import org.scamata.solver._
   */
 object ComputeCmax {
 
-  val debug= false
+  val debug= true
 
     def main(args: Array[String]): Unit = {
       val rule: SocialRule = Cmax
@@ -31,6 +31,7 @@ object ComputeCmax {
           var (exhaustiveSolverRule, giftSolverRule, lpSolverRule) =
             (List[Double](), List[Double](),  List[Double]())
           for (o <- 1 to nbPb) {
+            if (debug) println(s"Configuration $o")
             val pb = MWTA.randomProblem(m, n)
             val exhaustiveSolver = new ExhaustiveSolver(pb, rule)
             val exhaustiveAlloc = exhaustiveSolver.run()

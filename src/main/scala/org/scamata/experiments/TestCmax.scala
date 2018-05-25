@@ -12,7 +12,7 @@ import org.scamata.solver._
   */
 object TestCmax {
 
-  val debug= false
+  val debug= true
 
     def main(args: Array[String]): Unit = {
       val rule: SocialRule = Cmax
@@ -32,7 +32,7 @@ object TestCmax {
         s"minLpSolverPreTime,openLpSolverPreTime,meanLpSolverPreTime,closedSolverPreTime,maxLpSolverPreTime," +
         s"minLpSolverPostTime,openLpSolverPostTime,meanLpSolverPostTime,closedLpSolverPostTime,maxLpSolverPostTime," +
         s"dealGift,nbPropose,nbAccept,nbReject,nbWithdraw,nbConfirm,nbInform\n")
-      for (m <- 45 to 100) {
+      for (m <- 48 to 100) {
         for (n <- 5*m to 5*m) {
           if (debug) println(s"TestCmax configuration with $m peers and $n tasks")
           val nbPb = 100 // should be x*4
@@ -44,7 +44,7 @@ object TestCmax {
               0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
           for (o <- 1 to nbPb) {
             val pb = MWTA.randomProblem(m, n)
-            if (debug) println(s"PB:\n$pb")
+            if (debug) println(s"Configuration $o")
             val lpSolver : LPSolver  = new LPSolver(pb,rule)
             val giftSolver : GiftSolver  = new GiftSolver(pb,rule)
             val randomSolver : RandomSolver  = new RandomSolver(pb,rule)
