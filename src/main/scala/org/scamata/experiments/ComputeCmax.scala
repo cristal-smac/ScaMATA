@@ -44,6 +44,7 @@ object ComputeCmax {
           }
           exhaustiveSolverRule = exhaustiveSolverRule.sortWith(_ < _)
           giftSolverRule = giftSolverRule.sortWith(_ < _)
+          lpSolverRule = lpSolverRule.sortWith(_ < _)
           bw.write(
             s"$m,$n,"+
               s"${exhaustiveSolverRule.min},${exhaustiveSolverRule(nbPb/4)},${exhaustiveSolverRule(nbPb/2)},${exhaustiveSolverRule(nbPb*3/4)},${exhaustiveSolverRule.max}," +
