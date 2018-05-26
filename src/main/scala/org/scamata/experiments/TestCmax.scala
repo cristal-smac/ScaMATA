@@ -32,7 +32,7 @@ object TestCmax {
         s"minLpSolverPreTime,openLpSolverPreTime,meanLpSolverPreTime,closedSolverPreTime,maxLpSolverPreTime," +
         s"minLpSolverPostTime,openLpSolverPostTime,meanLpSolverPostTime,closedLpSolverPostTime,maxLpSolverPostTime," +
         s"dealGift,nbPropose,nbAccept,nbReject,nbWithdraw,nbConfirm,nbInform\n")
-      for (m <- 48 to 100) {
+      for (m <- 60 to 100) {
         for (n <- 5*m to 5*m) {
           if (debug) println(s"TestCmax configuration with $m peers and $n tasks")
           val nbPb = 100 // should be x*4
@@ -52,7 +52,6 @@ object TestCmax {
             val lpAlloc =lpSolver.run()
             val giftAlloc = giftSolver.run()
             deal +=  giftSolver.nbConfirm
-            if (debug) println(s"GIFT:\n$giftAlloc")
             val randomAlloc = randomSolver.run()
             val distributedGiftAlloc = distributedGiftSolver.run()
             nbPropose += distributedGiftSolver.nbPropose
