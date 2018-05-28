@@ -27,7 +27,7 @@ class SupervisorStatus(val stoppedActors: Set[ActorRef], val allocation: Allocat
   * @param pb MWTA problem instance
   * @param rule to apply (Cmax or Flowtime)
   * */
-class Supervisor(pb: MWTA, rule: SocialRule, initialAllocation : Allocation) extends Actor with FSM[SupervisorState,SupervisorStatus] {
+class Supervisor(pb: MWTA, rule: SocialRule) extends Actor with FSM[SupervisorState,SupervisorStatus] {
 
   var debug = false
   val extraDebug = false
@@ -41,7 +41,7 @@ class Supervisor(pb: MWTA, rule: SocialRule, initialAllocation : Allocation) ext
   /**
     * Initially all the worker are active and the allocation is random
     */
-  startWith(DefaultSupervisorState, new SupervisorStatus(Set[ActorRef](), initialAllocation))
+  startWith(DefaultSupervisorState, new SupervisorStatus(Set[ActorRef](), new Allocation(pb)))
 
 
   /**
@@ -59,16 +59,17 @@ class Supervisor(pb: MWTA, rule: SocialRule, initialAllocation : Allocation) ext
     */
   when(DefaultSupervisorState) {
     //When the works should be done
-    case Event(Trigger, status) =>
+    case Event(Trigger(allocation), status) =>
       solver = sender
       //Distribute the initial allocation
       directory.allActors().foreach { actor: ActorRef =>
         val worker = directory.workers(actor)
-        val bundle = status.allocation.bundle(worker)
+        val bundle = allocation.bundle(worker)
         if (debug) println(s"Supervisor initiates $worker with bundle $bundle")
         actor ! Initiate(bundle, directory, pb.cost)
       }
-      stay using status
+      stay using new SupervisorStatus(status.stoppedActors, allocation)
+
     //When an actor becomes ready
     case Event(Ready, status) =>
       nbReady += 1
