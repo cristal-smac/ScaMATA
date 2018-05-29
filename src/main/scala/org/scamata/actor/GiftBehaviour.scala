@@ -129,36 +129,6 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends WorkerAgent(worker
       val opponent = directory.workers(sender)
       val updatedMind = mind.updateBelief(opponent, peerWorkload)
       stay using updatedMind
-
-    // If the worker agent receives a withdrawal
-    case Event(Withdraw(_, peerWorkload), mind) =>
-      val opponent = directory.workers(sender)
-      val updatedMind = mind.updateBelief(opponent, peerWorkload)
-      stay using updatedMind
-
-    // If the worker agent receives a confirmation
-    case Event(Confirm(task, peerWorkload), mind) =>
-      val opponent = directory.workers(sender)
-      val workload = worker.workload(mind.bundle, cost)
-      val updatedMind = mind.updateBelief(opponent, peerWorkload)
-      if (trace) println(s"$worker -> $opponent : Cancel($task)")
-      sender ! Cancel(task, workload)
-      nbCancel += 1
-      stay using updatedMind
-
-    // If the worker agent receives a cancel
-    case Event(Cancel(task, peerWorkload), mind) =>
-      val opponent = directory.workers(sender)
-      val bundle = mind.bundle + task
-      val workload = worker.workload(bundle, cost)
-      var updatedMind = mind.updateBelief(opponent, peerWorkload)
-      updatedMind = mind.updateBelief(worker, workload)
-      updatedMind = mind.add(task)
-      if (trace) println(s"$worker -> $opponent : Cancel($task)")
-      sender ! Cancel(task, workload)
-      nbCancel += 1
-      stay using updatedMind
-
   }
 
   /**
@@ -211,21 +181,6 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends WorkerAgent(worker
       stash
       stay using mind
 
-    // If the worker agent receives a withdrawal
-    case Event(Withdraw(_, _), mind) =>
-      stash
-      stay using mind
-
-    // If the worker agent receives a confirmation
-    case Event(Confirm(_, _), mind) =>
-      stash
-      stay using mind
-
-    // If the worker agent receives a cancel
-    case Event(Cancel(_, _), mind) =>
-      stash
-      stay using mind
-
     // If the worker agent receives a trigger
     case Event(Trigger, mind) =>
       stash
@@ -235,13 +190,7 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends WorkerAgent(worker
   /**
     * Or the agent waits for confirmation
     */
-  when(Responder) { //  stateTimeout = deadline
-    //If the deadline is reached
-    /*case Event(StateTimeout, mind) =>
-      unstashAll()
-      self ! Trigger
-      goto(Initial) using mind
-    */
+  when(Responder) {
     // If the worker agent receives a confirmation
     case Event(Confirm(task, oWorkload), mind) =>
       val opponent = directory.workers(sender)
@@ -259,7 +208,6 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends WorkerAgent(worker
       val updatedMind = mind.updateBelief(opponent, oWorkload)
       self ! Trigger
       goto(Initial) using updatedMind
-
 
    // If the worker agent receives an acceptance
     case Event(Accept(task, oWorkload), mind) =>
@@ -329,9 +277,9 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends WorkerAgent(worker
     case Proposer -> Proposer =>
       if (debug) println(s"$worker stays in Proposer state")
     case Initial -> Responder =>
-      unstashAll()
       if (debug) println(s"$worker moves from Initial state to Responder state")
     case Responder -> Initial =>
+      unstashAll()
       if (debug) println(s"$worker moves from Responder state to Initial state")
     case Responder -> Responder =>
       if (debug) println(s"$worker stays in Responder state")

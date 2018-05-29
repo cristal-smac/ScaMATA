@@ -32,7 +32,7 @@ object TestCmax {
         s"minLpSolverPreTime,openLpSolverPreTime,meanLpSolverPreTime,closedSolverPreTime,maxLpSolverPreTime," +
         s"minLpSolverPostTime,openLpSolverPostTime,meanLpSolverPostTime,closedLpSolverPostTime,maxLpSolverPostTime," +
         s"dealGift,nbPropose,nbAccept,nbReject,nbWithdraw,nbConfirm,nbInform\n")
-      for (m <- 2 to 100 by 2) {
+      for (m <- 70 to 100 by 2) {
         for (n <- 5*m to 5*m) {
           if (debug) println(s"TestCmax configuration with $m peers and $n tasks")
           val nbPb = 20 // should be x*4

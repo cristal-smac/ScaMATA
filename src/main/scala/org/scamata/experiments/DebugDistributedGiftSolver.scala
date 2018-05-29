@@ -14,10 +14,10 @@ object DebugDistributedGiftSolver {
     val rule : SocialRule=Cmax
     val r = scala.util.Random
     val system = ActorSystem("Debug" + r.nextInt.toString) //The Actor system
-    for (m <- 50 to 100) {
+    for (m <- 2 to 100) {
       for (n <- 10 * m to 10* m) {
         println(s"DEBUG configuration with $m peers and $n tasks")
-        val nbPb = 100
+        val nbPb = 10
         var (goal, disGoal) = (0.0,0.0)
         var (nbDeal, nbDealDis) = (0.0, 0.0)
         for (o <- 1 to nbPb) {
