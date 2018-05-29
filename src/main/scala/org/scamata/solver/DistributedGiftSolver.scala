@@ -3,7 +3,7 @@ package org.scamata.solver
 
 import org.scamata.core.{Allocation, MWTA}
 import org.scamata.actor._
-import akka.actor.{ActorSystem, Props}
+import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.pattern.ask
 import akka.util.Timeout
 import javax.naming.spi.DirStateFactory.Result
@@ -14,35 +14,24 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 
 /**
-  * Distributed multiagent negotiation process for minimizing the rule
-  *
+  * Distributed solver based on multi-agent negotiation process of single gift in order to minimize the rule
   * @param pb to be solver
   * @param rule to be optimized
   * @param system of Actors
   */
 class DistributedGiftSolver(pb : MWTA, rule : SocialRule, system: ActorSystem) extends DealSolver(pb, rule) {
 
-  val TIMEOUTVALUE  = 1000000 seconds // default timeout of a run
-  implicit val timeout = Timeout(TIMEOUTVALUE)
-
-  val supervisor = system.actorOf(Props(classOf[Supervisor], pb, rule), name = "supervisor"+DistributedGiftSolver.id)
+  val TIMEOUTVALUE : FiniteDuration = 60 minutes // Default timeout of a run
+  implicit val timeout : Timeout = Timeout(TIMEOUTVALUE)
+  // Launch a new solverAgent
+  DistributedGiftSolver.id+=1
+  val supervisor : ActorRef = system.actorOf(Props(classOf[SolverAgent], pb, rule), name = "solverAgent"+DistributedGiftSolver.id)
 
   /**
-    * Returns an allocation
-    */
-  override def solve(): Allocation = {
-   reallocate(Allocation.randomAllocation(pb))
-  }
-  /**
-    * Returns an allocation
+    * Returns an allocation modifying the initial one
     */
   def reallocate(allocation: Allocation): Allocation = {
-    // Launch a new supervisor
-    DistributedGiftSolver.id+=1
-    if (debug) system.eventStream.setLogLevel(akka.event.Logging.DebugLevel)
-    //val supervisor = system.actorOf(Props(classOf[Supervisor], pb, rule, allocation), name = "supervisor"+DistributedGiftSolver.id)
-    // The current thread is blocked and it waits for the supervisor to "complete" the Future with it's reply.
-    val future = supervisor ? Trigger(allocation)
+    val future = supervisor ? Start(allocation)
     val result = Await.result(future, timeout.duration).asInstanceOf[Outcome]
     nbPropose = result.nbPropose
     nbAccept = result.nbAccept
@@ -74,8 +63,8 @@ object DistributedGiftSolver{
     println("@startuml")
     println("skinparam monochrome true")
     println("hide footbox")
-    println("participant Supervisor")
-    for (i<- 1 to pb.m) println(s"entity a$i")
+    println("participant SolverAgent")
+    for (i<- 1 to pb.m) println(s"participant a$i")
     val sol = negotiationSolver.reallocate(allocation)
     println("@enduml")
     println(sol.toString)

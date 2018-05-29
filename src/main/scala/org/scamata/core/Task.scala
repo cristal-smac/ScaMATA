@@ -26,4 +26,7 @@ class Task(val name : String) extends Ordered[Task]{
   }
 }
 
+/**
+  * The default task
+  */
 object NoTask extends Task("NoTask")

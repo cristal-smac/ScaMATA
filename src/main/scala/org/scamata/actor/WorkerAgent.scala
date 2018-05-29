@@ -6,20 +6,23 @@ import org.scamata.solver.{Cmax, Flowtime, SocialRule}
 
 import scala.collection.SortedSet
 import akka.actor.{Actor, ActorRef}
+import scala.concurrent.duration._
+import scala.language.postfixOps
 
 /**
-  * States of the agent
+  * States of the worker agent
   */
 sealed trait State
+case object Initial extends State
 case object Proposer extends State
 case object Responder extends State
-case object WaitConfirmation extends State
 
 /**
   * Internal immutable state of mind
   * @param bundle
   * @param belief about the workloads
-  * @param opponent which is under consideration
+  * @param opponent under consideration
+  * @param task under consideration
   */
 class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double], val opponent : Worker, val task : Task)
   extends Product4[SortedSet[Task], Map[Worker, Double], Worker, Task] {
@@ -28,7 +31,6 @@ class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double], 
   override def _3 : Worker = opponent
   override def _4 : Task = task
   override def canEqual(that: Any): Boolean = that.isInstanceOf[StateOfMind]
-
 
   def initBelief(newBundle :  SortedSet[Task], workers : Iterable[Worker]) : StateOfMind = {
     workers.foreach{w =>
@@ -43,31 +45,30 @@ class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double], 
     new StateOfMind(bundle, belief.updated(worker, workload), opponent, task)
   }
   /**
-    * Update bundle
+    * Add a new bundle to the current one
     */
-  def updateBundle(newBundle : SortedSet[Task]) : StateOfMind= {
+  def addBundle(newBundle : SortedSet[Task]) : StateOfMind= {
     new StateOfMind(bundle ++ newBundle, belief, opponent, task)
   }
 
   /**
-    * Add task
+    * Add a task to the current bundle
     */
   def add(task : Task) : StateOfMind = {
     new StateOfMind(bundle + task, belief, opponent, task)
   }
 
   /**
-    * Add task
+    * Remove a task to the current bundle
     */
   def remove(task : Task) : StateOfMind = {
     new StateOfMind(bundle - task, belief, opponent, task)
   }
 
-
   /**
-    * Update opponent
+    * Change the task and the opponent under consideration
     */
-  def updateDelegation(newOpponent : Worker, newTask : Task) : StateOfMind= {
+  def changeDelegation(newOpponent : Worker, newTask : Task) : StateOfMind= {
     new StateOfMind(bundle, belief, newOpponent, newTask)
   }
 
@@ -85,9 +86,11 @@ class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double], 
   * @param worker which is embedded
   * @param rule to optimize
   */
-abstract class Agent(val worker: Worker, val rule: SocialRule) extends Actor{
+abstract class WorkerAgent(val worker: Worker, val rule: SocialRule) extends Actor{
+  val trace = false
   val debug = false
-  val extraDebug = false
+
+  val deadline = 300 nanosecond
 
   var nbPropose = 0
   var nbAccept = 0
@@ -97,7 +100,7 @@ abstract class Agent(val worker: Worker, val rule: SocialRule) extends Actor{
   var nbCancel = 0
   var nbInform = 0
 
-  var supervisor : ActorRef = context.parent
+  var solverAgent : ActorRef = context.parent
   var directory : Directory = new Directory()
   var cost : Map[(Worker, Task), Double]= Map[(Worker, Task), Double]()
 
@@ -109,7 +112,7 @@ abstract class Agent(val worker: Worker, val rule: SocialRule) extends Actor{
   }
 
   /**
-    * Handles management messages
+    * Handles the stop message
     * @param message
     */
   def defaultReceive(message : Message) : Any = message match {

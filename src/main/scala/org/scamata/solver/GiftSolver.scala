@@ -2,13 +2,14 @@
 package org.scamata.solver
 
 import org.scamata.core._
-import org.scamata.deal._
+import org.scamata.deal.SingleGift
 
-import scala.collection.{SortedSet, immutable}
+import scala.collection.SortedSet
 import scala.util.Random
+import scala.collection.mutable.ListBuffer
 
 /**
-  * Multiagent negotiation process for minimizing the rule
+  * Minimizing the rule by applying single gift
   * @param pb to be solver
   * @param rule to be optimized
   */
@@ -16,52 +17,46 @@ class GiftSolver(pb : MWTA, rule : SocialRule) extends DealSolver(pb, rule) {
   debug = false
   val trace = false
 
-  /**
-    * Returns an allocation
-    */
-  override def solve(): Allocation = {
-    val allocation = Allocation.randomAllocation(pb)
-    if (debug) println(s"Give with a random allocation:\n$allocation")
-    reallocate(allocation)
-  }
-
     /**
     * Reallocate
     */
   def reallocate(initialAllocation: Allocation): Allocation = {
     var allocation = initialAllocation
-    var activeWorkers: List[Worker] = Random.shuffle(pb.workers.toList)
-    if (debug) println("All peers are initially active")
-    while(activeWorkers.nonEmpty){
-      activeWorkers.foreach { initiator: Worker =>
-        if (debug) println(s"$initiator tries to find a social rational gift")
+    var contractors: ListBuffer[Worker] = Random.shuffle(pb.workers.to[ListBuffer])
+    if (debug) println("All peers are initially potential contractors")
+
+    while(contractors.nonEmpty){
+      contractors.foreach { initiator: Worker =>
+        if (debug) println(s"$initiator tries to find a single gift which is socially rational")
         val potentialPartners = rule match {
           case Flowtime => // all the peers
-            pb.workers.filterNot(_ == initiator)
+            pb.workers - initiator
           case Cmax => // the peers with a smallest workload
-            pb.workers.filterNot(_ == initiator).filter(allocation.workload(_) < allocation.workload(initiator))
+            (pb.workers - initiator).filter(allocation.workload(_) < allocation.workload(initiator))
         }
         if (debug) println(s"Potential partner: $potentialPartners")
         if (potentialPartners.isEmpty || allocation.bundle(initiator).isEmpty) {
-          activeWorkers = activeWorkers.filter(_ != initiator)
+          contractors -= initiator
           if (debug) println(s"$initiator becomes inactive")
         }
         else {
           var found = false
           var bestAllocation: Allocation = allocation
-          var bestSingleGift: Gift = new Gift(initiator, initiator, Set[Task]())
+          var bestSingleGift: SingleGift = new SingleGift(initiator, initiator, NoTask)
           var bestGoal = rule match {
-            case Cmax => allocation.workload(initiator)//allocation.makespan()
-            case Flowtime => allocation.flowtime()
+            case Cmax => allocation.workload(initiator)
+            case Flowtime => 0.0
           }
-          potentialPartners.foreach { opponent =>
+          potentialPartners.foreach { supplier =>
             allocation.bundle(initiator).foreach { task =>
-              // 4 - Foreach potential swap
-              val gift = new SingleGift(initiator, opponent, task)
-              val modifiedAllocation = allocation.gift(gift)
+              // 4 - Foreach potential apply
+              val gift = new SingleGift(initiator, supplier, task)
+              val modifiedAllocation = allocation.apply(gift)
               val currentGoal = rule match { // Compute the new goal
-              case Cmax => Math.max(modifiedAllocation.workload(initiator), modifiedAllocation.workload(opponent))//modifiedAllocation.makespan()
-              case Flowtime => modifiedAllocation.flowtime()
+              case Cmax =>
+                Math.max(modifiedAllocation.workload(initiator), modifiedAllocation.workload(supplier))
+              case Flowtime =>
+                pb.cost(supplier, task) - pb.cost(initiator, task)
             }
               if (currentGoal < bestGoal) {
                 bestGoal = currentGoal
@@ -71,22 +66,26 @@ class GiftSolver(pb : MWTA, rule : SocialRule) extends DealSolver(pb, rule) {
               }
             }
           }
-          // Select the best gift if any
+          // Select the best apply if any
           if (!found) {
             if (debug) println(s"$initiator becomes inactive")
-            activeWorkers = activeWorkers.filter(_ != initiator)
+            contractors -= initiator
           } else {
             if (debug || trace) println(s"$bestSingleGift")
+            nbPropose += 1
+            nbAccept += 1
             nbConfirm += 1
             allocation = bestAllocation
-            if (rule == Cmax && ! activeWorkers.contains(bestSingleGift.supplier)) {
-              activeWorkers = bestSingleGift.supplier :: activeWorkers
+/*
+            if (rule == Cmax && ! contractors.contains(bestSingleGift.supplier)) {
+              contractors = bestSingleGift.supplier :: contractors
             }
+*/
             if (rule == Cmax) {
-              pb.workers.filter(worker => allocation.workload(worker) > bestGoal &&  ! activeWorkers.contains(worker)).foreach { worker =>
-                activeWorkers = worker :: activeWorkers
+              pb.workers.filter(worker => allocation.workload(worker) > bestGoal &&  !contractors.contains(worker)).foreach { worker =>
+                contractors += worker
               }
-              activeWorkers = Random.shuffle(activeWorkers)
+              contractors = Random.shuffle(contractors)
             }
           }
         }
@@ -111,5 +110,4 @@ object GiftSolver extends App {
   allocation = allocation.update(a4, SortedSet(t2))
   println(allocation)
   println(negotiationSolver.reallocate(allocation).toString)
-
 }

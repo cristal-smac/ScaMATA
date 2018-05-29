@@ -1,12 +1,12 @@
 // Copyright (C) Maxime MORGE 2018
-int M = ...; // Number of agents
-int N = ...; // Number of task
-range A = 1..M; // The set of agents
+int M = ...; // Number of workers
+int N = ...; // Number of tasks
+range A = 1..M; // The set of workers
 range T = 1..N; // The set of tasks
-float C[A][T] = ...; // The costs of the tasks for the agents
+float C[A][T] = ...; // The costs of the tasks for the workers
 
-dvar int X[A][T] in 0..1; // The decision variables 
-dvar int cmax;
+dvar int X[A][T] in 0..1; // The decision variables for assignments 
+dvar int makespan; // The decision variables for the minimal cost
 
 /* Preprocessing */
 float startingTime;
@@ -17,14 +17,14 @@ execute{
 
 /* Solving the model */
 minimize
-	cmax;// the makespan
+	makespan;
 subject to {
 	forall(t in T)
 	  ct_taskAssignment:
 	  	sum(i in A) X[i][t] == 1.0;
 	forall(i in A)
 	  ct_workload:
-	  	sum(t in T) X[i][t]*C[i][t]  <= cmax;
+	  	sum(t in T) X[i][t]*C[i][t]  <= makespan;
 }
 
 /* Postprocessing */
@@ -32,7 +32,7 @@ execute{
 	var endTime = new Date();
 	var processingTime=endTime.getTime()-startingTime //ms
 	var outputFile = new IloOplOutputFile("../../../experiments/OPL/lpOutput.txt");
-	outputFile.writeln(cplex.getObjValue());//Cmax
+	outputFile.writeln(cplex.getObjValue());//makespan
 	outputFile.writeln(processingTime);//T in millisecond
     for(a in thisOplModel.A){
         for(t in thisOplModel.T){

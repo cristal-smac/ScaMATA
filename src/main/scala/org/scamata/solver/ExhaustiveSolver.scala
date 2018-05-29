@@ -2,50 +2,48 @@
 package org.scamata.solver
 
 import org.scamata.core.{MWTA, Allocation}
-import org.scamata.deal._
-
-import scala.collection.SortedSet
 
 /**
-  * Multiagent negotiation process for minimizing the rule
+  * Solver testing all the allocation
   *
   * @param pb   to be solver
   * @param rule to be optimized
   */
-class ExhaustiveSolver(pb: MWTA, rule: SocialRule) extends DealSolver(pb, rule) {
+class ExhaustiveSolver(pb: MWTA, rule: SocialRule) extends Solver(pb, rule) {
   debug = false
 
   /**
     * Returns an allocation
     */
   override def solve(): Allocation = {
-    var min = Double.MaxValue
     var bestAllocation = new Allocation(pb)
-    pb.allAllocation().foreach { allocation =>
-      val goal = rule match {
-        case Cmax =>
-          allocation.makespan()
-        case Flowtime =>
-          allocation.flowtime()
+    if (rule == Flowtime) {
+      pb.tasks.foreach { task =>
+        val worker = pb.faster(task)
+        bestAllocation = bestAllocation.update(worker, bestAllocation.bundle(worker) + task)
       }
-      if (goal < min) {
-        bestAllocation = allocation
-        min = goal
+      bestAllocation
+    } else {
+      var min = Double.MaxValue
+      pb.allAllocation().foreach { allocation =>
+        val goal = allocation.makespan()
+        if (goal < min) {
+          bestAllocation = allocation
+          min = goal
+        }
       }
-
+      bestAllocation
     }
-    bestAllocation
   }
-}
 
+}
 
 /**
   * Companion object to test it
   */
 object ExhaustiveSolver extends App {
   val debug = false
-  //import org.scamata.example.toy2x4._
-  val pb = MWTA.randomProblem(2, 20)
+  import org.scamata.example.toy4x4._
   println(pb)
   val solver = new ExhaustiveSolver(pb,Cmax)
   println(solver.run().toString)

@@ -1,11 +1,11 @@
 // Copyright (C) Maxime MORGE 2018
-int M = ...; // Number of agents
-int N = ...; // Number of task
-range A = 1..M; // The set of agents
+int M = ...; // Number of workers
+int N = ...; // Number of tasks
+range A = 1..M; // The set of workers
 range T = 1..N; // The set of tasks
-float C[A][T] = ...; // The costs of the tasks for the agents
+float C[A][T] = ...; // The costs of the tasks for the workers
 
-dvar int X[A][T] in 0..1; // The decision variables
+dvar int X[A][T] in 0..1; // The decision variables for assignements
 
 /* Preprocessing */
 float startingTime;

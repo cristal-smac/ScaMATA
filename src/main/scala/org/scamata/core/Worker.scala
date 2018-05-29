@@ -19,7 +19,7 @@ class Worker(val name : String) extends Ordered[Worker]{
   def canEqual(a: Any) : Boolean = a.isInstanceOf[Worker]
 
   /**
-    * Returns 0 if this an that are the same,  negative if this < that, and positive otherwise
+    * Returns 0 if this an that are the same, negative if this < that, and positive otherwise
     */
   def compare(that: Worker) : Int = {
     if (this.name == that.name) return 0
@@ -37,4 +37,7 @@ class Worker(val name : String) extends Ordered[Worker]{
   }
 }
 
+/**
+  * The default worker
+  */
 object NoWorker extends Worker("NoWorker")

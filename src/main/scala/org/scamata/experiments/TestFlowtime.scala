@@ -47,7 +47,7 @@ object TestFlowtime {
             if (debug) println(s"PB:\n$pb")
             val lpSolver : LPSolver  = new LPSolver(pb,rule)
             val giftSolver : GiftSolver  = new GiftSolver(pb,rule)
-            val ExhaustiveSolver : ExhaustiveFlowtimeSolver  = new ExhaustiveFlowtimeSolver(pb,rule)
+            val ExhaustiveSolver : ExhaustiveSolver  = new ExhaustiveSolver(pb,rule)
             val lpAlloc =lpSolver.run()
             val giftAlloc = giftSolver.run()
             deal +=  giftSolver.nbConfirm

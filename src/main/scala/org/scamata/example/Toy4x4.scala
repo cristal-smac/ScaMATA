@@ -7,6 +7,7 @@ import scala.collection.SortedSet
 /**
   * A toy MATA problem example
   */
+
 object toy4x4{
   val a1 = new Worker("a1")
   val a2 = new Worker("a2")

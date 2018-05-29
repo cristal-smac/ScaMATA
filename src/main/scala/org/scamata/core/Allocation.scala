@@ -16,7 +16,7 @@ class Allocation(val pb: MWTA) {
   var bundle: Map[Worker, SortedSet[Task]] = Map[Worker, SortedSet[Task]]()
   pb.workers.foreach(a => bundle += a -> SortedSet[Task]())
 
-  override def toString: String = pb.workers.toList.map(a => s"$a: " + bundle(a).toList.mkString(", ")).mkString("\n")
+  override def toString: String = pb.workers.toList.map(w => s"$w: " + bundle(w).toList.mkString(", ")).mkString("\n")
 
   /**
     * Returns the workload of the worker
@@ -42,13 +42,12 @@ class Allocation(val pb: MWTA) {
         max = Math.max(max, workload(worker))
     }
     max
-    //foldLeft(0.0)((max, a) => math.max(max, workload(a)))
   }
 
   /**
     * Return the peers which are least loaded than the initiator
     */
-  def leastLoadedAgents(initiator: Worker): Set[Worker] = pb.workers.filter(a => workload(a) < workload(initiator)).toSet
+  def leastLoadedAgents(initiator: Worker): Set[Worker] = pb.workers.filter(w => workload(w) < workload(initiator)).toSet
 
   /**
     * Returns a copy
@@ -62,7 +61,7 @@ class Allocation(val pb: MWTA) {
   }
 
   /**
-    * Update an allocation for a worker with a new bundle
+    * Update an allocation with a new bundle for a worker
     */
   def update(worker: Worker, bundle : SortedSet[Task]) : Allocation = {
     val allocation = this.copy()
@@ -73,7 +72,7 @@ class Allocation(val pb: MWTA) {
   /**
     * The provider gives a task to the supplier
     */
-  def gift(gift: SingleGift): Allocation = {
+  def apply(gift: SingleGift): Allocation = {
     if (!bundle(gift.provider).contains(gift.task)) throw new RuntimeException(s"${gift.provider} cannot give ${gift.task}")
     val allocation = this.copy()
     allocation.bundle = allocation.bundle.updated(gift.provider, allocation.bundle(gift.provider) - gift.task)
@@ -82,9 +81,9 @@ class Allocation(val pb: MWTA) {
   }
 
   /**
-    * Two worker swap a single task
+    * Two worker apply a single task swap
     */
-  def swap(swap: SingleSwap): Allocation = {
+  def apply(swap: SingleSwap): Allocation = {
     if (!bundle(swap.worker1).contains(swap.task1) || !bundle(swap.worker2).contains(swap.task2)) throw new RuntimeException(s"${swap} cannot be performed on $this")
     val allocation = this.copy()
     allocation.bundle = allocation.bundle.updated(swap.worker1, allocation.bundle(swap.worker1) - swap.task1 + swap.task2)
@@ -105,12 +104,15 @@ class Allocation(val pb: MWTA) {
     swaps
   }
 
-
+  /**
+    * Returns true if the allocation is sound (a complete partition of the tasks)
+    */
   def isSound: Boolean =
     pb.tasks == bundle.values.foldLeft(Set[Task]())((acc, bundle) => acc ++ bundle.toSet) &&
     bundle.values.forall( b1 =>  bundle.values.filter(_ != b1).forall( b2 => b2.toSet.intersect(b1.toSet).isEmpty))
 
-}
+  }
+
   /**
     * Factory for [[Allocation]] instances
     */
@@ -121,7 +123,7 @@ class Allocation(val pb: MWTA) {
       * Build an allocation
       *
       * @param path of the OPL output
-      * @param pb   MWTA
+      * @param pb MWTA
       */
     def apply(path: String, pb: MWTA): Allocation = {
       val allocation = new Allocation(pb)

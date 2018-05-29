@@ -30,10 +30,10 @@ object AllocationWriter extends App {
   import org.scamata.example.toy4x4._
   println(pb)
   val alloc = new Allocation(pb)
-  alloc.bundle += ( pb.getAgent("a1") -> SortedSet(pb.getTask("t1")) )
-  alloc.bundle += ( pb.getAgent("a2") -> SortedSet(pb.getTask("t2")) )
-  alloc.bundle += ( pb.getAgent("a3") -> SortedSet(pb.getTask("t3")) )
-  alloc.bundle += ( pb.getAgent("a4") -> SortedSet(pb.getTask("t4")) )
+  alloc.bundle += ( pb.getWorker("a1") -> SortedSet(pb.getTask("t1")) )
+  alloc.bundle += ( pb.getWorker("a2") -> SortedSet(pb.getTask("t2")) )
+  alloc.bundle += ( pb.getWorker("a3") -> SortedSet(pb.getTask("t3")) )
+  alloc.bundle += ( pb.getWorker("a4") -> SortedSet(pb.getTask("t4")) )
   val writer=new AllocationWriter("examples/toy4x4Rcmax.txt", alloc)
   writer.write()
 }

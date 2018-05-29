@@ -5,6 +5,7 @@ set auto x
 set auto y
 set grid
 set ticslevel 0
+set logscale y
 set style data lines
 set xlabel "m workers (10m tasks)"
 set ylabel "Time (s)"

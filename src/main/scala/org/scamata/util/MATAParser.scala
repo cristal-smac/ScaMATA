@@ -125,7 +125,7 @@ class MATAParser(val fileName: String ) {
     */
   def parseCosts(key: String, value: String): Unit = {
     if (debug) println(s"parseCosts $key")
-    val source=pb.getAgent(key)
+    val source=pb.getWorker(key)
     val couple:Array[String]=value.split(" ").map(_.trim)
     if (couple.length!=2) throw new RuntimeException(s"ERROR parse $fileName line$lineNumber: $value")
     val target = pb.getTask(couple(0))

@@ -5,7 +5,7 @@ import scala.util.Random
 import scala.collection.SortedSet
 
 /**
-  * Class representing a MultiAgent Task Allocation problem
+  * Class representing a Multi-Worker Task Allocation problem
   * @param workers
   * @param tasks
   * @param cost Matrix
@@ -58,7 +58,7 @@ class MWTA(val workers: SortedSet[Worker], val tasks: SortedSet[Task], val cost 
     *
     * @param name of the worker
     */
-  def getAgent(name: String): Worker = {
+  def getWorker(name: String): Worker = {
     workers.find(a => a.name.equals(name)) match {
       case Some(s) => s
       case None => throw new RuntimeException("No worker " + name + " has been found")
@@ -78,7 +78,7 @@ class MWTA(val workers: SortedSet[Worker], val tasks: SortedSet[Task], val cost 
   }
 
   /**
-    * Return a string description of the MWTA problem in the Optimization Programming language
+    * Return a string description of the MWTA problem in the Optimization Programming Language
     */
   def toOPL: String = {
     "M = " + workers.size + "; \n" +
@@ -118,7 +118,7 @@ class MWTA(val workers: SortedSet[Worker], val tasks: SortedSet[Task], val cost 
     val otherWorkers = workers - worker
     tasks.subsets().foreach { bundle => // For each subset of tasks
       var complementary = tasks -- bundle
-      val subAllocations = allAllocation(otherWorkers, complementary) // compute the suballocation of the complementary
+      val subAllocations = allAllocation(otherWorkers, complementary) // compute the sub-allocation of the complementary
       // and allocate the current bundle to the worker
       subAllocations.foreach { a =>
         val newAllocation = a.update(worker, bundle)
@@ -138,24 +138,26 @@ object MWTA{
 
   val MAXCOST = 1000
   /**
-    * Returns a random MWTA proble instance
+    * Returns a random MWTA problem instance
     * @param m number of peers
     * @param n number of tasks
     */
   def randomProblem(m : Int, n : Int) : MWTA = {
     val workers: SortedSet[Worker] = collection.immutable.SortedSet[Worker]() ++ (for (k <- 1 until m+1) yield new Worker(name = s"w$k"))
     val tasks: SortedSet[Task] = collection.immutable.SortedSet[Task]() ++  (for (k <- 1 until n+1) yield new Task(name = s"t$k"))
-    val cost : Map[(Worker, Task), Double] = (for(i <- 0 until m; j <- 0 until n) yield (workers.toList(i),tasks.toList(j)) -> (Random.nextDouble()*MAXCOST).toInt.toDouble ).toMap
+    val cost : Map[(Worker, Task), Double] = (for(i <- 0 until m; j <- 0 until n) yield (workers.toList(i),tasks.toList(j)) -> (Random.nextInt(MAXCOST)).toInt.toDouble ).toMap
     new MWTA(workers, tasks, cost)
   }
 
+  /**
+    * Test random problem generation
+    */
   def main(args: Array[String]): Unit = {
     val pb = MWTA.randomProblem(10, 100)
     println(pb)
     val allocation =Allocation.randomAllocation(pb)
     println(allocation)
     println(allocation.makespan())
-
   }
 }
 

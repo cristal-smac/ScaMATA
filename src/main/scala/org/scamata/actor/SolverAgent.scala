@@ -6,12 +6,12 @@ import org.scamata.solver.SocialRule
 
 import akka.actor.{Actor, ActorRef, FSM, Props}
 
-// The supervisor behaviour is described by a single state FSM
-sealed trait SupervisorState
-case object DefaultSupervisorState extends SupervisorState
+// The solverAgent behaviour is described by a single state FSM
+sealed trait SolverState
+case object DefaultSolverState extends SolverState
 
 /**
-  * Immutable state of the supervisor
+  * Immutable state of the solverAgent
   * @param stoppedActors
   * @param allocation
   */
@@ -23,49 +23,47 @@ class SupervisorStatus(val stoppedActors: Set[ActorRef], val allocation: Allocat
 }
 
 /**
-  * Supervisor which starts and stops the computation of an allocation
+  * SolverAgent which starts and stops the computation of an allocation
   * @param pb MWTA problem instance
   * @param rule to apply (Cmax or Flowtime)
   * */
-class Supervisor(pb: MWTA, rule: SocialRule) extends Actor with FSM[SupervisorState,SupervisorStatus] {
+class SolverAgent(pb: MWTA, rule: SocialRule) extends Actor with FSM[SolverState,SupervisorStatus] {
 
   var debug = false
-  val extraDebug = false
 
-  var solver : ActorRef = context.parent//Reference to the distributed solver
-  var directory = new Directory()//White page for the peers
-  var nbReady = 0//Number of agents which are ready to negotiate
-  var finishedActor = Set[ActorRef]()//Number of agents which are providen the number of deal
-  var (nbPropose, nbAccept, nbReject, nbWithdraw, nbConfirm, nbInform) = (0, 0, 0, 0, 0, 0)
+  var solver : ActorRef = context.parent // Reference to the distributed solver
+  var directory = new Directory() // White page for the peers
+  var nbReady = 0 // Number of agents which are ready to negotiate
+  var finishedActor : Set[ActorRef] = Set[ActorRef]() // Number of agents which are deseperated
+  var (nbPropose, nbAccept, nbReject, nbWithdraw, nbConfirm, nbCancel, nbInform) = (0, 0, 0, 0, 0, 0, 0)
 
   /**
-    * Initially all the worker are active and the allocation is random
+    * Initially all the worker are active and the allocation is empty
     */
-  startWith(DefaultSupervisorState, new SupervisorStatus(Set[ActorRef](), new Allocation(pb)))
-
+  startWith(DefaultSolverState, new SupervisorStatus(Set[ActorRef](), new Allocation(pb)))
 
   /**
     * Method invoked after starting the actor
     */
   override def preStart(): Unit = {
     pb.workers.foreach{ worker : Worker => //For all workers
-      val actor =  context.actorOf(Props(classOf[GiftBehaviour], worker, rule), worker.name)//Create the agent
-      directory.add(worker, actor)//Add it to the directory
+      val actor =  context.actorOf(Props(classOf[GiftBehaviour], worker, rule), worker.name) // Create the agent
+      directory.add(worker, actor) // Add it to the directory
     }
   }
 
   /**
     * Message handling
     */
-  when(DefaultSupervisorState) {
+  when(DefaultSolverState) {
     //When the works should be done
-    case Event(Trigger(allocation), status) =>
+    case Event(Start(allocation), status) =>
       solver = sender
       //Distribute the initial allocation
       directory.allActors().foreach { actor: ActorRef =>
         val worker = directory.workers(actor)
         val bundle = allocation.bundle(worker)
-        if (debug) println(s"Supervisor initiates $worker with bundle $bundle")
+        if (debug) println(s"SolverAgent initiates $worker with bundle $bundle")
         actor ! Initiate(bundle, directory, pb.cost)
       }
       stay using new SupervisorStatus(status.stoppedActors, allocation)
@@ -76,18 +74,18 @@ class Supervisor(pb: MWTA, rule: SocialRule) extends Actor with FSM[SupervisorSt
       if (nbReady == pb.m()) {
         //When all of them are ready
         directory.allActors().foreach { actor: ActorRef => //Trigger them
-          if (debug) println(s"Supervisor starts ${directory.workers(sender)}")
+          if (debug) println(s"SolverAgent starts ${directory.workers(sender)}")
           actor ! Trigger
         }
       }
       stay using status
 
     //When an actor becomes active
-    case Event(ReStarted(bundle), status) =>
+    case Event(Activated(bundle), status) =>
       val worker = directory.workers(sender)
       val stoppedActor = status.stoppedActors - sender
       val allocation = status.allocation.update(worker, bundle)
-      if (debug) println(s"Supervisor: ${stoppedActor.size} agent(s) in pause since $worker restarts with bundle $bundle")
+      if (debug) println(s"SolverAgent: ${stoppedActor.size} agent(s) in pause since $worker restarts with bundle $bundle")
       stay using new SupervisorStatus(stoppedActor, allocation)
 
     // When an actor becomes inactive
@@ -95,33 +93,34 @@ class Supervisor(pb: MWTA, rule: SocialRule) extends Actor with FSM[SupervisorSt
       val worker = directory.workers(sender)
       val stoppedActor = status.stoppedActors + sender
       val allocation = status.allocation.update(worker, bundle)
-      if (debug) println(s"Supervisor: ${stoppedActor.size} agent(s) in pause since $worker stops with bundle $bundle")
+      if (debug) println(s"SolverAgent: ${stoppedActor.size} agent(s) in pause since $worker stops with bundle $bundle")
       if (stoppedActor.size == pb.m()) {
-        //debug = true
-        if (debug) println(s"Supervisor: all the actors are in pause")
+        //trace = true
+        if (debug) println(s"SolverAgent: all the actors are in pause")
         directory.allActors().foreach(a => a ! Query) // stops the actors
       }
       stay using new SupervisorStatus(stoppedActor, allocation)
 
-    case Event(Finish(nbP, nbA, nbR, nbW, nbC, nbI), status) =>
+    case Event(Finish(nbP, nbA, nbR, nbW, nbConf, nbCan, nbI), status) =>
       if (!finishedActor.contains(sender)) {
         nbPropose += nbP
         nbAccept += nbA
         nbReject += nbR
         nbWithdraw += nbW
-        nbConfirm += nbC
+        nbConfirm += nbConf
+        nbCancel += nbCan
         nbInform += nbI
         finishedActor += sender
       }
       if (finishedActor.size  == pb.m() && status.stoppedActors.size  == pb.m()) {
-        solver ! Outcome(status.allocation, nbPropose, nbAccept, nbReject, nbWithdraw, nbConfirm, nbInform) // reports the allocation
+        solver ! Outcome(status.allocation, nbPropose, nbAccept, nbReject, nbWithdraw, nbConfirm, nbCancel, nbInform) // reports the allocation
         directory.allActors().foreach(a => a ! Stop) // stops the actors
-        context.stop(self) //stops the supervisor
+        context.stop(self) //stops the solverAgent
       }
       stay using status
 
     case Event(msg@_, status) =>
-      println("Supervisor receives a message which was not expected: " + msg)
+      println("SolverAgent receives a message which was not expected: " + msg)
       stay using status
   }
 

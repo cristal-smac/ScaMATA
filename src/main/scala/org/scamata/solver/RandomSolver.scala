@@ -4,12 +4,11 @@ package org.scamata.solver
 import org.scamata.core.{Allocation, MWTA}
 
 /**
-  * Multiagent negotiation process for minimizing the rule
-  *
+  * Random solver
   * @param pb   to be solver
   * @param rule to be optimized
   */
-class RandomSolver(pb: MWTA, rule: SocialRule) extends DealSolver(pb, rule) {
+class RandomSolver(pb: MWTA, rule: SocialRule) extends Solver(pb, rule) {
   debug = false
 
   /**

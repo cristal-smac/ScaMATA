@@ -8,7 +8,7 @@ import org.scamata.core._
 import org.scamata.solver._
 
 /**
-  * Main app to test Exhuastive
+  * Main app to test Exhaustive solver vs Gift solver vs LP solver
   */
 object ComputeCmax {
 
@@ -17,7 +17,6 @@ object ComputeCmax {
     def main(args: Array[String]): Unit = {
       val rule: SocialRule = Cmax
       val r = scala.util.Random
-      val system = ActorSystem("ComputeCmax"+rule+r.nextInt.toString)//The Actor system
       val file = s"experiments/data/min$rule.csv"
       val bw = new BufferedWriter(new FileWriter(file))
       bw.write(s"m,n," +

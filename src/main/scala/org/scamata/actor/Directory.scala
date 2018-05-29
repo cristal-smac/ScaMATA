@@ -11,6 +11,8 @@ class Directory {
   var adr = Map[Worker, ActorRef]()//Agents' references
   var workers = Map[ActorRef, Worker]()// Actors' worker
 
+  override def toString: String = allWorkers().mkString("[",", ","]")
+
   /**
     * Add to the directory
     * @param worker
@@ -27,10 +29,6 @@ class Directory {
   def allActors() : Iterable[ActorRef]  = adr.values
   def allWorkers() : Iterable[Worker]  = workers.values
   def peers(worker: Worker) : Set[Worker] = allWorkers().filterNot(_ ==worker).toSet
-
   def peersActor(worker: Worker) :  Iterable[ActorRef] = peers(worker: Worker).map(w => adr(w))
-
-  override def toString: String = allWorkers().mkString("[",", ","]")
-
 
 }

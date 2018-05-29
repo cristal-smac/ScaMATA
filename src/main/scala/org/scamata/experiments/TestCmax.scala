@@ -18,7 +18,7 @@ object TestCmax {
       val rule: SocialRule = Cmax
       val r = scala.util.Random
       val system = ActorSystem("TestCmax"+rule+r.nextInt.toString)//The Actor system
-      val file = s"experiments/data/$rule.csv"
+      val file = s"experiments/data/$rule.bis.csv"
       val bw = new BufferedWriter(new FileWriter(file))
       bw.write(s"m,n," +
         s"minGiftSolver$rule,openGiftSolver$rule,meanGiftSolver$rule,closedGiftSolver$rule,maxGiftSolver$rule," +
@@ -35,13 +35,13 @@ object TestCmax {
       for (m <- 2 to 100 by 2) {
         for (n <- 5*m to 5*m) {
           if (debug) println(s"TestCmax configuration with $m peers and $n tasks")
-          val nbPb = 100 // should be x*4
+          val nbPb = 20 // should be x*4
           var (lpSolverRule, giftSolverRule, distributedGiftSolverRule, randomSolverRule,
           lpSolverTime, lpSolverPreTime, lpSolverPostTime, giftSolverTime, randomSolverTime, distributedGiftSolverTime,
-          deal, nbPropose, nbAccept, nbReject, nbWithdraw, nbConfirm, nbInform) =
+          deal, nbPropose, nbAccept, nbReject, nbWithdraw, nbConfirm, nbCancel, nbInform) =
             (List[Double](), List[Double](), List[Double](), List[Double](),
               List[Double](), List[Double](), List[Double](), List[Double](), List[Double](), List[Double](),
-              0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+              0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 )
           for (o <- 1 to nbPb) {
             val pb = MWTA.randomProblem(m, n)
             if (debug) println(s"Configuration $o")
@@ -59,6 +59,7 @@ object TestCmax {
             nbReject += distributedGiftSolver.nbReject
             nbWithdraw += distributedGiftSolver.nbWithdraw
             nbConfirm += distributedGiftSolver.nbConfirm
+            nbCancel += distributedGiftSolver.nbCancel
             nbInform += distributedGiftSolver.nbInform
             rule match {
                 case Cmax =>

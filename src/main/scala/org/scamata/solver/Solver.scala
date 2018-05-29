@@ -8,9 +8,6 @@ import org.scamata.core.Allocation
   * Class representing a social rule
   */
 class SocialRule{
-  /**
-    * Returns a string representation of the social rule
-    */
   override def toString: String = this match{
     case Cmax => "cmax"
     case Flowtime => "flowtime"
