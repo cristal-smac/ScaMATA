@@ -18,7 +18,7 @@ object TestCmax {
       val rule: SocialRule = Cmax
       val r = scala.util.Random
       val system = ActorSystem("TestCmax"+rule+r.nextInt.toString)//The Actor system
-      val file = s"experiments/data/$rule.bis.csv"
+      val file = s"experiments/data/$rule.csv"
       val bw = new BufferedWriter(new FileWriter(file))
       bw.write(s"m,n," +
         s"minGiftSolver$rule,openGiftSolver$rule,meanGiftSolver$rule,closedGiftSolver$rule,maxGiftSolver$rule," +
@@ -32,7 +32,7 @@ object TestCmax {
         s"minLpSolverPreTime,openLpSolverPreTime,meanLpSolverPreTime,closedSolverPreTime,maxLpSolverPreTime," +
         s"minLpSolverPostTime,openLpSolverPostTime,meanLpSolverPostTime,closedLpSolverPostTime,maxLpSolverPostTime," +
         s"dealGift,nbPropose,nbAccept,nbReject,nbWithdraw,nbConfirm,nbInform\n")
-      for (m <- 70 to 100 by 2) {
+      for (m <- 2 to 100 by 2) {
         for (n <- 5*m to 5*m) {
           if (debug) println(s"TestCmax configuration with $m peers and $n tasks")
           val nbPb = 20 // should be x*4
