@@ -29,6 +29,6 @@ object SwapSolver extends App {
   val debug = false
   import org.scamata.example.toy4x4._
   println(pb)
-  val negotiationSolver = new SwapSolver(pb,Flowtime)
+  val negotiationSolver = new SwapSolver(pb,LC)
   println(negotiationSolver.run().toString)
 }

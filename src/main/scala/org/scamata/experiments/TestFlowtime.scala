@@ -17,7 +17,7 @@ object TestFlowtime {
     def main(args: Array[String]): Unit = {
       val r = scala.util.Random
       val system = ActorSystem("TestFlowtime"+r.nextInt.toString)//The Actor system
-      val rule: SocialRule = Flowtime
+      val rule: SocialRule = LC
       val file = s"experiments/data/$rule.csv"
       val bw = new BufferedWriter(new FileWriter(file))
       bw.write(s"m,n," +
@@ -54,11 +54,11 @@ object TestFlowtime {
             if (debug) println(s"GIFT:\n$giftAlloc")
             val ExhaustiveAlloc = ExhaustiveSolver.run()
             rule match {
-                case Cmax =>
+                case LCmax =>
                   lpSolverRule ::=  lpAlloc.makespan()
                   giftSolverRule ::= giftAlloc.makespan()
                   exhaustiveSolverRule ::= ExhaustiveAlloc.makespan()
-                case Flowtime =>
+                case LC =>
                   lpSolverRule ::= lpAlloc.flowtime()
                   giftSolverRule ::= giftAlloc.flowtime()
                   exhaustiveSolverRule ::= ExhaustiveAlloc.flowtime()

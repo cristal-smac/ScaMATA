@@ -15,7 +15,7 @@ object ComputeCmax {
   val debug= true
 
     def main(args: Array[String]): Unit = {
-      val rule: SocialRule = Cmax
+      val rule: SocialRule = LCmax
       val r = scala.util.Random
       val file = s"experiments/data/min$rule.csv"
       val bw = new BufferedWriter(new FileWriter(file))

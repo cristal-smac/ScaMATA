@@ -9,12 +9,12 @@ import org.scamata.core.Allocation
   */
 class SocialRule{
   override def toString: String = this match{
-    case Cmax => "cmax"
-    case Flowtime => "flowtime"
+    case LCmax => "lcmax"
+    case LC => "lc"
   }
 }
-case object Flowtime extends SocialRule
-case object Cmax extends SocialRule
+case object LC extends SocialRule
+case object LCmax extends SocialRule
 
 /**
   * Abstract class representing a solver

@@ -4,14 +4,14 @@ package org.scamata.experiments
 import akka.actor.ActorSystem
 import org.scamata.core.MWTA
 import org.scamata.solver.{DistributedGiftSolver,GiftSolver}
-import org.scamata.solver.{SocialRule, Cmax}
+import org.scamata.solver.{SocialRule, LCmax}
 
 /**
   * Main app to trace DistributedGiftSolver
   */
 object DebugDistributedGiftSolver {
   def main(args: Array[String]): Unit = {
-    val rule : SocialRule=Cmax
+    val rule : SocialRule=LCmax
     val r = scala.util.Random
     val system = ActorSystem("Debug" + r.nextInt.toString) //The Actor system
     for (m <- 2 to 100) {

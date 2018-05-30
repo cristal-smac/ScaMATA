@@ -15,7 +15,7 @@ object TestCmax {
   val debug= true
 
     def main(args: Array[String]): Unit = {
-      val rule: SocialRule = Cmax
+      val rule: SocialRule = LCmax
       val r = scala.util.Random
       val system = ActorSystem("TestCmax"+rule+r.nextInt.toString)//The Actor system
       val file = s"experiments/data/$rule.csv"
@@ -62,12 +62,12 @@ object TestCmax {
             nbCancel += distributedGiftSolver.nbCancel
             nbInform += distributedGiftSolver.nbInform
             rule match {
-                case Cmax =>
+                case LCmax =>
                   lpSolverRule ::=  lpAlloc.makespan()
                   giftSolverRule ::= giftAlloc.makespan()
                   randomSolverRule ::= randomAlloc.makespan()
                   distributedGiftSolverRule ::= distributedGiftAlloc.makespan()
-                case Flowtime =>
+                case LC =>
                   lpSolverRule ::= lpAlloc.flowtime()
                   giftSolverRule ::= giftAlloc.flowtime()
                   randomSolverRule ::= randomAlloc.flowtime()

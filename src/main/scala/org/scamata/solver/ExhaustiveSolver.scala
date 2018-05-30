@@ -17,7 +17,7 @@ class ExhaustiveSolver(pb: MWTA, rule: SocialRule) extends Solver(pb, rule) {
     */
   override def solve(): Allocation = {
     var bestAllocation = new Allocation(pb)
-    if (rule == Flowtime) {
+    if (rule == LC) {
       pb.tasks.foreach { task =>
         val worker = pb.faster(task)
         bestAllocation = bestAllocation.update(worker, bestAllocation.bundle(worker) + task)
@@ -45,7 +45,7 @@ object ExhaustiveSolver extends App {
   val debug = false
   import org.scamata.example.toy4x4._
   println(pb)
-  val solver = new ExhaustiveSolver(pb,Cmax)
+  val solver = new ExhaustiveSolver(pb,LCmax)
   println(solver.run().toString)
 
 }

@@ -29,9 +29,9 @@ class GiftSolver(pb : MWTA, rule : SocialRule) extends DealSolver(pb, rule) {
       contractors.foreach { initiator: Worker =>
         if (debug) println(s"$initiator tries to find a single gift which is socially rational")
         val potentialPartners = rule match {
-          case Flowtime => // all the peers
+          case LC => // all the peers
             pb.workers - initiator
-          case Cmax => // the peers with a smallest workload
+          case LCmax => // the peers with a smallest workload
             (pb.workers - initiator).filter(allocation.workload(_) < allocation.workload(initiator))
         }
         if (debug) println(s"Potential partner: $potentialPartners")
@@ -44,8 +44,8 @@ class GiftSolver(pb : MWTA, rule : SocialRule) extends DealSolver(pb, rule) {
           var bestAllocation: Allocation = allocation
           var bestSingleGift: SingleGift = new SingleGift(initiator, initiator, NoTask)
           var bestGoal = rule match {
-            case Cmax => allocation.workload(initiator)
-            case Flowtime => 0.0
+            case LCmax => allocation.workload(initiator)
+            case LC => 0.0
           }
           potentialPartners.foreach { supplier =>
             allocation.bundle(initiator).foreach { task =>
@@ -53,9 +53,9 @@ class GiftSolver(pb : MWTA, rule : SocialRule) extends DealSolver(pb, rule) {
               val gift = new SingleGift(initiator, supplier, task)
               val modifiedAllocation = allocation.apply(gift)
               val currentGoal = rule match { // Compute the new goal
-              case Cmax =>
+              case LCmax =>
                 Math.max(modifiedAllocation.workload(initiator), modifiedAllocation.workload(supplier))
-              case Flowtime =>
+              case LC =>
                 pb.cost(supplier, task) - pb.cost(initiator, task)
             }
               if (currentGoal < bestGoal) {
@@ -77,11 +77,11 @@ class GiftSolver(pb : MWTA, rule : SocialRule) extends DealSolver(pb, rule) {
             nbConfirm += 1
             allocation = bestAllocation
 /*
-            if (rule == Cmax && ! contractors.contains(bestSingleGift.supplier)) {
+            if (rule == LCmax && ! contractors.contains(bestSingleGift.supplier)) {
               contractors = bestSingleGift.supplier :: contractors
             }
 */
-            if (rule == Cmax) {
+            if (rule == LCmax) {
               pb.workers.filter(worker => allocation.workload(worker) > bestGoal &&  !contractors.contains(worker)).foreach { worker =>
                 contractors += worker
               }
@@ -102,7 +102,7 @@ object GiftSolver extends App {
   val debug = false
   import org.scamata.example.toy4x4._
   println(pb)
-  val negotiationSolver = new GiftSolver(pb,Cmax)
+  val negotiationSolver = new GiftSolver(pb,LCmax)
   var allocation = new Allocation(pb)
   allocation = allocation.update(a1, SortedSet(t4))
   allocation = allocation.update(a2, SortedSet(t3))

@@ -19,8 +19,8 @@ object GiftVsDisGift {
       val r = scala.util.Random
       val system = ActorSystem("TestCmax"+criterion+r.nextInt.toString)//The Actor system
       val rule: SocialRule = criterion match {
-        case "cmax" => Cmax
-        case "flowtime" => Flowtime
+        case "cmax" => LCmax
+        case "flowtime" => LC
         case _ => throw new RuntimeException("The argument is not supported")
       }
       val file = s"experiments/data/${rule}GiftVsDisGift.csv"
@@ -53,10 +53,10 @@ object GiftVsDisGift {
             nbConfirm += distributedGiftSolver.nbConfirm
             nbInform += distributedGiftSolver.nbInform
             rule match {
-                case Cmax =>
+                case LCmax =>
                   giftSolverRule ::= giftAlloc.makespan()
                   distributedGiftSolverRule ::= distributedGiftAlloc.makespan()
-                case Flowtime =>
+                case LC =>
                   giftSolverRule ::= giftAlloc.flowtime()
                   distributedGiftSolverRule ::= distributedGiftAlloc.flowtime()
             }

@@ -20,9 +20,9 @@ class LPSolver(pb : MWTA, rule : SocialRule) extends DualSolver(pb, rule) {
   val inputPath: String =config.getString("path.scamata")+"/"+config.getString("path.input")
   val outputPath: String = config.getString("path.scamata")+"/"+config.getString("path.output")
   var lpPath: String = rule match {
-    case Cmax =>
+    case LCmax =>
       config.getString("path.scamata")+"/"+config.getString("path.cmax")
-    case Flowtime =>
+    case LC =>
       config.getString("path.scamata")+"/"+config.getString("path.flowtime")
   }
 
@@ -55,6 +55,6 @@ object LPSolver extends App {
   val debug = false
   import org.scamata.example.toy4x4._
   println(pb)
-  val lpSolver = new LPSolver(pb,Cmax)
+  val lpSolver = new LPSolver(pb,LCmax)
   println(lpSolver.run().toString)
 }

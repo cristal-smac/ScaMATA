@@ -2,7 +2,7 @@
 package org.scamata.actor
 
 import org.scamata.core.{Task, Worker, NoWorker, NoTask}
-import org.scamata.solver.{Cmax, Flowtime, SocialRule}
+import org.scamata.solver.{LCmax, LC, SocialRule}
 
 import akka.actor.{FSM, Stash}
 import scala.language.postfixOps
@@ -45,9 +45,9 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends WorkerAgent(worker
       }
       // Otherwise the mind is up to date
       val potentialPartners = rule match { // The potential partners are
-        case Flowtime => // all the peers
+        case LC => // all the peers
           directory.peers(worker)
-        case Cmax => // the peers with a smallest workload
+        case LCmax => // the peers with a smallest workload
           directory.peers(worker).filter(updatedMind.belief(_) < workload)
       }
       // Either the worker has an empty bundle or no potential partners
@@ -59,9 +59,9 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends WorkerAgent(worker
         var bestOpponent = worker
         var bestTask : Task =  NoTask
         var bestGoal = rule match {
-          case Cmax =>
+          case LCmax =>
             workload
-          case Flowtime =>
+          case LC =>
             0.0
         }
         potentialPartners.foreach { opponent =>
@@ -69,9 +69,9 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends WorkerAgent(worker
             val giftWorkload = workload - cost(worker, task)
             val giftOpponentWorkload = updatedMind.belief(opponent) + cost(opponent, task)
             val giftGoal = rule match {
-              case Cmax =>
+              case LCmax =>
                 Math.max( giftWorkload, giftOpponentWorkload )
-              case Flowtime =>
+              case LC =>
                 cost(opponent, task) - cost(worker, task)
             }
             if (giftGoal < bestGoal) {
@@ -241,7 +241,7 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends WorkerAgent(worker
   whenUnhandled {
     // If the worker agent receives an inform
     case Event(Inform(opponent, workload), mind) =>
-      if (rule == Cmax && workload < mind.belief(opponent)){
+      if (rule == LCmax && workload < mind.belief(opponent)){
         self ! Trigger
       }
       val updatedMind = mind.updateBelief(opponent, workload)

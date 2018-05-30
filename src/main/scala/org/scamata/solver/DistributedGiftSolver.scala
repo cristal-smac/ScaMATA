@@ -59,7 +59,7 @@ object DistributedGiftSolver{
     val r = scala.util.Random
     val system = ActorSystem("DistributedGiftSolver" + r.nextInt.toString)
     //The Actor system
-    val negotiationSolver = new DistributedGiftSolver(pb, Cmax, system)
+    val negotiationSolver = new DistributedGiftSolver(pb, LCmax, system)
     println("@startuml")
     println("skinparam monochrome true")
     println("hide footbox")

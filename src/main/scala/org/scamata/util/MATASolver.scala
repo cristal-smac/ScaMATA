@@ -27,7 +27,7 @@ object MATASolver extends App {
 
   // Default parameters for the solver
   var verbose = false
-  var socialRule : SocialRule = Cmax
+  var socialRule : SocialRule = LCmax
 
   // Default fileNames/path for the input/output
   var inputFilename = new String()
@@ -65,8 +65,8 @@ object MATASolver extends App {
   val writer = new AllocationWriter(outputFilename, allocation)
   writer.write()
   socialRule match {
-    case Cmax => println(s"Makespan: ${allocation.makespan}")
-    case Flowtime => println(s"Flowtime: ${allocation.flowtime}")
+    case LCmax => println(s"Makespan: ${allocation.makespan}")
+    case LC => println(s"LC: ${allocation.flowtime}")
   }
 
   println(s"Preprocessing time: ${solver.asInstanceOf[DualSolver].preSolvingTime} (ns)")
@@ -98,7 +98,7 @@ object MATASolver extends App {
     val tag: String = tags.head.substring(1) // remove '-'
     tag match {
       case "v" => verbose = true
-      case "f" => socialRule = Flowtime
+      case "f" => socialRule = LC
       case _ => false
     }
     nextOption(tags.tail)

@@ -2,7 +2,7 @@
 package org.scamata.actor
 
 import org.scamata.core.{Task, Worker}
-import org.scamata.solver.{Cmax, Flowtime, SocialRule}
+import org.scamata.solver.{LCmax, LC, SocialRule}
 
 import scala.collection.SortedSet
 import akka.actor.{Actor, ActorRef}
@@ -127,9 +127,9 @@ abstract class WorkerAgent(val worker: Worker, val rule: SocialRule) extends Act
     */
   def acceptable(task : Task, provider : Worker, supplier : Worker, mind : StateOfMind) : Boolean = {
     rule match {
-      case Cmax => // The local Cmax must strictly decrease
+      case LCmax => // The local LCmax must strictly decrease
         Math.max( mind.belief(provider), mind.belief(supplier)) > Math.max( mind.belief(provider)-cost(provider, task),  mind.belief(supplier) + cost(supplier, task))
-      case Flowtime => // The local flowtime  must strictly decrease
+      case LC => // The local flowtime  must strictly decrease
         cost(provider, task) > cost(supplier, task)
     }
   }

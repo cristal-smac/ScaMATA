@@ -25,7 +25,7 @@ class SupervisorStatus(val stoppedActors: Set[ActorRef], val allocation: Allocat
 /**
   * SolverAgent which starts and stops the computation of an allocation
   * @param pb MWTA problem instance
-  * @param rule to apply (Cmax or Flowtime)
+  * @param rule to apply (LCmax or LC)
   * */
 class SolverAgent(pb: MWTA, rule: SocialRule) extends Actor with FSM[SolverState,SupervisorStatus] {
 
