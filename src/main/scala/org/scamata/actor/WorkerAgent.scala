@@ -87,10 +87,11 @@ class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double], 
   * @param rule to optimize
   */
 abstract class WorkerAgent(val worker: Worker, val rule: SocialRule) extends Actor{
-  val trace = false
+  val trace =  false
   val debug = false
 
   val deadline = 300 nanosecond
+  val forgetRate = 10 // rate of drop proposals in Proposer state in [0,100]
 
   var nbPropose = 0
   var nbAccept = 0

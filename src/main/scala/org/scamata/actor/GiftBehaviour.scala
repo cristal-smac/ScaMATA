@@ -7,6 +7,7 @@ import org.scamata.solver.{LCmax, LC, SocialRule}
 import akka.actor.{FSM, Stash}
 import scala.language.postfixOps
 import scala.collection.SortedSet
+import scala.util.Random
 
 /**
   * Gift negotiation behaviour
@@ -177,9 +178,19 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends WorkerAgent(worker
       }
 
     // If the worker agent receives a proposal
-    case Event(Propose(_, _), mind) =>
-      stash
-      stay using mind
+    case Event(Propose(task, oWorkload), mind) =>
+      val opponent = directory.workers(sender)
+      val workload = mind.belief(worker)
+      val updatedMind = mind.updateBelief(opponent, oWorkload)
+      if (Random.nextInt(100) <= forgetRate) {
+        if (trace) println(s"$worker -> $opponent : Reject($task)")
+        sender ! Reject(task, workload)
+        nbReject+=1
+        stay using updatedMind
+      }else{
+        stash
+        stay using mind
+      }
 
     // If the worker agent receives a trigger
     case Event(Trigger, mind) =>
