@@ -18,7 +18,7 @@ object TestCmax {
       val rule: SocialRule = LCmax
       val r = scala.util.Random
       val system = ActorSystem("TestCmax"+rule+r.nextInt.toString)//The Actor system
-      val file = s"experiments/data/$rule.csv"
+      val file = s"experiments/data/$rule.bis.csv"
       val bw = new BufferedWriter(new FileWriter(file))
       bw.write(s"m,n," +
         s"minGiftSolver$rule,openGiftSolver$rule,meanGiftSolver$rule,closedGiftSolver$rule,maxGiftSolver$rule," +
