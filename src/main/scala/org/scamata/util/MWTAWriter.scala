@@ -24,7 +24,7 @@ class MWTAWriter(pathName: String, pb : MWTA){
 }
 
 /**
-  * TestCmax MWTAWriter
+  * Test MWTAWriter
   */
 object MWTAWriter extends App{
   val config = ConfigFactory.load()

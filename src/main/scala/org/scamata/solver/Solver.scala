@@ -9,8 +9,8 @@ import org.scamata.core.Allocation
   */
 class SocialRule{
   override def toString: String = this match{
-    case LCmax => "cmax"
-    case LC => "flowtime"
+    case LCmax => "LCmax"
+    case LC => "LC"
   }
 }
 case object LC extends SocialRule

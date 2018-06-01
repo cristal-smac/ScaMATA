@@ -25,7 +25,7 @@ object ComputeCmax {
         s"minlpSolver$rule,openlpSolver$rule,meanlpSolver$rule,closedlpSolver$rule,maxlpSolver$rule\n")
       for (m <- 2 to 100) {
         for (n <- 2*m to 2*m) {
-          if (debug) println(s"TestCmax configuration with $m peers and $n tasks")
+          if (debug) println(s"Test configuration with $m peers and $n tasks")
           val nbPb = 100 // should be x*4
           var (exhaustiveSolverRule, giftSolverRule, lpSolverRule) =
             (List[Double](), List[Double](),  List[Double]())

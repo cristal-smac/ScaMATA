@@ -69,7 +69,7 @@ class SolverAgent(pb: MWTA, rule: SocialRule) extends Actor with FSM[SolverState
         val worker = directory.workers(actor)
         val bundle = allocation.bundle(worker)
         if (debug) println(s"SolverAgent initiates $worker with bundle $bundle")
-        actor ! Initiate(bundle, directory, pb.cost)
+        actor ! Initiate(bundle, directory, pb.costMatrix)
       }
       stay using new SupervisorStatus(status.stoppedActors, allocation)
 

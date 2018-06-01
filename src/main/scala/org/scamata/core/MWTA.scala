@@ -10,7 +10,12 @@ import scala.collection.SortedSet
   * @param tasks
   * @param cost Matrix
   */
-class MWTA(val workers: SortedSet[Worker], val tasks: SortedSet[Task], val cost : Map[(Worker, Task), Double]) {
+class MWTA(val workers: SortedSet[Worker], val tasks: SortedSet[Task], val costMatrix : Map[(Worker, Task), Double]) {
+
+  /**
+    * Return the cost of a task for a worker, eventually 0.0 if NoTask
+     */
+  def cost(worker: Worker, task: Task): Double = if (task != NoTask) costMatrix(worker, task) else 0.0
 
   /**
     * Returns a string describing the MWTA problem
@@ -94,7 +99,7 @@ class MWTA(val workers: SortedSet[Worker], val tasks: SortedSet[Task], val cost 
   /**
     * Returns true if the cost of allActors tasks for allActors peers are specified
     */
-  def isFullySpecified: Boolean = cost.size == workers.size * tasks.size
+  def isFullySpecified: Boolean = costMatrix.size == workers.size * tasks.size
 
   /**
     * Returns all the potential allocations

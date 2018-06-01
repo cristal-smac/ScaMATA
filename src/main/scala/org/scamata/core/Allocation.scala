@@ -1,7 +1,7 @@
 // Copyright (C) Maxime MORGE 2018
 package org.scamata.core
 
-import org.scamata.deal.{SingleGift, SingleSwap}
+import org.scamata.deal.{SingleGift, SingleSwap, Deal}
 import org.scamata.util.RandomUtils
 
 import scala.collection.SortedSet
@@ -67,6 +67,14 @@ class Allocation(val pb: MWTA) {
     val allocation = this.copy()
     allocation.bundle = allocation.bundle.updated(worker, bundle)
     allocation
+  }
+
+  def apply(deal: Deal): Allocation = {
+    deal match {
+      case g: SingleGift =>  apply(g.asInstanceOf[SingleGift])
+      case s: SingleSwap =>  apply(s.asInstanceOf[SingleSwap])
+      case d: Deal=> throw new RuntimeException(s"Do not know how to apply deal $d")
+    }
   }
 
   /**

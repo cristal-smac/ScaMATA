@@ -36,7 +36,7 @@ class DistributedGiftSolver(pb : MWTA, rule : SocialRule, system: ActorSystem) e
     if (debug) {
       for (i<- 1 to pb.m) println(s"participant a$i")
     }
-    supervisor ! Debug
+    if (debug) supervisor ! Debug
     val future = supervisor ? Start(allocation)
     val result = Await.result(future, timeout.duration).asInstanceOf[Outcome]
     if (debug) println("@enduml")

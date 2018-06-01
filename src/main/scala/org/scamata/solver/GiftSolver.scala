@@ -36,7 +36,7 @@ class GiftSolver(pb : MWTA, rule : SocialRule) extends DealSolver(pb, rule) {
         else {
           var found = false
           var bestAllocation: Allocation = allocation
-          var bestSingleGift: SingleGift = new SingleGift(initiator, initiator, NoTask)
+          var bestSingleGift: SingleGift = new SingleGift(initiator, NoWorker, NoTask)
           var bestGoal = rule match {
             case LCmax => allocation.workload(initiator)
             case LC => 0.0

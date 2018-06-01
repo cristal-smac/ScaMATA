@@ -140,7 +140,7 @@ class MWTAParser(val fileName: String ) {
 }
 
 /**
-  * TestCmax MWTAParser
+  * Test MWTAParser
   */
 object MWTAParser extends App {
   val parser =new MWTAParser("examples/toy2x4.txt")
