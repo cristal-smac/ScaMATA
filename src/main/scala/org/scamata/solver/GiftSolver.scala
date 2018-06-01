@@ -18,7 +18,7 @@ class GiftSolver(pb : MWTA, rule : SocialRule) extends DealSolver(pb, rule) {
   val trace = false
 
     /**
-    * Reallocate
+    * Reallocate the initial allocation
     */
   def reallocate(initialAllocation: Allocation): Allocation = {
     var allocation = initialAllocation
@@ -29,7 +29,6 @@ class GiftSolver(pb : MWTA, rule : SocialRule) extends DealSolver(pb, rule) {
         if (debug) println(s"$initiator tries to find a single gift which is socially rational")
         var suppliers = pb.workers - initiator
         if (rule == LCmax) suppliers=suppliers.filter(j => allocation.workload(j) < allocation.workload(initiator))
-        if (debug) println(s"Potential suppliers: $suppliers")
         if (suppliers.isEmpty || allocation.bundle(initiator).isEmpty) {
           contractors -= initiator
           if (debug) println(s"$initiator is desesperated")

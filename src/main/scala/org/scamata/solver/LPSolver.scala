@@ -2,7 +2,7 @@
 package org.scamata.solver
 
 import org.scamata.core.{Allocation, MWTA}
-import org.scamata.util.MATAWriter
+import org.scamata.util.MWTAWriter
 
 import sys.process._
 import java.io.File
@@ -29,7 +29,7 @@ class LPSolver(pb : MWTA, rule : SocialRule) extends DualSolver(pb, rule) {
   override def solve(): Allocation = {
     // 1 - Reformulate the problem
     var startingTime: Long = System.nanoTime()
-    val writer=new MATAWriter(inputPath ,pb)
+    val writer=new MWTAWriter(inputPath ,pb)
     writer.write
     preSolvingTime = System.nanoTime() - startingTime
 

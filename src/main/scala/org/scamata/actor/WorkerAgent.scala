@@ -87,7 +87,7 @@ class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double], 
   * @param rule to optimize
   */
 abstract class WorkerAgent(val worker: Worker, val rule: SocialRule) extends Actor{
-  val trace =  false
+  var trace =  false
   val debug = false
 
   val deadline = 300 nanosecond
@@ -118,6 +118,7 @@ abstract class WorkerAgent(val worker: Worker, val rule: SocialRule) extends Act
     */
   def defaultReceive(message : Message) : Any = message match {
     case Stop => context.stop(self) // Stop the actor
+    case Debug => this.trace = true
   }
 
   /**

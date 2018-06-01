@@ -1,6 +1,6 @@
 name := "ScaMATA"
 
-version := "0.1"
+version := "0.2"
 
 scalacOptions += "-deprecation"
 scalacOptions += "-feature"
@@ -9,8 +9,8 @@ scalacOptions += "-Yrepl-sync"
 javaOptions in run += "-Xms8G"
 javaOptions in run += "-Xmx8G"
 
-mainClass in (Compile,run) := Some("org.scamata.util.MATASolver")
-mainClass in assembly := Some("org.scamata.util.MATASolver")
+mainClass in (Compile,run) := Some("org.scamata.util.MWTASolver")
+mainClass in assembly := Some("org.scamata.util.MWTASolver")
 
 fork := true
 

@@ -6,7 +6,6 @@ import org.scamata.actor._
 import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.pattern.ask
 import akka.util.Timeout
-import javax.naming.spi.DirStateFactory.Result
 
 import scala.collection.SortedSet
 import scala.concurrent.Await
@@ -31,14 +30,23 @@ class DistributedGiftSolver(pb : MWTA, rule : SocialRule, system: ActorSystem) e
     * Returns an allocation modifying the initial one
     */
   def reallocate(allocation: Allocation): Allocation = {
+    if (debug) println("@startuml")
+    if (debug) println("skinparam monochrome true")
+    if (debug) println("hide footbox")
+    if (debug) {
+      for (i<- 1 to pb.m) println(s"participant a$i")
+    }
+    supervisor ! Debug
     val future = supervisor ? Start(allocation)
     val result = Await.result(future, timeout.duration).asInstanceOf[Outcome]
+    if (debug) println("@enduml")
     nbPropose = result.nbPropose
     nbAccept = result.nbAccept
     nbReject = result.nbReject
     nbWithdraw = result.nbWithdraw
     nbConfirm = result.nbConfirm
     nbInform = result.nbInform
+    if (debug) println(result.allocation)
     result.allocation
   }
 
@@ -60,13 +68,7 @@ object DistributedGiftSolver{
     val system = ActorSystem("DistributedGiftSolver" + r.nextInt.toString)
     //The Actor system
     val negotiationSolver = new DistributedGiftSolver(pb, LCmax, system)
-    println("@startuml")
-    println("skinparam monochrome true")
-    println("hide footbox")
-    println("participant SolverAgent")
-    for (i<- 1 to pb.m) println(s"participant a$i")
     val sol = negotiationSolver.reallocate(allocation)
-    println("@enduml")
     println(sol.toString)
     println(sol.makespan())
     System.exit(1)

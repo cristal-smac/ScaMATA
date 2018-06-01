@@ -1,6 +1,6 @@
 m: 4
 n: 4
-agents: a1, a2, a3, a4
+workers: a1, a2, a3, a4
 tasks: t1, t2, t3, t4
 a1: t1 2.0
 a1: t2 3.0

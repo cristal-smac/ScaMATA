@@ -33,8 +33,8 @@ class SolverAgent(pb: MWTA, rule: SocialRule) extends Actor with FSM[SolverState
 
   var solver : ActorRef = context.parent // Reference to the distributed solver
   var directory = new Directory() // White page for the peers
-  var nbReady = 0 // Number of agents which are ready to negotiate
-  var finishedActor : Set[ActorRef] = Set[ActorRef]() // Number of agents which are deseperated
+  var nbReady = 0 // Number of workers which are ready to negotiate
+  var finishedActor : Set[ActorRef] = Set[ActorRef]() // Number of workers which are deseperated
   var (nbPropose, nbAccept, nbReject, nbWithdraw, nbConfirm, nbCancel, nbInform) = (0, 0, 0, 0, 0, 0, 0)
 
   /**
@@ -56,6 +56,11 @@ class SolverAgent(pb: MWTA, rule: SocialRule) extends Actor with FSM[SolverState
     * Message handling
     */
   when(DefaultSolverState) {
+    //In order to debug
+    case Event(Debug, status) =>
+      directory.allActors().foreach( _ ! Debug)
+      stay using status
+
     //When the works should be done
     case Event(Start(allocation), status) =>
       solver = sender

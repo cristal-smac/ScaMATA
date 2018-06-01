@@ -24,14 +24,15 @@ In order to compile the code you need:
 
 ## Test
 
-    java -jar ScaMATA-assembly-X.Y.jar org.scamata.util.MATAPSolver -v examples/toy4x4.txt  examples/toy4x4Cmax.txt
+    java -jar ScaMATA-assembly-X.Y.jar org.scamata.util.MWTAPSolver -v -d examples/toy4x4.txt  examples/toy4x4Cmax.txt
 
 Usage: 
 
-    Usage: java -jar ScaMATA-assembly-X.Y.jar [-v] inputFilename outputFilename
+    Usage: java -jar ScaMWTA-assembly-X.Y.jar [-v] inputFilename outputFilename
     The following options are available:
     -v: verbose
-    -f: flowtime (Cmax by default)
+    -d: distributed (false by default)
+    -f: LC (LCmax by default)
 
 ## Installation
 
@@ -45,7 +46,7 @@ Compile
 
 then
 
-    sbt "run org.scamata.util.MATASolver -v examples/toy4x4.txt  examples/toy4x4Cmax.txt"
+    sbt "run org.scamata.util.MWTASolver -v -d examples/toy4x4.txt  examples/toy4x4Cmax.txt"
  
 and eventually
 
