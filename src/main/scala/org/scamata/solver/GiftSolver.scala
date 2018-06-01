@@ -24,20 +24,15 @@ class GiftSolver(pb : MWTA, rule : SocialRule) extends DealSolver(pb, rule) {
     var allocation = initialAllocation
     var contractors: ListBuffer[Worker] = Random.shuffle(pb.workers.to[ListBuffer])
     if (debug) println("All peers are initially potential contractors")
-
     while(contractors.nonEmpty){
       contractors.foreach { initiator: Worker =>
         if (debug) println(s"$initiator tries to find a single gift which is socially rational")
-        val potentialPartners = rule match {
-          case LC => // all the peers
-            pb.workers - initiator
-          case LCmax => // the peers with a smallest workload
-            (pb.workers - initiator).filter(allocation.workload(_) < allocation.workload(initiator))
-        }
-        if (debug) println(s"Potential partner: $potentialPartners")
-        if (potentialPartners.isEmpty || allocation.bundle(initiator).isEmpty) {
+        var suppliers = pb.workers - initiator
+        if (rule == LCmax) suppliers=suppliers.filter(j => allocation.workload(j) < allocation.workload(initiator))
+        if (debug) println(s"Potential suppliers: $suppliers")
+        if (suppliers.isEmpty || allocation.bundle(initiator).isEmpty) {
           contractors -= initiator
-          if (debug) println(s"$initiator becomes inactive")
+          if (debug) println(s"$initiator is desesperated")
         }
         else {
           var found = false
@@ -47,20 +42,20 @@ class GiftSolver(pb : MWTA, rule : SocialRule) extends DealSolver(pb, rule) {
             case LCmax => allocation.workload(initiator)
             case LC => 0.0
           }
-          potentialPartners.foreach { supplier =>
+          suppliers.foreach { supplier =>
             allocation.bundle(initiator).foreach { task =>
               // 4 - Foreach potential apply
               val gift = new SingleGift(initiator, supplier, task)
-              val modifiedAllocation = allocation.apply(gift)
+              val postAllocation = allocation.apply(gift)
               val currentGoal = rule match { // Compute the new goal
               case LCmax =>
-                Math.max(modifiedAllocation.workload(initiator), modifiedAllocation.workload(supplier))
+                Math.max(postAllocation.workload(initiator), postAllocation.workload(supplier))
               case LC =>
                 pb.cost(supplier, task) - pb.cost(initiator, task)
             }
               if (currentGoal < bestGoal) {
                 bestGoal = currentGoal
-                bestAllocation = modifiedAllocation
+                bestAllocation = postAllocation
                 bestSingleGift = gift
                 found = true
               }
@@ -68,7 +63,7 @@ class GiftSolver(pb : MWTA, rule : SocialRule) extends DealSolver(pb, rule) {
           }
           // Select the best apply if any
           if (!found) {
-            if (debug) println(s"$initiator becomes inactive")
+            if (debug) println(s"$initiator is deseperated")
             contractors -= initiator
           } else {
             if (debug || trace) println(s"$bestSingleGift")
@@ -76,17 +71,11 @@ class GiftSolver(pb : MWTA, rule : SocialRule) extends DealSolver(pb, rule) {
             nbAccept += 1
             nbConfirm += 1
             allocation = bestAllocation
-/*
-            if (rule == LCmax && ! contractors.contains(bestSingleGift.supplier)) {
-              contractors = bestSingleGift.supplier :: contractors
-            }
-*/
             if (rule == LCmax) {
-              pb.workers.filter(worker => allocation.workload(worker) > bestGoal &&  !contractors.contains(worker)).foreach { worker =>
-                contractors += worker
-              }
-              contractors = Random.shuffle(contractors)
+              contractors = contractors.toSet.union(pb.workers.filter(j => allocation.workload(j) > bestGoal)).to[ListBuffer]
             }
+            contractors = Random.shuffle(contractors)
+
           }
         }
       }

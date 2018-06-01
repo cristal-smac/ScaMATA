@@ -21,7 +21,7 @@ import scala.language.postfixOps
   */
 class DistributedGiftSolver(pb : MWTA, rule : SocialRule, system: ActorSystem) extends DealSolver(pb, rule) {
 
-  val TIMEOUTVALUE : FiniteDuration = 60 minutes // Default timeout of a run
+  val TIMEOUTVALUE : FiniteDuration = 120 minutes // Default timeout of a run
   implicit val timeout : Timeout = Timeout(TIMEOUTVALUE)
   // Launch a new solverAgent
   DistributedGiftSolver.id+=1
