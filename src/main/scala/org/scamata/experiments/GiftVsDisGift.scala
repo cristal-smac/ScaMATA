@@ -8,7 +8,7 @@ import org.scamata.core._
 import org.scamata.solver._
 
 /**
-  * Main app to test LPSolver and Dis/GiftSolver
+  * Main app to test LPSolver and (Dis)Solver with SingleGiftOnly)
   */
 object GiftVsDisGift {
 
@@ -41,7 +41,7 @@ object GiftVsDisGift {
               0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
           for (o <- 1 to nbPb) {
             val pb = MWTA.randomProblem(m, n)
-            val giftSolver : GiftSolver  = new GiftSolver(pb,rule)
+            val giftSolver : CentralizedSolver  = new CentralizedSolver(pb, rule, SingleGiftOnly)
             val distributedGiftSolver : DistributedGiftSolver  = new DistributedGiftSolver(pb, rule, system)
             val giftAlloc = giftSolver.run()
             deal +=  giftSolver.nbConfirm

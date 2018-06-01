@@ -2,18 +2,19 @@
 package org.scamata.solver
 
 import org.scamata.core._
-import org.scamata.deal.SingleGift
+import org.scamata.core.{NoTask,Task}
+import org.scamata.deal.{Deal, Swap, SingleSwap, SingleGift}
 
 import scala.collection.SortedSet
-import scala.util.Random
 import scala.collection.mutable.ListBuffer
+import scala.util.Random
 
 /**
   * Minimizing the rule by applying single gift
   * @param pb to be solver
   * @param rule to be optimized
   */
-class GiftSolver(pb : MWTA, rule : SocialRule) extends DealSolver(pb, rule) {
+class CentralizedSolver(pb : MWTA, rule : SocialRule, strategy : DealStrategy) extends DealSolver(pb, rule) {
   debug = false
   val trace = false
 
@@ -27,36 +28,44 @@ class GiftSolver(pb : MWTA, rule : SocialRule) extends DealSolver(pb, rule) {
     while(contractors.nonEmpty){
       contractors.foreach { initiator: Worker =>
         if (debug) println(s"$initiator tries to find a single gift which is socially rational")
-        var suppliers = pb.workers - initiator
-        if (rule == LCmax) suppliers=suppliers.filter(j => allocation.workload(j) < allocation.workload(initiator))
-        if (suppliers.isEmpty || allocation.bundle(initiator).isEmpty) {
+        var responders = pb.workers - initiator
+        if (rule == LCmax) responders=responders.filter(j => allocation.workload(j) < allocation.workload(initiator))
+        if (responders.isEmpty || allocation.bundle(initiator).isEmpty) {
           contractors -= initiator
           if (debug) println(s"$initiator is desesperated")
         }
         else {
           var found = false
           var bestAllocation: Allocation = allocation
-          var bestSingleGift: SingleGift = new SingleGift(initiator, NoWorker, NoTask)
+          var bestSingleSwap: Swap = new SingleSwap(initiator, NoWorker, NoTask, NoTask)
           var bestGoal = rule match {
             case LCmax => allocation.workload(initiator)
             case LC => 0.0
           }
-          suppliers.foreach { supplier =>
-            allocation.bundle(initiator).foreach { task =>
-              // 4 - Foreach potential apply
-              val gift = new SingleGift(initiator, supplier, task)
-              val postAllocation = allocation.apply(gift)
-              val currentGoal = rule match { // Compute the new goal
-              case LCmax =>
-                Math.max(postAllocation.workload(initiator), postAllocation.workload(supplier))
-              case LC =>
-                pb.cost(supplier, task) - pb.cost(initiator, task)
-            }
-              if (currentGoal < bestGoal) {
-                bestGoal = currentGoal
-                bestAllocation = postAllocation
-                bestSingleGift = gift
-                found = true
+          responders.foreach { responder =>
+            allocation.bundle(initiator).foreach { task1 =>
+              val counterparts = strategy match {
+                case SingleGiftOnly => SortedSet(NoTask)
+                case SingleSwapAndSingleGift =>  allocation.bundle(responder)+NoTask
+              }
+              counterparts.foreach { task2 : Task =>
+                val deal : Swap = task2 match {
+                  case NoTask => new SingleGift(initiator, responder, task1)
+                  case _ => new SingleSwap(initiator, responder, task1, task2)
+                }
+                val postAllocation = allocation.apply(deal)
+                val currentGoal = rule match {
+                  case LCmax =>
+                    Math.max(postAllocation.workload(initiator), postAllocation.workload(responder))
+                  case LC =>
+                    pb.cost(responder, task1) - pb.cost(initiator, task1) + pb.cost(initiator, task2) - pb.cost(responder, task2)
+                }
+                if (currentGoal < bestGoal) {
+                  bestGoal = currentGoal
+                  bestAllocation = postAllocation
+                  bestSingleSwap = deal
+                  found = true
+                }
               }
             }
           }
@@ -65,7 +74,7 @@ class GiftSolver(pb : MWTA, rule : SocialRule) extends DealSolver(pb, rule) {
             if (debug) println(s"$initiator is deseperated")
             contractors -= initiator
           } else {
-            if (debug || trace) println(s"$bestSingleGift")
+            if (debug || trace) println(s"$bestSingleSwap")
             nbPropose += 1
             nbAccept += 1
             nbConfirm += 1
@@ -86,11 +95,11 @@ class GiftSolver(pb : MWTA, rule : SocialRule) extends DealSolver(pb, rule) {
 /**
   * Companion object to test it
   */
-object GiftSolver extends App {
+object CentralizedSolver extends App {
   val debug = false
   import org.scamata.example.toy4x4._
   println(pb)
-  val negotiationSolver = new GiftSolver(pb,LCmax)
+  val negotiationSolver = new CentralizedSolver(pb,LCmax,SingleSwapAndSingleGift)
   var allocation = new Allocation(pb)
   allocation = allocation.update(a1, SortedSet(t4))
   allocation = allocation.update(a2, SortedSet(t3))

@@ -8,7 +8,7 @@ import org.scamata.core._
 import org.scamata.solver._
 
 /**
-  * Main app to test LPSolver and Dis/GiftSolver
+  * Main app to test LPSolver and (Dis)Solver with SingleGiftOnly or SingleSwapAndSingleGift
   */
 object Test {
 
@@ -51,8 +51,8 @@ object Test {
             val pb = MWTA.randomProblem(m, n)
             if (debug) println(s"Configuration $o")
             val lpSolver : LPSolver  = new LPSolver(pb,rule)
-            val giftSolver : GiftSolver  = new GiftSolver(pb,rule)
-            val swapSolver : SwapSolver  = new SwapSolver(pb,rule)
+            val giftSolver : CentralizedSolver = new  CentralizedSolver(pb,rule, SingleGiftOnly)
+            val swapSolver : CentralizedSolver  = new CentralizedSolver(pb,rule, SingleSwapAndSingleGift)
             val distributedGiftSolver : DistributedGiftSolver  = new DistributedGiftSolver(pb, rule, system)
             val lpAlloc =lpSolver.run()
             val giftAlloc = giftSolver.run()

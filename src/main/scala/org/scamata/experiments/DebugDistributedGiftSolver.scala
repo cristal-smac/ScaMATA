@@ -3,8 +3,7 @@ package org.scamata.experiments
 
 import akka.actor.ActorSystem
 import org.scamata.core.MWTA
-import org.scamata.solver.{DistributedGiftSolver,GiftSolver}
-import org.scamata.solver.{SocialRule, LCmax, LC}
+import org.scamata.solver._
 
 /**
   * Main app to trace DistributedGiftSolver
@@ -24,7 +23,7 @@ object DebugDistributedGiftSolver {
           println(s"DEBUG configuration $o")
           val pb =  MWTA.randomProblem(m, n)
           val distributedGiftSolver: DistributedGiftSolver = new DistributedGiftSolver(pb, rule, system)
-          val giftSolver: GiftSolver = new GiftSolver(pb, rule)
+          val giftSolver: CentralizedSolver = new CentralizedSolver(pb, rule, SingleGiftOnly)
           val outcome = giftSolver.run()
           nbDeal += giftSolver.nbConfirm
           val disOutcome = distributedGiftSolver.run()

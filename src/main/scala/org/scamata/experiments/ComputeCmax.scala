@@ -34,7 +34,7 @@ object ComputeCmax {
             val pb = MWTA.randomProblem(m, n)
             val exhaustiveSolver = new ExhaustiveSolver(pb, rule)
             val exhaustiveAlloc = exhaustiveSolver.run()
-            val giftSolver = new GiftSolver(pb, rule)
+            val giftSolver = new CentralizedSolver(pb, rule, SingleGiftOnly)
             val giftAlloc = giftSolver.run()
             val lpSolver = new LPSolver(pb, rule)
             val lpAlloc = lpSolver.run()
