@@ -2,6 +2,7 @@
 package org.scamata.solver
 
 import org.scamata.core._
+import org.scamata.core.{NoTask,Task}
 import org.scamata.deal._
 
 import scala.collection.SortedSet
@@ -43,9 +44,11 @@ class SwapSolver(pb : MWTA, rule : SocialRule) extends DealSolver(pb, rule) {
           }
           responders.foreach { responder =>
             allocation.bundle(initiator).foreach { task1 =>
-              (allocation.bundle(responder)+NoTask).foreach { task2 =>
-                val deal : Swap = if (task2 != NoTask) new SingleSwap(initiator, responder, task1, task2)
-                  else new SingleGift(initiator, responder, task1)
+              (allocation.bundle(responder)+NoTask).foreach { task2 : Task =>
+                val deal : Swap = task2 match {
+                  case NoTask => new SingleGift(initiator, responder, task1)
+                  case _ => new SingleSwap(initiator, responder, task1, task2)
+                }
                 val postAllocation = allocation.apply(deal)
                 val currentGoal = rule match {
                   case LCmax =>

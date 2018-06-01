@@ -16,7 +16,11 @@ object Test {
 
     def main(args: Array[String]): Unit = {
       if (args.length <= 0) throw new RuntimeException("Usage: Test LC|LCmax")
-      val rule: SocialRule = if (args(0) == "LCMax") LCmax else LC
+      val rule: SocialRule = args(0) match {
+        case "LCmax" => LCmax
+        case "LC" => LC
+        case _ => throw new RuntimeException("Bad social rule")
+      }
       val r = scala.util.Random
       val system = ActorSystem("Test"+rule+r.nextInt.toString)//The Actor system
       val file = s"experiments/data/$rule.csv"
