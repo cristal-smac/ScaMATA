@@ -34,8 +34,7 @@ case object Stop extends Message
 
 // Negotiation messages
 case object Trigger extends Message // Trigger a negotiation as initiator if possible
-case class Propose(task : Task, workload: Double) extends Message// Make a proposal
-case class CounterPropose(task : Task, counterpart : Task, workload: Double, id : Int) extends Message // Make a counter-proposal
+case class Propose(task : Task, counterpart : Task, workload: Double) extends Message // Make a counter-proposal
 case class Reject(task : Task, workload: Double) extends Message // Reject a proposal
 case class Accept(task : Task, workload: Double) extends Message // Accept a proposal
 case class Confirm(task : Task, workload: Double) extends Message // Confirm a deal

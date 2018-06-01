@@ -91,14 +91,14 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends WorkerAgent(worker
           val opponent = directory.adr(bestOpponent)
           updatedMind = updatedMind.changeDelegation(bestOpponent, bestTask)
           if (trace) println(s"$worker -> $bestOpponent : Propose($bestTask)")
-          opponent ! Propose(bestTask, workload)
+          opponent ! Propose(bestTask, NoTask, workload)
           nbPropose+=1
           goto(Proposer) using updatedMind
         }
       }
 
     // If the worker agent receives a proposal
-    case Event(Propose(task, peerWorkload), mind) =>
+    case Event(Propose(task, _, peerWorkload), mind) =>
       val opponent = directory.workers(sender)
       val updatedMind = mind.updateBelief(opponent, peerWorkload)
       if (acceptable(task, provider = opponent, supplier = worker, updatedMind)) {
@@ -178,7 +178,7 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends WorkerAgent(worker
       }
 
     // If the worker agent receives a proposal
-    case Event(Propose(task, oWorkload), mind) =>
+    case Event(Propose(task, _, oWorkload), mind) =>
       val opponent = directory.workers(sender)
       val workload = mind.belief(worker)
       val updatedMind = mind.updateBelief(opponent, oWorkload)
@@ -231,7 +231,7 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends WorkerAgent(worker
       stay using updatedMind
 
     // If the worker agent receives a proposal
-    case Event(Propose(task, _), mind) =>
+    case Event(Propose(task, _, _), mind) =>
       stash
       stay using mind
 
