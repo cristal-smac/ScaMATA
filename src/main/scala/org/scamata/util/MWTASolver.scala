@@ -111,7 +111,7 @@ object MWTASolver extends App {
     * @param pb MWTA
     */
   def selectSolver(pb: MWTA): Solver = {
-    if (distributed) new DistributedGiftSolver(pb, socialRule, system)
-    else new GiftSolver(pb, socialRule)
+    if (distributed) new DistributedSolver(pb, socialRule, SingleGiftOnly, system)
+    else new CentralizedSolver(pb, socialRule, SingleGiftOnly)
   }
 }

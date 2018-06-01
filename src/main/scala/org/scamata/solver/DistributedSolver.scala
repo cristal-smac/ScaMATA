@@ -18,13 +18,13 @@ import scala.language.postfixOps
   * @param rule to be optimized
   * @param system of Actors
   */
-class DistributedGiftSolver(pb : MWTA, rule : SocialRule, system: ActorSystem) extends DealSolver(pb, rule) {
+class DistributedSolver(pb : MWTA, rule : SocialRule, strategy : DealStrategy, system: ActorSystem) extends DealSolver(pb, rule, strategy) {
 
   val TIMEOUTVALUE : FiniteDuration = 120 minutes // Default timeout of a run
   implicit val timeout : Timeout = Timeout(TIMEOUTVALUE)
   // Launch a new solverAgent
-  DistributedGiftSolver.id+=1
-  val supervisor : ActorRef = system.actorOf(Props(classOf[SolverAgent], pb, rule), name = "solverAgent"+DistributedGiftSolver.id)
+  DistributedSolver.id+=1
+  val supervisor : ActorRef = system.actorOf(Props(classOf[SolverAgent], pb, rule, strategy), name = "solverAgent"+DistributedSolver.id)
 
   /**
     * Returns an allocation modifying the initial one
@@ -52,7 +52,7 @@ class DistributedGiftSolver(pb : MWTA, rule : SocialRule, system: ActorSystem) e
 
 }
 
-object DistributedGiftSolver{
+object DistributedSolver{
   var id = 0
   val debug = false
   def main(args: Array[String]): Unit = {
@@ -65,9 +65,9 @@ object DistributedGiftSolver{
     allocation = allocation.update(a4, SortedSet(t2))
     println(allocation)
     val r = scala.util.Random
-    val system = ActorSystem("DistributedGiftSolver" + r.nextInt.toString)
+    val system = ActorSystem("DistributedSolver" + r.nextInt.toString)
     //The Actor system
-    val negotiationSolver = new DistributedGiftSolver(pb, LCmax, system)
+    val negotiationSolver = new DistributedSolver(pb, LCmax, SingleGiftOnly, system)
     val sol = negotiationSolver.reallocate(allocation)
     println(sol.toString)
     println(sol.makespan())

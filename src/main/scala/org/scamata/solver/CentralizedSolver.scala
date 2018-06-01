@@ -13,8 +13,9 @@ import scala.util.Random
   * Minimizing the rule by applying single gift
   * @param pb to be solver
   * @param rule to be optimized
+  * @param strategy for selecting the kind of deal
   */
-class CentralizedSolver(pb : MWTA, rule : SocialRule, strategy : DealStrategy) extends DealSolver(pb, rule) {
+class CentralizedSolver(pb : MWTA, rule : SocialRule, strategy : DealStrategy) extends DealSolver(pb, rule, strategy) {
   debug = false
   val trace = false
 
@@ -45,7 +46,7 @@ class CentralizedSolver(pb : MWTA, rule : SocialRule, strategy : DealStrategy) e
           responders.foreach { responder =>
             allocation.bundle(initiator).foreach { task1 =>
               val counterparts = strategy match {
-                case SingleGiftOnly => SortedSet(NoTask)
+                case SingleGiftOnly =>  Set[Task](NoTask)
                 case SingleSwapAndSingleGift =>  allocation.bundle(responder)+NoTask
               }
               counterparts.foreach { task2 : Task =>

@@ -53,7 +53,7 @@ object Test {
             val lpSolver : LPSolver  = new LPSolver(pb,rule)
             val giftSolver : CentralizedSolver = new  CentralizedSolver(pb,rule, SingleGiftOnly)
             val swapSolver : CentralizedSolver  = new CentralizedSolver(pb,rule, SingleSwapAndSingleGift)
-            val distributedGiftSolver : DistributedGiftSolver  = new DistributedGiftSolver(pb, rule, system)
+            val distributedGiftSolver : DistributedSolver  = new DistributedSolver(pb, rule, SingleGiftOnly, system)
             val lpAlloc =lpSolver.run()
             val giftAlloc = giftSolver.run()
             gift +=  giftSolver.nbConfirm
@@ -113,4 +113,5 @@ object Test {
         }
       }
     }
+  System.exit(0)
 }

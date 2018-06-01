@@ -2,8 +2,7 @@
 package org.scamata.actor
 
 import org.scamata.core.{Allocation, MWTA, Worker}
-import org.scamata.solver.SocialRule
-
+import org.scamata.solver.{DealStrategy, SingleGiftOnly, SingleSwapAndSingleGift, SocialRule}
 import akka.actor.{Actor, ActorRef, FSM, Props}
 
 // The solverAgent behaviour is described by a single state FSM
@@ -26,8 +25,9 @@ class SupervisorStatus(val stoppedActors: Set[ActorRef], val allocation: Allocat
   * SolverAgent which starts and stops the computation of an allocation
   * @param pb MWTA problem instance
   * @param rule to apply (LCmax or LC)
+  * @param strategy for selecting the kind of deal
   * */
-class SolverAgent(pb: MWTA, rule: SocialRule) extends Actor with FSM[SolverState,SupervisorStatus] {
+class SolverAgent(pb: MWTA, rule: SocialRule, strategy : DealStrategy) extends Actor with FSM[SolverState,SupervisorStatus] {
 
   var debug = false
 
@@ -47,7 +47,10 @@ class SolverAgent(pb: MWTA, rule: SocialRule) extends Actor with FSM[SolverState
     */
   override def preStart(): Unit = {
     pb.workers.foreach{ worker : Worker => //For all workers
-      val actor =  context.actorOf(Props(classOf[GiftBehaviour], worker, rule), worker.name) // Create the agent
+      val actor =  strategy match { // Create the agent
+        case SingleGiftOnly => context.actorOf(Props(classOf[GiftBehaviour], worker, rule), worker.name)
+        case SingleSwapAndSingleGift => throw new RuntimeException("Swap behaviour of worker agent not yet implemented !")
+      }
       directory.add(worker, actor) // Add it to the directory
     }
   }

@@ -42,7 +42,7 @@ object GiftVsDisGift {
           for (o <- 1 to nbPb) {
             val pb = MWTA.randomProblem(m, n)
             val giftSolver : CentralizedSolver  = new CentralizedSolver(pb, rule, SingleGiftOnly)
-            val distributedGiftSolver : DistributedGiftSolver  = new DistributedGiftSolver(pb, rule, system)
+            val distributedGiftSolver : DistributedSolver  = new DistributedSolver(pb, rule, SingleGiftOnly, system)
             val giftAlloc = giftSolver.run()
             deal +=  giftSolver.nbConfirm
             val distributedGiftAlloc = distributedGiftSolver.run()

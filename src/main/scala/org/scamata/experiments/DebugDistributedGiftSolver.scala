@@ -6,11 +6,12 @@ import org.scamata.core.MWTA
 import org.scamata.solver._
 
 /**
-  * Main app to trace DistributedGiftSolver
+  * Main app to trace DistributedSolver
   */
 object DebugDistributedGiftSolver {
   def main(args: Array[String]): Unit = {
     val rule : SocialRule=LC
+    val strategy = SingleGiftOnly
     val r = scala.util.Random
     val system = ActorSystem("Debug" + r.nextInt.toString) //The Actor system
     for (m <- 2 to 100) {
@@ -22,8 +23,8 @@ object DebugDistributedGiftSolver {
         for (o <- 1 to nbPb) {
           println(s"DEBUG configuration $o")
           val pb =  MWTA.randomProblem(m, n)
-          val distributedGiftSolver: DistributedGiftSolver = new DistributedGiftSolver(pb, rule, system)
-          val giftSolver: CentralizedSolver = new CentralizedSolver(pb, rule, SingleGiftOnly)
+          val distributedGiftSolver: DistributedSolver = new DistributedSolver(pb, rule, SingleGiftOnly, system)
+          val giftSolver: CentralizedSolver = new CentralizedSolver(pb, rule, strategy)
           val outcome = giftSolver.run()
           nbDeal += giftSolver.nbConfirm
           val disOutcome = distributedGiftSolver.run()
