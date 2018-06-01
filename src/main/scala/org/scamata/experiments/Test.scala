@@ -19,7 +19,7 @@ object Test {
       val rule: SocialRule = if (args(0) == "LCMax") LCmax else LC
       val r = scala.util.Random
       val system = ActorSystem("Test"+rule+r.nextInt.toString)//The Actor system
-      val file = s"experiments/data/$rule.bis.csv"
+      val file = s"experiments/data/$rule.csv"
       val bw = new BufferedWriter(new FileWriter(file))
       bw.write(s"m,n," +
         s"minGiftSolver$rule,openGiftSolver$rule,meanGiftSolver$rule,closedGiftSolver$rule,maxGiftSolver$rule," +
