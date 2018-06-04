@@ -2,7 +2,7 @@
 package org.scamata.actor
 
 import org.scamata.core.{NoTask, Task, Worker}
-import org.scamata.solver.{LC, LCmax, SocialRule}
+import org.scamata.solver.{SocialRule, LC, LCmax, DealStrategy, SingleSwapAndSingleGift, SingleGiftOnly}
 
 import scala.collection.SortedSet
 import akka.actor.{Actor, ActorRef}
@@ -97,8 +97,9 @@ class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double], 
   *
   * @param worker which is embedded
   * @param rule   to optimize
+  * @param strategy to negotiate
   */
-abstract class WorkerAgent(val worker: Worker, val rule: SocialRule) extends Actor {
+abstract class WorkerAgent(val worker: Worker, val rule: SocialRule, val strategy: DealStrategy) extends Actor {
   var trace: Boolean = false
   val debug = false
 
@@ -176,4 +177,36 @@ abstract class WorkerAgent(val worker: Worker, val rule: SocialRule) extends Act
         cost(provider, task) > cost(supplier, task) && cost(supplier, counterpart) > cost(provider, counterpart)
     }
   }
+
+  /**
+    * Returns the best counterpart eventually NoTask for the task and the opponent according to the mind
+    */
+  def bestCounterpart(task: Task, opponent : Worker, mind: StateOfMind) : Task ={
+    if (strategy == SingleGiftOnly) return NoTask
+      val workload = mind.belief(worker)
+      var bestCounterpart : Task =  NoTask
+      var bestGoal = rule match {
+        case LCmax =>
+          mind.belief(opponent)
+        case LC =>
+          0.0
+      }
+      (mind.bundle + NoTask).foreach { counterpart => // foreach potential single apply
+        val swapWorkload = workload + cost(worker, task) - cost(worker, counterpart)
+        val swapOpponentWorkload = mind.belief(opponent) - cost(opponent, task) + cost(opponent, counterpart)
+        val swapGoal = rule match {
+          case LCmax =>
+            Math.max(swapWorkload, swapOpponentWorkload)
+          case LC =>
+            cost(opponent, task) - cost(worker, task) + cost(worker, counterpart) - cost(opponent, counterpart)
+        }
+        //println(s"$worker: swap ($task, $counterpart) = $swapGoal")
+        if (swapGoal < bestGoal) {
+          bestGoal = swapGoal
+          bestCounterpart = counterpart
+        }
+      }
+    bestCounterpart
+  }
+
 }

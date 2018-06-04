@@ -1,10 +1,10 @@
 // Copyright (C) Maxime MORGE 2018
 package org.scamata.actor
 
-import org.scamata.core.{Task, Worker, NoWorker, NoTask}
-import org.scamata.solver.{LCmax, LC, SocialRule}
-
+import org.scamata.core.{NoTask, NoWorker, Task, Worker}
+import org.scamata.solver.{DealStrategy, LC, LCmax, SocialRule}
 import akka.actor.{FSM, Stash}
+
 import scala.language.postfixOps
 import scala.collection.SortedSet
 import scala.util.Random
@@ -14,7 +14,7 @@ import scala.util.Random
   * @param worker which is embedded
   * @param rule to optimize
   */
-class GiftBehaviour(worker: Worker, rule: SocialRule) extends WorkerAgent(worker: Worker, rule: SocialRule) with FSM[State, StateOfMind] with Stash{
+class GiftBehaviour(worker: Worker, rule: SocialRule, strategy : DealStrategy) extends WorkerAgent(worker: Worker, rule: SocialRule, strategy: DealStrategy) with FSM[State, StateOfMind] with Stash{
 
   /**
     * Initially the worker is in the initial state with no bundle, no beliefs about the workloads and no task/opponent taken into consideration
@@ -101,7 +101,7 @@ class GiftBehaviour(worker: Worker, rule: SocialRule) extends WorkerAgent(worker
     case Event(Propose(task, NoTask, peerWorkload), mind) =>
       val opponent = directory.workers(sender)
       val updatedMind = mind.updateBelief(opponent, peerWorkload)
-      if (acceptable(task, NoTask, provider = opponent, supplier = worker, updatedMind)) {
+      if (acceptable(task, provider = opponent, supplier = worker, updatedMind)) {
         solverAgent ! Activated(updatedMind.bundle)
         if (trace) println(s"$worker -> $opponent : Accept($task)")
         sender ! Accept(task, NoTask, updatedMind.belief(worker))

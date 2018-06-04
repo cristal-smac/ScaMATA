@@ -47,10 +47,7 @@ class SolverAgent(pb: MWTA, rule: SocialRule, strategy : DealStrategy) extends A
     */
   override def preStart(): Unit = {
     pb.workers.foreach{ worker : Worker => //For all workers
-      val actor =  strategy match { // Create the agent
-        case SingleGiftOnly => context.actorOf(Props(classOf[GiftBehaviour], worker, rule), worker.name)
-        case SingleSwapAndSingleGift => context.actorOf(Props(classOf[SwapBehaviour], worker, rule), worker.name)
-      }
+      val actor = context.actorOf(Props(classOf[WorkerAgentBehaviour], worker, rule, strategy), worker.name)
       directory.add(worker, actor) // Add it to the directory
     }
   }

@@ -2,6 +2,7 @@
 package org.scamata.solver
 
 import org.scamata.core.{Allocation, MWTA}
+import org.scamata.solver.{SingleSwapAndSingleGift, SingleGiftOnly}
 import org.scamata.actor._
 import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.pattern.ask
@@ -59,15 +60,15 @@ object DistributedSolver{
     import org.scamata.example.toy4x4._
     println(pb)
     var allocation = new Allocation(pb)
-    allocation = allocation.update(a1, SortedSet(t4))
-    allocation = allocation.update(a2, SortedSet(t3))
-    allocation = allocation.update(a3, SortedSet(t1))
-    allocation = allocation.update(a4, SortedSet(t2))
+    allocation = allocation.update(a1, SortedSet(t3))//t4
+    allocation = allocation.update(a2, SortedSet(t4))//t3
+    allocation = allocation.update(a3, SortedSet(t1))//t1
+    allocation = allocation.update(a4, SortedSet(t2))//t2
     println(allocation)
     val r = scala.util.Random
     val system = ActorSystem("DistributedSolver" + r.nextInt.toString)
     //The Actor system
-    val negotiationSolver = new DistributedSolver(pb, LCmax, SingleSwapAndSingleGift, system)//
+    val negotiationSolver = new DistributedSolver(pb, LCmax, SingleSwapAndSingleGift, system)//SingleGiftOnly
     negotiationSolver.debug = true
     val sol = negotiationSolver.reallocate(allocation)
     println(sol.toString)
