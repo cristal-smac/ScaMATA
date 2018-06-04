@@ -106,6 +106,7 @@ abstract class WorkerAgent(val worker: Worker, val rule: SocialRule) extends Act
   val forgetRate = 10 // rate of drop proposals in Proposer state in [0,100]
 
   var nbPropose = 0
+  var nbCounterPropose = 0
   var nbAccept = 0
   var nbReject = 0
   var nbWithdraw = 0
@@ -115,7 +116,13 @@ abstract class WorkerAgent(val worker: Worker, val rule: SocialRule) extends Act
 
   var solverAgent: ActorRef = context.parent
   var directory: Directory = new Directory()
-  var cost: Map[(Worker, Task), Double] = Map[(Worker, Task), Double]()
+  var costMatrix: Map[(Worker, Task), Double] = Map[(Worker, Task), Double]()
+
+  /**
+    * Return the cost of a task for a worker, eventually 0.0 if NoTask
+    */
+  def cost(worker: Worker, task: Task): Double = if (task != NoTask) costMatrix(worker, task) else 0.0
+
 
   /**
     * Broadcasts workload
@@ -154,48 +161,19 @@ abstract class WorkerAgent(val worker: Worker, val rule: SocialRule) extends Act
   /**
     * Returns true if a task and a counterpart can be swap
     *
-    * @param task to take
+    * @param task        to take
     * @param counterpart to give
     * @param provider
     * @param supplier
     */
-  def acceptable(task: Task, counterpart : Task, provider: Worker, supplier: Worker, mind: StateOfMind): Boolean = {
+  def acceptable(task: Task, counterpart: Task, provider: Worker, supplier: Worker, mind: StateOfMind): Boolean = {
     rule match {
       case LCmax => // The local LCmax must strictly decrease
         Math.max(mind.belief(provider), mind.belief(supplier)) >
-          Math.max(mind.belief(provider) - cost(provider, task) +  cost(provider, counterpart),
-            mind.belief(supplier) + cost(supplier, task) - cost(supplier, counterpart))
-      case LC => // The local flowtime  must strictly decrease
-        cost(provider, task)  > cost(supplier, task) &&  cost(supplier, counterpart) > cost(provider, counterpart)
-    }
-  }
-
-
-  /**
-    * Returns the best counterpart when a task can be delegated TODO
-    * @param task to delegate
-    * @param provider
-    * @param supplier
-    */
-  def bestCounterPart(task: Task, provider: Worker, supplier: Worker, mind: StateOfMind): Task = {
-    var bestT: Task = NoTask
-    var bestGoal = rule match {
-      case LCmax => // The local LCmax must strictly decrease
-        Math.max(mind.belief(provider), mind.belief(supplier))
-      case LC => // The local flowtime  must strictly decrease
-        0
-    }
-    mind.bundle.foreach { counterpart =>
-      val goal = rule match {
-        case LCmax =>
           Math.max(mind.belief(provider) - cost(provider, task) + cost(provider, counterpart),
             mind.belief(supplier) + cost(supplier, task) - cost(supplier, counterpart))
-        case LC =>
-          cost(supplier, task) - cost(provider, task) + cost(supplier, counterpart) - cost(provider, counterpart)
-      }
-      if (bestGoal < goal) bestT = counterpart
+      case LC => // The local flowtime  must strictly decrease
+        cost(provider, task) > cost(supplier, task) && cost(supplier, counterpart) > cost(provider, counterpart)
     }
-    bestT
   }
 }
-

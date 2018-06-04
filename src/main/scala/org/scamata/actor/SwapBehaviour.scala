@@ -27,12 +27,12 @@ class SwapBehaviour(worker: Worker, rule: SocialRule) extends WorkerAgent(worker
   when(Initial) {
     // If the worker agent is initiated
     case Event(Initiate(bundle, d, c), mind) => // Initiate the directory and the cost matrix
-      this.cost = c
+      this.costMatrix = c
       this.directory = d
       this.solverAgent = sender
       var updatedMind = mind.initBelief(bundle, directory.allWorkers())
       updatedMind = updatedMind.addBundle(bundle)
-      val workload = worker.workload(bundle, cost)
+      val workload = worker.workload(bundle, costMatrix)
       updatedMind = updatedMind.updateBelief(worker, workload)
       sender ! Ready
       stay using updatedMind
@@ -98,35 +98,65 @@ class SwapBehaviour(worker: Worker, rule: SocialRule) extends WorkerAgent(worker
       }
 
     // If the worker agent receives a proposal
-    case Event(Propose(task, _, peerWorkload), mind) =>
+    case Event(Propose(task, NoTask, peerWorkload), mind) =>
       val opponent = directory.workers(sender)
-      val updatedMind = mind.updateBelief(opponent, peerWorkload)
-      if (acceptable(task, provider = opponent, supplier = worker, updatedMind)) {
+      var updatedMind = mind.updateBelief(opponent, peerWorkload)
+      val workload = updatedMind.belief(worker)
+      var bestCounterpart : Task =  NoTask
+      var bestGoal = rule match {
+        case LCmax =>
+          peerWorkload
+        case LC =>
+          0.0
+      }
+      (updatedMind.bundle+NoTask).foreach { counterpart => // foreach potential single apply
+        val swapWorkload = workload + cost(worker, task) - cost(worker, task)
+        val swapOpponentWorkload = updatedMind.belief(opponent) - cost(opponent, task) + cost(opponent, counterpart)
+        val swapGoal = rule match {
+          case LCmax =>
+            Math.max(swapWorkload, swapOpponentWorkload)
+          case LC =>
+            cost(opponent, task) - cost(worker, task) + cost(worker, counterpart) - cost(opponent, counterpart)
+        }
+        if (swapGoal < bestGoal) {
+          bestGoal = swapGoal
+          bestCounterpart = counterpart
+        }
+      }
+      if (bestCounterpart != NoTask){
+        solverAgent ! Activated(updatedMind.bundle)
+        updatedMind = updatedMind.changeDelegation(opponent, bestCounterpart)
+        if (trace) println(s"$worker -> $opponent : Propose($task,$bestCounterpart)")
+        sender ! Propose(bestCounterpart, task, updatedMind.belief(worker))
+        nbCounterPropose +=1
+        goto(Proposer) using updatedMind
+
+      } else if (acceptable(task, NoTask, provider = opponent, supplier = worker, updatedMind)) {
         solverAgent ! Activated(updatedMind.bundle)
         if (trace) println(s"$worker -> $opponent : Accept($task)")
-        sender ! Accept(task, updatedMind.belief(worker))
+        sender ! Accept(task, NoTask, updatedMind.belief(worker))
         nbAccept+=1
         goto(Responder) using updatedMind
       }else{
         val workload = updatedMind.belief(worker)
         if (trace) println(s"$worker -> $opponent : Reject($task)")
-        sender ! Reject(task, workload)
+        sender ! Reject(task, NoTask, workload)
         nbReject+=1
         goto(Initial) using updatedMind
       }
 
     // If the worker agent receives an acceptance
-    case Event(Accept(task, peerWorkload), mind) =>
+    case Event(Accept(task, counterpart, peerWorkload), mind) =>
       val opponent = directory.workers(sender)
       val updatedMind = mind.updateBelief(opponent, peerWorkload)
-      val workload = worker.workload(updatedMind.bundle, cost)
-      if (trace) println(s"$worker -> $opponent : Withdraw($task)")
-      sender ! Withdraw(task, workload)
+      val workload = worker.workload(updatedMind.bundle, costMatrix)
+      if (trace) println(s"$worker -> $opponent : Withdraw($task, $counterpart)")
+      sender ! Withdraw(task, counterpart, workload)
       nbWithdraw += 1
       stay using updatedMind
 
     // If the worker agent receives a rejection
-    case Event(Reject(_, peerWorkload), mind) =>
+    case Event(Reject(_, _, peerWorkload), mind) =>
       val opponent = directory.workers(sender)
       val updatedMind = mind.updateBelief(opponent, peerWorkload)
       stay using updatedMind
@@ -142,7 +172,7 @@ class SwapBehaviour(worker: Worker, rule: SocialRule) extends WorkerAgent(worker
       goto(Initial) using mind
 
     // If the worker agent receives a rejection
-    case Event(Reject(task, oWorkload), mind) =>
+    case Event(Reject(task, _, oWorkload), mind) =>
       val opponent = directory.workers(sender)
       if (opponent != mind.opponent || task != mind.task) {
         val updatedMind = mind.updateBelief(opponent, oWorkload)
@@ -154,23 +184,24 @@ class SwapBehaviour(worker: Worker, rule: SocialRule) extends WorkerAgent(worker
         goto(Initial) using updatedMind
       }
 
-    // If the worker agent receives an accptance
-    case Event(Accept(task, oWorkload), mind) =>
+    // If the worker agent receives an acceptance
+    case Event(Accept(task, counterpart, oWorkload), mind) =>
       val workload = mind.belief(worker)
       val opponent = directory.workers(sender)
       val updatedMind = mind.updateBelief(opponent, oWorkload)
       if (opponent != mind.opponent || task != mind.task) {
         if (trace) println(s"$worker -> $opponent : Withdraw($task)")
-        sender ! Withdraw(task, workload)
+        sender ! Withdraw(task, counterpart, workload)
         nbWithdraw += 1
         stay using updatedMind
       } else {
-        val workload = mind.belief(worker) - cost(worker, task)
+        val workload = mind.belief(worker) - cost(worker, task) + cost(worker, counterpart)
         var updatedMind = mind.remove(task)
+        updatedMind = mind.add(counterpart)
         updatedMind = updatedMind.updateBelief(worker, workload)
         updatedMind = updatedMind.changeDelegation(NoWorker, NoTask)
         if (trace) println(s"$worker -> $opponent : Confirm($task)")
-        sender ! Confirm(task, workload)
+        sender ! Confirm(task, counterpart, workload)
         nbConfirm += 1
         broadcastInform(updatedMind.belief(worker))
         self ! Trigger
@@ -178,13 +209,13 @@ class SwapBehaviour(worker: Worker, rule: SocialRule) extends WorkerAgent(worker
       }
 
     // If the worker agent receives a proposal
-    case Event(Propose(task, _, oWorkload), mind) =>
+    case Event(Propose(task, counterpart, oWorkload), mind) =>
       val opponent = directory.workers(sender)
       val workload = mind.belief(worker)
       val updatedMind = mind.updateBelief(opponent, oWorkload)
       if (Random.nextInt(100) <= forgetRate) {
         if (trace) println(s"$worker -> $opponent : Reject($task)")
-        sender ! Reject(task, workload)
+        sender ! Reject(task, counterpart, workload)
         nbReject+=1
         stay using updatedMind
       }else{
@@ -203,10 +234,10 @@ class SwapBehaviour(worker: Worker, rule: SocialRule) extends WorkerAgent(worker
     */
   when(Responder) {
     // If the worker agent receives a confirmation
-    case Event(Confirm(task, oWorkload), mind) =>
+    case Event(Confirm(task, counterpart, oWorkload), mind) =>
       val opponent = directory.workers(sender)
       var updatedMind = mind.add(task)
-      updatedMind = updatedMind.updateBelief(worker,  updatedMind.belief(worker) + cost(worker, task) )
+      updatedMind = updatedMind.updateBelief(worker,  updatedMind.belief(worker) + cost(worker, task) - cost(worker, counterpart) )
       updatedMind = updatedMind.updateBelief(opponent, oWorkload)
       val workload = updatedMind.belief(worker)
       broadcastInform(workload)
@@ -214,29 +245,29 @@ class SwapBehaviour(worker: Worker, rule: SocialRule) extends WorkerAgent(worker
       goto(Initial) using updatedMind
 
     // If the  worker agent receives a withrawal
-    case Event(Withdraw(_, oWorkload), mind) =>
+    case Event(Withdraw(_, _, oWorkload), mind) =>
       val opponent = directory.workers(sender)
       val updatedMind = mind.updateBelief(opponent, oWorkload)
       self ! Trigger
       goto(Initial) using updatedMind
 
    // If the worker agent receives an acceptance
-    case Event(Accept(task, oWorkload), mind) =>
+    case Event(Accept(task, counterpart, oWorkload), mind) =>
       val workload = mind.belief(worker)
       val opponent = directory.workers(sender)
       val updatedMind = mind.updateBelief(opponent, oWorkload)
       if (trace) println(s"$worker -> $opponent : Withdraw($task)")
-      sender ! Withdraw(task, workload)
+      sender ! Withdraw(task, counterpart, workload)
       nbWithdraw += 1
       stay using updatedMind
 
     // If the worker agent receives a proposal
-    case Event(Propose(task, _, _), mind) =>
+    case Event(Propose(_, _, _), mind) =>
       stash
       stay using mind
 
     // If the worker agent receives a rejection
-    case Event(Reject(_, _), mind) =>
+    case Event(Reject(_, _, _), mind) =>
       stash
       stay using mind
 
@@ -260,7 +291,7 @@ class SwapBehaviour(worker: Worker, rule: SocialRule) extends WorkerAgent(worker
 
     // If the worker agent receives a query
     case Event(Query, mind) =>
-      sender ! Finish(nbPropose, nbAccept, nbReject, nbWithdraw, nbConfirm, nbCancel, nbInform)
+      sender ! Finish(nbPropose, nbCounterPropose, nbAccept, nbReject, nbWithdraw, nbConfirm, nbCancel, nbInform)
       stay using mind
 
     // If the worker agent receives another message

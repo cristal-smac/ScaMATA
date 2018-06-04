@@ -67,7 +67,8 @@ object DistributedSolver{
     val r = scala.util.Random
     val system = ActorSystem("DistributedSolver" + r.nextInt.toString)
     //The Actor system
-    val negotiationSolver = new DistributedSolver(pb, LCmax, SingleGiftOnly, system)
+    val negotiationSolver = new DistributedSolver(pb, LCmax, SingleSwapAndSingleGift, system)//
+    negotiationSolver.debug = true
     val sol = negotiationSolver.reallocate(allocation)
     println(sol.toString)
     println(sol.makespan())
