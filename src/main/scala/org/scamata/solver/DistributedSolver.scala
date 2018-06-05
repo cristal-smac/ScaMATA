@@ -2,12 +2,11 @@
 package org.scamata.solver
 
 import org.scamata.core.{Allocation, MWTA}
-import org.scamata.solver.{SingleSwapAndSingleGift, SingleGiftOnly}
+
 import org.scamata.actor._
 import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.pattern.ask
 import akka.util.Timeout
-
 import scala.collection.SortedSet
 import scala.concurrent.Await
 import scala.concurrent.duration._
