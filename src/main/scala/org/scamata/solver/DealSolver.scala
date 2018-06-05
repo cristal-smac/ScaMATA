@@ -25,6 +25,7 @@ case object SingleSwapAndSingleGift extends DealStrategy
   */
 abstract class DealSolver(pb : MWTA, rule : SocialRule, strategy : DealStrategy) extends Solver(pb, rule){
   var nbPropose = 0
+  var nbCounterPropose = 0
   var nbAccept = 0
   var nbReject = 0
   var nbWithdraw = 0

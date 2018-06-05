@@ -77,6 +77,7 @@ class CentralizedSolver(pb : MWTA, rule : SocialRule, strategy : DealStrategy) e
           } else {
             if (debug || trace) println(s"$bestSingleSwap")
             nbPropose += 1
+            if (bestSingleSwap.isInstanceOf[SingleGift]) nbCounterPropose +=1
             nbAccept += 1
             nbConfirm += 1
             allocation = bestAllocation
