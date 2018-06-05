@@ -22,7 +22,8 @@ object Test {
         case _ => throw new RuntimeException("Bad social rule")
       }
       val r = scala.util.Random
-      val system = ActorSystem("Test" + rule + r.nextInt.toString)
+      val system1 = ActorSystem("Test1" + rule + r.nextInt.toString)
+      val system2 = ActorSystem("Test2" + rule + r.nextInt.toString)
       //The Actor system
       val file = s"experiments/data/$rule.csv"
       val bw = new BufferedWriter(new FileWriter(file))
@@ -63,8 +64,8 @@ object Test {
             val lpSolver: LPSolver = new LPSolver(pb, rule)
             val giftSolver: CentralizedSolver = new CentralizedSolver(pb, rule, SingleGiftOnly)
             val swapSolver: CentralizedSolver = new CentralizedSolver(pb, rule, SingleSwapAndSingleGift)
-            val distributedGiftSolver: DistributedSolver = new DistributedSolver(pb, rule, SingleGiftOnly, system)
-            val distributedSwapSolver: DistributedSolver = new DistributedSolver(pb, rule, SingleSwapAndSingleGift, system)
+            val distributedGiftSolver: DistributedSolver = new DistributedSolver(pb, rule, SingleGiftOnly, system1)
+            val distributedSwapSolver: DistributedSolver = new DistributedSolver(pb, rule, SingleSwapAndSingleGift, system2)
             val lpAlloc = lpSolver.run()
             val giftAlloc = giftSolver.run()
             gift4gift += giftSolver.nbPropose
