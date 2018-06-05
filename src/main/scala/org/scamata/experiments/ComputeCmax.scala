@@ -26,9 +26,9 @@ object ComputeCmax {
       for (m <- 2 to 100) {
         for (n <- 2*m to 2*m) {
           if (debug) println(s"Test configuration with $m peers and $n tasks")
-          val nbPb = 100 // should be x*4
-          var (exhaustiveSolverRule, giftSolverRule, lpSolverRule) =
-            (List[Double](), List[Double](),  List[Double]())
+          val nbPb = 20 // should be x*4
+          var (exhaustiveSolverRule, giftSolverRule, swapSolverRule, lpSolverRule) =
+            (List[Double](), List[Double](),  List[Double](), List[Double]())
           for (o <- 1 to nbPb) {
             if (debug) println(s"Configuration $o")
             val pb = MWTA.randomProblem(m, n)
@@ -42,12 +42,12 @@ object ComputeCmax {
             val lpAlloc = lpSolver.run()
             exhaustiveSolverRule ::= exhaustiveAlloc.makespan()
             giftSolverRule ::= giftAlloc.makespan()
-            swapSolverRule ::= swapAllocAlloc.makespan()
+            swapSolverRule ::= swapAlloc.makespan()
             lpSolverRule ::= lpAlloc.makespan()
           }
           exhaustiveSolverRule = exhaustiveSolverRule.sortWith(_ < _)
           giftSolverRule = giftSolverRule.sortWith(_ < _)
-          swapSolverRule = swapolverRule.sortWith(_ < _)
+          swapSolverRule = swapSolverRule.sortWith(_ < _)
           lpSolverRule = lpSolverRule.sortWith(_ < _)
           bw.write(
             s"$m,$n,"+
