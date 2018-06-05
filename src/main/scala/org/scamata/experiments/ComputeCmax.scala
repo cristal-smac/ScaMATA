@@ -36,19 +36,24 @@ object ComputeCmax {
             val exhaustiveAlloc = exhaustiveSolver.run()
             val giftSolver = new CentralizedSolver(pb, rule, SingleGiftOnly)
             val giftAlloc = giftSolver.run()
+            val swapSolver = new CentralizedSolver(pb, rule, SingleSwapAndSingleGift)
+            val swapAlloc = swapSolver.run()
             val lpSolver = new LPSolver(pb, rule)
             val lpAlloc = lpSolver.run()
             exhaustiveSolverRule ::= exhaustiveAlloc.makespan()
             giftSolverRule ::= giftAlloc.makespan()
+            swapSolverRule ::= swapAllocAlloc.makespan()
             lpSolverRule ::= lpAlloc.makespan()
           }
           exhaustiveSolverRule = exhaustiveSolverRule.sortWith(_ < _)
           giftSolverRule = giftSolverRule.sortWith(_ < _)
+          swapSolverRule = swapolverRule.sortWith(_ < _)
           lpSolverRule = lpSolverRule.sortWith(_ < _)
           bw.write(
             s"$m,$n,"+
               s"${exhaustiveSolverRule.min},${exhaustiveSolverRule(nbPb/4)},${exhaustiveSolverRule(nbPb/2)},${exhaustiveSolverRule(nbPb*3/4)},${exhaustiveSolverRule.max}," +
               s"${giftSolverRule.min},${giftSolverRule(nbPb/4)},${giftSolverRule(nbPb/2)},${giftSolverRule(nbPb*3/4)},${giftSolverRule.max}," +
+              s"${swapSolverRule.min},${swapSolverRule(nbPb/4)},${swapSolverRule(nbPb/2)},${swapSolverRule(nbPb*3/4)},${swapSolverRule.max}," +
               s"${lpSolverRule.min},${lpSolverRule(nbPb/4)},${lpSolverRule(nbPb/2)},${lpSolverRule(nbPb*3/4)},${lpSolverRule.max}\n")
           bw.flush()
         }
