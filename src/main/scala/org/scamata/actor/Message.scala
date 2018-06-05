@@ -39,7 +39,6 @@ case class Reject(task : Task, countpart : Task, workload: Double) extends Messa
 case class Accept(task : Task, countpart : Task, workload: Double) extends Message // Accept a proposal
 case class Confirm(task : Task, countpart : Task, workload: Double) extends Message // Confirm a deal
 case class Withdraw(task : Task, countpart : Task, workload: Double) extends Message // Withdraw a deal
-case class Cancel(task : Task, countpart : Task, workload: Double) extends Message // Cancel a deal
 case class Inform(worker: Worker, workload: Double) extends Message // Inform the peer about the workload
 
 

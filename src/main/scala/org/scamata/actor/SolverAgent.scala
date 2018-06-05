@@ -100,7 +100,6 @@ class SolverAgent(pb: MWTA, rule: SocialRule, strategy : DealStrategy) extends A
       val allocation = status.allocation.update(worker, bundle)
       if (debug) println(s"SolverAgent: ${stoppedActor.size} agent(s) in pause since $worker stops with bundle $bundle")
       if (stoppedActor.size == pb.m()) {
-        //trace = true
         if (debug) println(s"SolverAgent: all the actors are in pause")
         directory.allActors().foreach(a => a ! Query) // stops the actors
       }
