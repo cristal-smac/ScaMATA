@@ -11,7 +11,7 @@ import scala.collection.SortedSet
 class Message
 
 // Managing messages
-case object Debug extends  Message
+case object Trace extends  Message
 // Start the reallocation
 case class Start(allocation: Allocation) extends Message
 // Initiate the worker with the bundle the directory and the cost matrix

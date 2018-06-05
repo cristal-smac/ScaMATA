@@ -9,11 +9,11 @@ import scala.collection.SortedSet
   */
 
 object toy4x4{
-  val a1 = new Worker("a1")
-  val a2 = new Worker("a2")
-  val a3 = new Worker("a3")
-  val a4 = new Worker("a4")
-  val agents = SortedSet(a1, a2, a3, a4)
+  val a1 = new Worker("1")
+  val a2 = new Worker("2")
+  val a3 = new Worker("3")
+  val a4 = new Worker("4")
+  val workers = SortedSet(a1, a2, a3, a4)
 
   val t1 = new Task("t1")
   val t2 = new Task("t2")
@@ -38,5 +38,5 @@ object toy4x4{
   cost+= ((a4, t2) -> 4.0)
   cost+= ((a4, t3) -> 3.0)
   cost+= ((a4, t4) -> 2.0)
-  val pb = new MWTA(agents, tasks, cost)
+  val pb = new MWTA(workers, tasks, cost)
 }

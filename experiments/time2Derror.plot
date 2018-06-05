@@ -23,7 +23,7 @@ plot "data/cmax.csv" using 1:($44)/1E9:($46)/1E9 with filledcurves lc "light-red
      "data/cmax.csv" using 1:($39)/1E9:($41)/1E9 with filledcurves lc "light-cyan" notitle,\
      "data/cmax.csv" using 1:($40)/1E9 with lines dt 9 lc "dark-cyan" title 'Dis. Swap'
 set output 'figures/time2DerrorFlowtime.pdf'
-set xlabel "m workers (10m tasks)"
+set xlabel "m workers (5m tasks)"
 plot "data/flowtime.csv" using 1:($44)/1E9:($46)/1E9 with filledcurves lc "light-red" notitle,\
      "data/flowtime.csv" using 1:($45)/1E9 with lines dt 5 lc "dark-red" title 'LP',\
      "data/flowtime.csv" using 1:($24)/1E9:($26)/1E9 with filledcurves lc "light-blue" notitle,\

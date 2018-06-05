@@ -36,7 +36,7 @@ class DistributedSolver(pb : MWTA, rule : SocialRule, strategy : DealStrategy, s
     if (debug) {
       for (i<- 1 to pb.m) println(s"participant a$i")
     }
-    if (debug) supervisor ! Debug
+    if (debug) supervisor ! Trace
     val future = supervisor ? Start(allocation)
     val result = Await.result(future, timeout.duration).asInstanceOf[Outcome]
     if (debug) println("@enduml")

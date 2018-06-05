@@ -57,8 +57,8 @@ class SolverAgent(pb: MWTA, rule: SocialRule, strategy : DealStrategy) extends A
     */
   when(DefaultSolverState) {
     //In order to debug
-    case Event(Debug, status) =>
-      directory.allActors().foreach( _ ! Debug)
+    case Event(Trace, status) =>
+      directory.allActors().foreach( _ ! Trace)
       stay using status
 
     //When the works should be done
@@ -79,7 +79,7 @@ class SolverAgent(pb: MWTA, rule: SocialRule, strategy : DealStrategy) extends A
       if (nbReady == pb.m()) {
         //When all of them are ready
         directory.allActors().foreach { actor: ActorRef => //Trigger them
-          if (debug) println(s"SolverAgent starts ${directory.workers(sender)}")
+          if (debug) println(s"SolverAgent starts ${directory.workers(actor)}")
           actor ! Trigger
         }
       }

@@ -36,15 +36,16 @@ class WorkerAgentBehaviour(worker: Worker, rule: SocialRule, strategy: DealStrat
         // If the agent is triggered by the solverAgent
         broadcastInform(workload)
       }
-      // Otherwise the mind is up to date
+       // Otherwise the mind is up to date
       val suppliers = rule match { // The potential suppliers are
         case LC => // all the peers
           directory.peers(worker)
         case LCmax => // the peers with a smallest workload
-          directory.peers(worker).filter(updatedMind.belief(_) < workload)
+          directory.peers(worker).filter(j => updatedMind.belief(j) < workload)
       }
       // Either the worker has an empty bundle or no potential partners
       if (suppliers.isEmpty || updatedMind.bundle.isEmpty) {
+        if (debug) println(s"$worker desesperated since $suppliers")
         solverAgent ! Stopped(updatedMind.bundle)
         stay using updatedMind
       } else { // Otherwise
@@ -121,7 +122,7 @@ class WorkerAgentBehaviour(worker: Worker, rule: SocialRule, strategy: DealStrat
       val opponent = directory.workers(sender)
       var updatedMind = mind.updateBelief(opponent, peerWorkload)
       val workload = updatedMind.belief(worker)
-      if (trace) println(s"$worker I -> $opponent : Reject($task, $counterpart)")
+      if (trace) println(s"$worker -> $opponent : Reject($task, $counterpart)")
       sender ! Reject(task, counterpart, workload)
       nbReject += 1
       goto(Initial) using updatedMind
@@ -289,8 +290,8 @@ class WorkerAgentBehaviour(worker: Worker, rule: SocialRule, strategy: DealStrat
       this.directory = d
       var updatedMind = mind.addBundle(bundle)
       val workload = worker.workload(bundle, costMatrix)
-      updatedMind = updatedMind.updateBelief(worker, workload)
       updatedMind = updatedMind.initBelief(bundle, directory.allWorkers())
+      updatedMind = updatedMind.updateBelief(worker, workload)
       sender ! Ready
       stay using updatedMind
 

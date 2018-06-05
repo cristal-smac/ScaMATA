@@ -13,7 +13,7 @@ object DebugDistributedGiftSolver {
     val rule : SocialRule=LCmax//LC
     val strategy = SingleSwapAndSingleGift//SingleGiftOnly
     val r = scala.util.Random
-    val system = ActorSystem("Debug" + r.nextInt.toString) //The Actor system
+    val system = ActorSystem("Trace" + r.nextInt.toString) //The Actor system
     for (m <- 2 to 100) {
       for (n <- 10 * m to 10* m) {
         println(s"DEBUG configuration with $m peers and $n tasks")

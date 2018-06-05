@@ -144,9 +144,8 @@ abstract class WorkerAgent(val worker: Worker, val rule: SocialRule, val strateg
     */
   def defaultReceive(message: Message): Any = message match {
     case Stop => context.stop(self)
-    case Debug =>
+    case Trace =>
       this.trace = true
-      this.debug = true
   }
 
   /**
