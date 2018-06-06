@@ -23,48 +23,50 @@ class CentralizedSolver(pb : MWTA, rule : SocialRule, strategy : DealStrategy) e
     * Reallocate the initial allocation
     */
   def reallocate(initialAllocation: Allocation): Allocation = {
-    var allocation = initialAllocation
-    var contractors: ListBuffer[Worker] = Random.shuffle(pb.workers.to[ListBuffer])
+    var a = initialAllocation
+    var cons: ListBuffer[Worker] = Random.shuffle(pb.workers.to[ListBuffer])
     if (debug) println("All peers are initially potential contractors")
-    while(contractors.nonEmpty){
-      contractors.foreach { initiator: Worker =>
-        if (debug) println(s"$initiator tries to find a single gift which is socially rational")
-        var responders = pb.workers - initiator
-        if (rule == LCmax) responders=responders.filter(j => allocation.workload(j) < allocation.workload(initiator))
-        if (responders.isEmpty || allocation.bundle(initiator).isEmpty) {
-          contractors -= initiator
-          if (debug) println(s"$initiator is desesperated")
+    while(cons.nonEmpty){
+      cons.foreach { i: Worker =>
+        var responders = pb.workers - i
+        if (rule == LCmax) responders=responders.filter(j => a.workload(j) < a.workload(i))
+        if (responders.isEmpty || a.bundle(i).isEmpty) {
+          cons -= i
+          if (debug) println(s"$i is desesperated")
         }
         else {
           var found = false
-          var bestAllocation: Allocation = allocation
-          var bestSingleSwap: Swap = new SingleSwap(initiator, NoWorker, NoTask, NoTask)
-          var bestGoal = rule match {
-            case LCmax => allocation.workload(initiator)
+          var bestA: Allocation = a
+          var bestD: Deal= new SingleSwap(i, NoWorker, NoTask, NoTask)
+          var bestT = rule match {
+            case LCmax => a.workload(i)
             case LC => 0.0
           }
-          responders.foreach { responder =>
-            allocation.bundle(initiator).foreach { task1 =>
+          responders.foreach { r =>
+            a.bundle(i).foreach { t1 =>
               val counterparts = strategy match {
                 case SingleGiftOnly =>  Set[Task](NoTask)
-                case SingleSwapAndSingleGift =>  allocation.bundle(responder)+NoTask
+                case SingleSwapAndSingleGift =>  a.bundle(r)+NoTask
               }
-              counterparts.foreach { task2 : Task =>
-                val deal : Swap = task2 match {
-                  case NoTask => new SingleGift(initiator, responder, task1)
-                  case _ => new SingleSwap(initiator, responder, task1, task2)
+              counterparts.foreach { t2 : Task =>
+                val deal : Deal = t2 match {
+                  case NoTask => new SingleGift(i, r, t1)
+                  case _ => new SingleSwap(i, r, t1, t2)
                 }
-                val postAllocation = allocation.apply(deal)
-                val currentGoal = rule match {
+                val postA = a.apply(deal)
+                val currentT = rule match {
                   case LCmax =>
-                    Math.max(postAllocation.workload(initiator), postAllocation.workload(responder))
+                    Math.max(postA.workload(i), postA.workload(r))
                   case LC =>
-                    pb.cost(responder, task1) - pb.cost(initiator, task1) + pb.cost(initiator, task2) - pb.cost(responder, task2)
+                    if (pb.cost(r, t1) > pb.cost(i, t1) &&
+                      pb.cost(i, t2) > pb.cost(r, t2))
+                      pb.cost(r, t1) - pb.cost(i, t1) + pb.cost(i, t2) - pb.cost(r, t2)
+                    else 0.0
                 }
-                if (currentGoal < bestGoal) {
-                  bestGoal = currentGoal
-                  bestAllocation = postAllocation
-                  bestSingleSwap = deal
+                if (currentT < bestT) {
+                  bestT = currentT
+                  bestA = postA
+                  bestD = deal
                   found = true
                 }
               }
@@ -72,25 +74,25 @@ class CentralizedSolver(pb : MWTA, rule : SocialRule, strategy : DealStrategy) e
           }
           // Select the best apply if any
           if (!found) {
-            if (debug) println(s"$initiator is deseperated")
-            contractors -= initiator
+            if (debug) println(s"$i is deseperated")
+            cons -= i
           } else {
-            if (debug || trace) println(s"$bestSingleSwap")
+            if (debug || trace) println(s"$bestD")
             nbPropose += 1
-            if (bestSingleSwap.isInstanceOf[SingleGift]) nbCounterPropose +=1
+            if (bestD.isInstanceOf[SingleGift]) nbCounterPropose +=1
             nbAccept += 1
             nbConfirm += 1
-            allocation = bestAllocation
+            a = bestA
             if (rule == LCmax) {
-              contractors = contractors.toSet.union(pb.workers.filter(j => allocation.workload(j) > bestGoal)).to[ListBuffer]
+              cons = cons.toSet.union(pb.workers.filter(j => a.workload(j) > bestT)).to[ListBuffer]
             }
-            contractors = Random.shuffle(contractors)
+            cons = Random.shuffle(cons)
 
           }
         }
       }
     }
-    allocation
+    a
   }
 }
 
