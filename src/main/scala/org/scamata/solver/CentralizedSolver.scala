@@ -101,12 +101,13 @@ object CentralizedSolver extends App {
   val debug = false
   import org.scamata.example.toy4x4._
   println(pb)
-  val negotiationSolver = new CentralizedSolver(pb,LCmax,SingleSwapAndSingleGift)
+  val negotiationSolver = new CentralizedSolver(pb, LC, SingleSwapAndSingleGift)//
   var allocation = new Allocation(pb)
   allocation = allocation.update(a1, SortedSet(t4))
   allocation = allocation.update(a2, SortedSet(t3))
   allocation = allocation.update(a3, SortedSet(t1))
   allocation = allocation.update(a4, SortedSet(t2))
   println(allocation)
+  negotiationSolver.debug = true
   println(negotiationSolver.reallocate(allocation).toString)
 }
