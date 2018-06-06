@@ -105,7 +105,7 @@ abstract class WorkerAgent(val worker: Worker, val rule: SocialRule, val strateg
   var trace: Boolean = false
   var debug: Boolean = false
 
-  val rnd = ThreadLocalRandom.current()
+  val rnd : ThreadLocalRandom = ThreadLocalRandom.current()
 
   val deadline: FiniteDuration = 300 nanosecond
 

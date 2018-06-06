@@ -14,7 +14,7 @@ object DebugDistributedGiftSolver {
     val strategy = SingleSwapAndSingleGift//SingleGiftOnly
     val r = scala.util.Random
     val system = ActorSystem("Trace" + r.nextInt.toString) //The Actor system
-    for (m <- 2 to 100) {
+    for (m <- 20 to 100) {
       for (n <- 10 * m to 10* m) {
         println(s"DEBUG configuration with $m peers and $n tasks")
         val nbPb = 10
@@ -25,7 +25,7 @@ object DebugDistributedGiftSolver {
           val pb =  MWTA.randomProblem(m, n)
           //println(pb)
           val distributedGiftSolver: DistributedSolver = new DistributedSolver(pb, rule, strategy, system)
-          //distributedGiftSolver.debug = true
+          distributedGiftSolver.debug = true
           val giftSolver: CentralizedSolver = new CentralizedSolver(pb, rule, strategy)
           val outcome = giftSolver.run()
           nbDeal += giftSolver.nbConfirm
