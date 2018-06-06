@@ -23,7 +23,7 @@ plot  "data/cmax.csv" using 1:4:6 with filledcurves lc "light-blue" notitle,\
       "data/cmax.csv" using 1:24:26 with filledcurves lc "light-red" notitle,\
       "data/cmax.csv" using 1:25 with lines dt 5 lc "dark-red" title 'LP'
 set ylabel "Flowtime"
-set xlabel "m workers (5m tasks)"
+set xlabel "m workers (10m tasks)"
 set output 'figures/rule2DerrorFlowtime.pdf'
 plot  "data/flowtime.csv" using 1:4:6 with filledcurves lc "light-blue" notitle,\
       "data/flowtime.csv" using 1:5 with lines dt 3 lc "dark-blue" title 'Gift',\
