@@ -37,7 +37,7 @@ class CentralizedSolver(pb : MWTA, rule : SocialRule, strategy : DealStrategy) e
         else {
           var found = false
           var bestA: Allocation = a
-          var bestD: Deal= new SingleSwap(i, NoWorker, NoTask, NoTask)
+          var bestD: Swap= new SingleSwap(i, NoWorker, NoTask, NoTask)
           var bestT = rule match {
             case LCmax => a.workload(i)
             case LC => 0.0
@@ -49,7 +49,7 @@ class CentralizedSolver(pb : MWTA, rule : SocialRule, strategy : DealStrategy) e
                 case SingleSwapAndSingleGift =>  a.bundle(r)+NoTask
               }
               counterparts.foreach { t2 : Task =>
-                val deal : Deal = t2 match {
+                val deal : Swap = t2 match {
                   case NoTask => new SingleGift(i, r, t1)
                   case _ => new SingleSwap(i, r, t1, t2)
                 }
@@ -58,11 +58,13 @@ class CentralizedSolver(pb : MWTA, rule : SocialRule, strategy : DealStrategy) e
                   case LCmax =>
                     Math.max(postA.workload(i), postA.workload(r))
                   case LC =>
-                    if (pb.cost(r, t1) > pb.cost(i, t1) &&
-                      pb.cost(i, t2) > pb.cost(r, t2))
+                    if (t2 !=NoTask && pb.cost(r, t1) < pb.cost(i, t1) &&
+                      pb.cost(i, t2) < pb.cost(r, t2))
                       pb.cost(r, t1) - pb.cost(i, t1) + pb.cost(i, t2) - pb.cost(r, t2)
+                    else if (t2 == NoTask && pb.cost(r, t1) < pb.cost(i, t1))
+                      pb.cost(r, t1) - pb.cost(i, t1)
                     else 0.0
-                }
+                    }
                 if (currentT < bestT) {
                   bestT = currentT
                   bestA = postA
@@ -103,7 +105,7 @@ object CentralizedSolver extends App {
   val debug = false
   import org.scamata.example.toy4x4._
   println(pb)
-  val negotiationSolver = new CentralizedSolver(pb, LC, SingleSwapAndSingleGift)//
+  val negotiationSolver = new CentralizedSolver(pb, LCmax, SingleSwapAndSingleGift)//SingleSwapAndSingleGift
   var allocation = new Allocation(pb)
   allocation = allocation.update(a1, SortedSet(t4))
   allocation = allocation.update(a2, SortedSet(t3))
