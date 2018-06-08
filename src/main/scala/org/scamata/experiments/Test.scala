@@ -142,7 +142,7 @@ object Test {
           s"${lpSolverTime.min},${lpSolverTime(nbPb / 4)},${lpSolverTime(nbPb / 2)},${lpSolverTime(nbPb * 3 / 4)},${lpSolverTime.max}," +
           s"${lpSolverPreTime.min},${lpSolverPreTime(nbPb / 4)},${lpSolverPreTime(nbPb / 2)},${lpSolverPreTime(nbPb * 3 / 4)},${lpSolverPreTime.max}," +
           s"${lpSolverPostTime.min},${lpSolverPostTime(nbPb / 4)},${lpSolverPostTime(nbPb / 2)},${lpSolverPostTime(nbPb / 4)},${lpSolverPostTime.max}," +
-          s"$gift4gift,$gift4swap,$swap4swap," +
+          s"${gift4gift / nbPb},${gift4swap / nbPb },${swap4swap /nbPb}," +
           s"${nbPropose4gift / nbPb},${nbCounterPropose4gift / nbPb},${nbAccept4gift / nbPb},${nbReject4gift / nbPb},${nbWithdraw4gift / nbPb},${nbConfirm4gift / nbPb},${nbInform4gift / nbPb}," +
           s"${nbPropose4swap / nbPb},${nbCounterPropose4swap / nbPb},${nbAccept4swap / nbPb},${nbReject4swap / nbPb},${nbWithdraw4swap / nbPb},${nbConfirm4swap / nbPb},${nbInform4swap / nbPb}\n")
       bw.flush()
