@@ -60,10 +60,10 @@ object DistributedSolver{
     import org.scamata.example.toy4x4._
     println(pb)
     var allocation = new Allocation(pb)
-    allocation = allocation.update(a1, SortedSet(t4))
-    allocation = allocation.update(a2, SortedSet(t3))
-    allocation = allocation.update(a3, SortedSet(t1))
-    allocation = allocation.update(a4, SortedSet(t2))
+    allocation = allocation.update(w1, SortedSet(t4))
+    allocation = allocation.update(w2, SortedSet(t3))
+    allocation = allocation.update(w3, SortedSet(t1))
+    allocation = allocation.update(w4, SortedSet(t2))
     println(allocation)
     val r = scala.util.Random
     val system = ActorSystem("DistributedSolver" + r.nextInt.toString)

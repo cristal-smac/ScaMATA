@@ -14,7 +14,7 @@ class MWSTA(workers: SortedSet[Worker], tasks: SortedSet[Task], val locationMatr
   MWTA(workers: SortedSet[Worker], tasks: SortedSet[Task]){
 
   locationMatrix.foreach{ case ((w : Worker, t: Task), nbChunks : Int) =>
-    costMatrix += ((w, t) -> (nbChunks +
+    costMatrix += ((w, t) -> (nbChunks + 2 *
     locationMatrix.filterKeys( k  => k._1 != w && k._2 == t).foldLeft(0)(_+_._2) )
       )
   }

@@ -24,25 +24,25 @@ object FromSituated4x4{
 
   var cost: Map[(Worker, Task), Double] = Map[(Worker,Task), Double]()
   cost+= ((w1, t1) -> 6.0)
-  cost+= ((w1, t2) -> 12.0)
+  cost+= ((w1, t2) -> 10.0)
   cost+= ((w1, t3) -> 17.0)
-  cost+= ((w1, t4) -> 28.0)
+  cost+= ((w1, t4) -> 24.0)
   cost+= ((w2, t1) -> 10.0)
-  cost+= ((w2, t2) -> 9.0)
+  cost+= ((w2, t2) -> 8.0)
   cost+= ((w2, t3) -> 18.0)
   cost+= ((w2, t4) -> 22.0)
   cost+= ((w3, t1) -> 9.0)
-  cost+= ((w3, t2) -> 12.0)
+  cost+= ((w3, t2) -> 10.0)
   cost+= ((w3, t3) -> 10.0)
   cost+= ((w3, t4) -> 24.0)
   cost+= ((w4, t1) -> 10.0)
-  cost+= ((w4, t2) -> 9.0)
+  cost+= ((w4, t2) -> 7.0)
   cost+= ((w4, t3) -> 18.0)
   cost+= ((w4, t4) -> 14.0)
   val pb = new MWTA(workers, tasks, cost)
 
   def main(args: Array[String]): Unit = {
-    val negotiationSolver = new CentralizedSolver(pb, LCmax, SingleSwapAndSingleGift)//SingleSwapAndSingleGift
+    val negotiationSolver = new CentralizedSolver(pb, LCmax, SingleSwapAndSingleGift)//SingleGiftOnly
     var allocation = new Allocation(pb)
     allocation = allocation.update(w1, SortedSet(t4))
     allocation = allocation.update(w2, SortedSet(t3))

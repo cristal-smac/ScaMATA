@@ -107,10 +107,10 @@ object CentralizedSolver extends App {
   println(pb)
   val negotiationSolver = new CentralizedSolver(pb, LCmax, SingleSwapAndSingleGift)//SingleSwapAndSingleGift
   var allocation = new Allocation(pb)
-  allocation = allocation.update(a1, SortedSet(t4))
-  allocation = allocation.update(a2, SortedSet(t3))
-  allocation = allocation.update(a3, SortedSet(t1))
-  allocation = allocation.update(a4, SortedSet(t2))
+  allocation = allocation.update(w1, SortedSet(t4))
+  allocation = allocation.update(w2, SortedSet(t3))
+  allocation = allocation.update(w3, SortedSet(t1))
+  allocation = allocation.update(w4, SortedSet(t2))
   println(allocation)
   negotiationSolver.debug = true
   println(negotiationSolver.reallocate(allocation).toString)
