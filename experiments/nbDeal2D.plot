@@ -6,14 +6,16 @@ set auto y
 set grid
 set ticslevel 0
 set style data lines
-set xlabel "m workers (10m tasks)"
-set ylabel "Nb of gift"
+set key bottom right
+set xlabel "m workers (5m tasks)"
+set ylabel "Number of deals"
 set log y
 set output 'figures/nbDeal2DCmax.pdf'
-plot  "data/cmax.csv" using 1:63 with lines lc "dark-blue" title 'nbGift 4 GiftOnly',\
-       "data/cmax.csv" using 1:64 with lines lc "dark-green" title 'nbGift 4 SwapAndGift',\
-       "data/cmax.csv" using 1:65 with lines lc "dark-red" title 'nbSwap 4 SwapAndGift'
+plot  "data/cmax.csv" using 1:63 with lines dt 1 lc "dark-blue" title 'nb. of gifts for the strategy Gift',\
+       "data/cmax.csv" using 1:64 with lines dt 3 lc "dark-green" title 'nb. of gifts for the strategy Swap',\
+       "data/cmax.csv" using 1:65 with lines dt 5 lc "dark-red" title 'nb. of swaps for the strategy Swap'
 set output 'figures/nbDeal2DFlowtime.pdf'
-plot  "data/flowtime.csv" using 1:63 with lines lc "dark-blue" title 'nbGift 4 GiftOnly',\
-       "data/flowtime.csv" using 1:64 with lines lc "dark-green" title 'nbGift 4 SwapAndGift',\
-       "data/flowtime.csv" using 1:65 with lines lc "dark-red" title 'nbSwap 4 SwapAndGift'
+set xlabel "m workers (10m tasks)"
+plot  "data/flowtime.csv" using 1:63 with lines dt 1 lc "dark-blue" title 'nb. of gifts  for the strategy Gift',\
+       "data/flowtime.csv" using 1:64 with lines dt 3 lc "dark-green" title 'nb. of gifts for the strategy Swap',\
+       "data/flowtime.csv" using 1:65 with lines dt 5 lc "dark-red" title 'nb. of swaps for the strategy Swap'
