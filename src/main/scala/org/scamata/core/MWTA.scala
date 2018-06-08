@@ -6,11 +6,23 @@ import scala.collection.SortedSet
 
 /**
   * Class representing a Multi-Worker Task Allocation problem
-  * @param workers
-  * @param tasks
-  * @param cost Matrix
+  * @param workers performing the tasks
+  * @param tasks to be performed
   */
-class MWTA(val workers: SortedSet[Worker], val tasks: SortedSet[Task], val costMatrix : Map[(Worker, Task), Double]) {
+class MWTA(val workers: SortedSet[Worker], val tasks: SortedSet[Task]) {
+
+  var costMatrix : Map[(Worker, Task), Double] = Map[(Worker, Task), Double]()
+
+  /**
+    * Constructor
+    * @param workers performing the tasks
+    * @param tasks to be performed
+    * @param costMatrix cost matrix for performing the task by the worker
+    */
+  def this(workers: SortedSet[Worker], tasks: SortedSet[Task], costMatrix : Map[(Worker, Task), Double]) ={
+    this(workers, tasks)
+    this.costMatrix = costMatrix
+  }
 
   /**
     * Return the cost of a task for a worker, eventually 0.0 if NoTask

@@ -14,5 +14,6 @@ plot  "data/cmax.csv" using 1:63 with lines lc "dark-blue" title 'nbGift 4 GiftO
        "data/cmax.csv" using 1:64 with lines lc "dark-green" title 'nbGift 4 SwapAndGift',\
        "data/cmax.csv" using 1:65 with lines lc "dark-red" title 'nbSwap 4 SwapAndGift'
 set output 'figures/nbDeal2DFlowtime.pdf'
-plot  "data/flowtime.csv" using 1:53 with lines lc "dark-blue" title 'Gift',\
-       "data/flowtime.csv" using 1:58 with lines lc "dark-green" title 'Dis. Gift'
+plot  "data/flowtime.csv" using 1:63 with lines lc "dark-blue" title 'nbGift 4 GiftOnly',\
+       "data/flowtime.csv" using 1:64 with lines lc "dark-green" title 'nbGift 4 SwapAndGift',\
+       "data/flowtime.csv" using 1:65 with lines lc "dark-red" title 'nbSwap 4 SwapAndGift'
