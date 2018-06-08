@@ -105,10 +105,10 @@ class SolverAgent(pb: MWTA, rule: SocialRule, strategy : DealStrategy) extends A
       }
       stay using new SupervisorStatus(stoppedActor, allocation)
 
-    case Event(Finish(nbP, nbCount, nbA, nbR, nbW, nbConf, nbCan, nbI), status) =>
+    case Event(Finish(nbP, nbCP, nbA, nbR, nbW, nbConf, nbCan, nbI), status) =>
       if (!finishedActor.contains(sender)) {
         nbPropose += nbP
-        nbCounterPropose += nbCount
+        nbCounterPropose += nbCP
         nbAccept += nbA
         nbReject += nbR
         nbWithdraw += nbW

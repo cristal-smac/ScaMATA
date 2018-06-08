@@ -41,6 +41,7 @@ class DistributedSolver(pb : MWTA, rule : SocialRule, strategy : DealStrategy, s
     val result = Await.result(future, timeout.duration).asInstanceOf[Outcome]
     if (debug) println("@enduml")
     nbPropose = result.nbPropose
+    nbCounterPropose = result.nbCounterPropose
     nbAccept = result.nbAccept
     nbReject = result.nbReject
     nbWithdraw = result.nbWithdraw
@@ -71,7 +72,8 @@ object DistributedSolver{
     negotiationSolver.debug = true
     val sol = negotiationSolver.reallocate(allocation)
     println(sol.toString)
-    println(sol.makespan())
+    println("Makespan "+sol.makespan())
+    println("NbCounterProposal "+negotiationSolver.nbCounterPropose)
     System.exit(1)
   }
 }
