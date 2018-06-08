@@ -34,7 +34,7 @@ class DistributedSolver(pb : MWTA, rule : SocialRule, strategy : DealStrategy, s
     if (debug) println("skinparam monochrome true")
     if (debug) println("hide footbox")
     if (debug) {
-      for (i<- 1 to pb.m) println(s"participant a$i")
+      for (i<- 1 to pb.m) println(s"participant $i")
     }
     if (debug) supervisor ! Trace
     val future = supervisor ? Start(allocation)

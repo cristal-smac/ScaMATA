@@ -1,9 +1,10 @@
 // Copyright (C) Maxime MORGE 2018
 package org.scamata.example
 
+import akka.actor.ActorSystem
 import org.scamata.core.{Allocation, MWSTA, Task, Worker}
 import org.scamata.example.FromSituated4x4._
-import org.scamata.solver.{CentralizedSolver, LCmax, LC,  SingleSwapAndSingleGift, SingleGiftOnly}
+import org.scamata.solver._
 
 import scala.collection.SortedSet
 
@@ -42,6 +43,8 @@ object Situated4x4 {
   def main(args: Array[String]): Unit = {
     println(pb)
     val negotiationSolver = new CentralizedSolver(pb, LCmax, SingleSwapAndSingleGift)//SingleGiftOnly
+    //val system = ActorSystem("Situated4x4")
+    //val negotiationSolver = new DistributedSolver(pb, LCmax, SingleSwapAndSingleGift, system)//SingleGiftOnly
     var allocation = new Allocation(pb)
     allocation = allocation.update(w1, SortedSet(t4))
     allocation = allocation.update(w2, SortedSet(t3))
