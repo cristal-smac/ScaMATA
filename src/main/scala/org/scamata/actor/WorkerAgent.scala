@@ -205,9 +205,13 @@ abstract class WorkerAgent(val worker: Worker, val rule: SocialRule, val strateg
         case LCmax =>
           Math.max(swapWorkload, swapOpponentWorkload)
         case LC =>
-          if (cost(opponent, task) > cost(worker, task) &&
+          if (counterpart!= NoTask &&
+            cost(opponent, task) > cost(worker, task) &&
             cost(worker, counterpart) > cost(opponent, counterpart))
-          cost(opponent, task) - cost(worker, task) + cost(worker, counterpart) - cost(opponent, counterpart)
+            cost(opponent, task) - cost(worker, task) + cost(worker, counterpart) - cost(opponent, counterpart)
+          else if (counterpart!= NoTask &&
+            cost(opponent, task) < cost(worker, task))
+            cost(opponent, task) - cost(worker, task)
           else 0.0
       }
       if (swapGoal < bestGoal) {
