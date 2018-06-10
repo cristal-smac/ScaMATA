@@ -45,7 +45,8 @@ class DistributedSolver(pb : MWTA, rule : SocialRule, strategy : DealStrategy, s
     nbAccept = result.nbAccept
     nbReject = result.nbReject
     nbWithdraw = result.nbWithdraw
-    nbConfirm = result.nbConfirm
+    nbConfirmGift = result.nbConfirmGift
+    nbConfirmSwap = result.nbConfirmSwap
     nbInform = result.nbInform
     if (debug) println(result.allocation)
     result.allocation

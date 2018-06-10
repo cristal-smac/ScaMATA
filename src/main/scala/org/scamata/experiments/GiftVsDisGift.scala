@@ -44,13 +44,13 @@ object GiftVsDisGift {
             val giftSolver : CentralizedSolver  = new CentralizedSolver(pb, rule, SingleGiftOnly)
             val distributedGiftSolver : DistributedSolver  = new DistributedSolver(pb, rule, SingleGiftOnly, system)
             val giftAlloc = giftSolver.run()
-            deal +=  giftSolver.nbConfirm
+            deal +=  giftSolver.nbConfirmGift + giftSolver.nbConfirmSwap
             val distributedGiftAlloc = distributedGiftSolver.run()
             nbPropose += distributedGiftSolver.nbPropose
             nbAccept += distributedGiftSolver.nbAccept
             nbReject += distributedGiftSolver.nbReject
             nbWithdraw += distributedGiftSolver.nbWithdraw
-            nbConfirm += distributedGiftSolver.nbConfirm
+            nbConfirm += distributedGiftSolver.nbConfirmGift + distributedGiftSolver.nbConfirmSwap
             nbInform += distributedGiftSolver.nbInform
             rule match {
                 case LCmax =>

@@ -81,15 +81,17 @@ class CentralizedSolver(pb : MWTA, rule : SocialRule, strategy : DealStrategy) e
           } else {
             if (debug || trace) println(s"$bestD")
             nbPropose += 1
-            if (bestD.isInstanceOf[SingleGift]) nbCounterPropose +=1
+            if (! bestD.isInstanceOf[SingleGift]) {
+              nbCounterPropose += 1
+              nbConfirmSwap +=1
+            }
+            else nbConfirmGift += 1
             nbAccept += 1
-            nbConfirm += 1
             a = bestA
             if (rule == LCmax) {
               cons = cons.toSet.union(pb.workers.filter(j => a.workload(j) > bestT)).to[ListBuffer]
             }
             cons = Random.shuffle(cons)
-
           }
         }
       }

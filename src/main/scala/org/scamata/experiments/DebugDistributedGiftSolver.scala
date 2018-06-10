@@ -28,9 +28,9 @@ object DebugDistributedGiftSolver {
           distributedGiftSolver.debug = true
           val giftSolver: CentralizedSolver = new CentralizedSolver(pb, rule, strategy)
           val outcome = giftSolver.run()
-          nbDeal += giftSolver.nbConfirm
+          nbDeal += giftSolver.nbConfirmGift + giftSolver.nbConfirmSwap
           val disOutcome = distributedGiftSolver.run()
-          nbDealDis += distributedGiftSolver.nbConfirm
+          nbDealDis += distributedGiftSolver.nbConfirmGift + distributedGiftSolver.nbConfirmSwap
           goal += outcome.makespan()
           disGoal += disOutcome.makespan()
         }
