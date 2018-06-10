@@ -116,7 +116,8 @@ abstract class WorkerAgent(val worker: Worker, val rule: SocialRule, val strateg
   var nbAccept = 0
   var nbReject = 0
   var nbWithdraw = 0
-  var nbConfirm = 0
+  var nbConfirmGift = 0
+  var nbConfirmSwap = 0
   var nbCancel = 0
   var nbInform = 0
 

@@ -183,7 +183,8 @@ class WorkerAgentBehaviour(worker: Worker, rule: SocialRule, strategy: DealStrat
         updatedMind = updatedMind.changeDelegation(NoWorker, NoTask)
         if (trace) println(s"$worker -> $opponent : Confirm($task, $counterpart)")
         sender ! Confirm(task, counterpart, workload)
-        nbConfirm += 1
+        if (counterpart == NoTask)nbConfirmGift += 1
+        else nbConfirmSwap += 1
         if (rule == LCmax) broadcastInform(updatedMind.belief(worker))
         self ! Trigger
         goto(Initial) using updatedMind
@@ -305,7 +306,7 @@ class WorkerAgentBehaviour(worker: Worker, rule: SocialRule, strategy: DealStrat
 
     // If the worker agent receives a query
     case Event(Query, mind) =>
-      sender ! Finish(nbPropose, nbCounterPropose, nbAccept, nbReject, nbWithdraw, nbConfirm, nbCancel, nbInform)
+      sender ! Finish(nbPropose, nbCounterPropose, nbAccept, nbReject, nbWithdraw, nbConfirmGift, nbConfirmSwap, nbCancel, nbInform)
       stay using mind
 
     // If the worker agent receives another message

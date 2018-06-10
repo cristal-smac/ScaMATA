@@ -25,9 +25,9 @@ case class Activated(bundle: SortedSet[Task]) extends Message
 // Query the statistics
 case object Query extends Message
 // Report statistics
-case class Finish(nbPropose : Int, nbCounterPropose : Int, nbAccept : Int, nbReject : Int, nbWithdraw : Int, nbConfirm : Int, nbCancel : Int,  nbInform : Int) extends Message
+case class Finish(nbPropose : Int, nbCounterPropose : Int, nbAccept : Int, nbReject : Int, nbWithdraw : Int, nbConfirmGift : Int, nbConfirmSwap : Int, nbCancel : Int,  nbInform : Int) extends Message
 // The solver agent returns an allocation and the statistics
-case class Outcome(allocation : Allocation, nbPropose : Int, nbCounterPropose : Int,nbAccept : Int, nbReject : Int, nbWithdraw : Int, nbConfirm : Int, nbCancel : Int, nbInform : Int) extends  Message
+case class Outcome(allocation : Allocation, nbPropose : Int, nbCounterPropose : Int,nbAccept : Int, nbReject : Int, nbWithdraw : Int, nbConfirmGift : Int, nbConfirmSwap : Int, nbCancel : Int, nbInform : Int) extends  Message
 // Stop an agent
 case object Stop extends Message
 

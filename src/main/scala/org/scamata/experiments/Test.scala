@@ -45,8 +45,8 @@ object Test {
       s"minLpSolverPreTime,openLpSolverPreTime,meanLpSolverPreTime,closedSolverPreTime,maxLpSolverPreTime," +
       s"minLpSolverPostTime,openLpSolverPostTime,meanLpSolverPostTime,closedLpSolverPostTime,maxLpSolverPostTime," +
       s"gift4gift,gift4swap,swap4swap," +
-      s"nbPropose4gift,nbCounterPropose4gift,nbAccept4gift,nbReject4gift,nbWithdraw4gift,nbConfirm4gift,nbInform4gift," +
-      s"nbPropose4swap,nbCounterPropose4swap,nbAccept4swap,nbReject4swap,nbWithdraw4swap,nbConfirm4swap,nbInform4swap\n")
+      s"nbPropose4gift,nbCounterPropose4gift,nbAccept4gift,nbReject4gift,nbWithdraw4gift,nbConfirmGift4gift,nbConfirmSwap4Swap,nbInform4gift," +
+      s"nbPropose4swap,nbCounterPropose4swap,nbAccept4swap,nbReject4swap,nbWithdraw4swap,nbConfirmGift4swap,nbConfirmSwap4swap,nbInform4swap\n")
     for (m <- 2 to 70 by 2) {
       val n = nbTasksPerWorker * m
       if (debug) println(s"Test configuration with $m peers and $n tasks")
@@ -56,11 +56,11 @@ object Test {
         (List[Double](), List[Double](), List[Double](), List[Double](), List[Double](), List[Double](),
           List[Double](), List[Double](), List[Double](), List[Double](), List[Double](), List[Double]())
       var (gift4gift, gift4swap, swap4swap,
-      nbPropose4gift, nbCounterPropose4gift, nbAccept4gift, nbReject4gift, nbWithdraw4gift, nbConfirm4gift, nbInform4gift,
-      nbPropose4swap, nbCounterPropose4swap, nbAccept4swap, nbReject4swap, nbWithdraw4swap, nbConfirm4swap, nbInform4swap) =
+      nbPropose4gift, nbCounterPropose4gift, nbAccept4gift, nbReject4gift, nbWithdraw4gift, nbConfirmGift4gift, nbConfirmSwap4gift, nbInform4gift,
+      nbPropose4swap, nbCounterPropose4swap, nbAccept4swap, nbReject4swap, nbWithdraw4swap, nbConfirmGift4swap, nbConfirmSwap4swap, nbInform4swap) =
         (0.0, 0.0, 0.0,
-          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 
       for (o <- 1 to nbPb) {
         val pb = MWTA.randomProblem(m, n)
@@ -83,7 +83,8 @@ object Test {
         nbAccept4gift += distributedGiftSolver.nbAccept
         nbReject4gift += distributedGiftSolver.nbReject
         nbWithdraw4gift += distributedGiftSolver.nbWithdraw
-        nbConfirm4gift += distributedGiftSolver.nbConfirm
+        nbConfirmGift4gift += distributedGiftSolver.nbConfirmGift
+        nbConfirmSwap4gift += distributedGiftSolver.nbConfirmSwap
         nbInform4gift += distributedGiftSolver.nbInform
 
         val distributedSwapAlloc = distributedSwapSolver.run()
@@ -92,7 +93,8 @@ object Test {
         nbAccept4swap += distributedSwapSolver.nbAccept
         nbReject4swap += distributedSwapSolver.nbReject
         nbWithdraw4swap += distributedSwapSolver.nbWithdraw
-        nbConfirm4swap += distributedSwapSolver.nbConfirm
+        nbConfirmGift4swap += distributedSwapSolver.nbConfirmGift
+        nbConfirmSwap4swap += distributedSwapSolver.nbConfirmSwap
         nbInform4swap += distributedSwapSolver.nbInform
 
         rule match {
@@ -143,8 +145,8 @@ object Test {
           s"${lpSolverPreTime.min},${lpSolverPreTime(nbPb / 4)},${lpSolverPreTime(nbPb / 2)},${lpSolverPreTime(nbPb * 3 / 4)},${lpSolverPreTime.max}," +
           s"${lpSolverPostTime.min},${lpSolverPostTime(nbPb / 4)},${lpSolverPostTime(nbPb / 2)},${lpSolverPostTime(nbPb / 4)},${lpSolverPostTime.max}," +
           s"${gift4gift / nbPb},${gift4swap / nbPb },${swap4swap /nbPb}," +
-          s"${nbPropose4gift / nbPb},${nbCounterPropose4gift / nbPb},${nbAccept4gift / nbPb},${nbReject4gift / nbPb},${nbWithdraw4gift / nbPb},${nbConfirm4gift / nbPb},${nbInform4gift / nbPb}," +
-          s"${nbPropose4swap / nbPb},${nbCounterPropose4swap / nbPb},${nbAccept4swap / nbPb},${nbReject4swap / nbPb},${nbWithdraw4swap / nbPb},${nbConfirm4swap / nbPb},${nbInform4swap / nbPb}\n")
+          s"${nbPropose4gift / nbPb},${nbCounterPropose4gift / nbPb},${nbAccept4gift / nbPb},${nbReject4gift / nbPb},${nbWithdraw4gift / nbPb},${nbConfirmGift4gift / nbPb}${nbConfirmSwap4gift / nbPb},${nbInform4gift / nbPb}," +
+          s"${nbPropose4swap / nbPb},${nbCounterPropose4swap / nbPb},${nbAccept4swap / nbPb},${nbReject4swap / nbPb},${nbWithdraw4swap / nbPb},${nbConfirmGift4swap / nbPb},${nbConfirmSwap4swap / nbPb},${nbInform4swap / nbPb}\n")
       bw.flush()
     }
     System.exit(0)

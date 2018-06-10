@@ -35,7 +35,7 @@ class SolverAgent(pb: MWTA, rule: SocialRule, strategy : DealStrategy) extends A
   var directory = new Directory() // White page for the peers
   var nbReady = 0 // Number of workers which are ready to negotiate
   var finishedActor : Set[ActorRef] = Set[ActorRef]() // Number of workers which are deseperated
-  var (nbPropose, nbCounterPropose, nbAccept, nbReject, nbWithdraw, nbConfirm, nbCancel, nbInform) = (0, 0, 0, 0, 0, 0, 0, 0)
+  var (nbPropose, nbCounterPropose, nbAccept, nbReject, nbWithdraw, nbConfirmGift, nbConfirmSwap, nbCancel, nbInform) = (0, 0, 0, 0, 0, 0, 0, 0, 0)
 
   /**
     * Initially all the worker are active and the allocation is empty
@@ -105,20 +105,21 @@ class SolverAgent(pb: MWTA, rule: SocialRule, strategy : DealStrategy) extends A
       }
       stay using new SupervisorStatus(stoppedActor, allocation)
 
-    case Event(Finish(nbP, nbCP, nbA, nbR, nbW, nbConf, nbCan, nbI), status) =>
+    case Event(Finish(nbP, nbCP, nbA, nbR, nbW, nbConfG, nbConfS, nbCan, nbI), status) =>
       if (!finishedActor.contains(sender)) {
         nbPropose += nbP
         nbCounterPropose += nbCP
         nbAccept += nbA
         nbReject += nbR
         nbWithdraw += nbW
-        nbConfirm += nbConf
+        nbConfirmGift += nbConfG
+        nbConfirmSwap += nbConfS
         nbCancel += nbCan
         nbInform += nbI
         finishedActor += sender
       }
       if (finishedActor.size  == pb.m() && status.stoppedActors.size  == pb.m()) {
-        solver ! Outcome(status.allocation, nbPropose, nbCounterPropose, nbAccept, nbReject, nbWithdraw, nbConfirm, nbCancel, nbInform) // reports the allocation
+        solver ! Outcome(status.allocation, nbPropose, nbCounterPropose, nbAccept, nbReject, nbWithdraw, nbConfirmGift, nbConfirmSwap, nbCancel, nbInform) // reports the allocation
         directory.allActors().foreach(a => a ! Stop) // stops the actors
         context.stop(self) //stops the solverAgent
       }
