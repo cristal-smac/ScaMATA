@@ -24,11 +24,11 @@ In order to compile the code you need:
 
 ## Test
 
-    java -jar ScaMATA-assembly-X.Y.jar org.scamata.util.MWTAPSolver -v -d examples/toy4x4.txt  examples/toy4x4Cmax.txt
+    java -jar ScaMATA-assembly-X.Y.jar org.scamata.util.MATASolver -v -d examples/toy4x4.txt  examples/toy4x4Cmax.txt
 
 Usage: 
 
-    Usage: java -jar ScaMWTA-assembly-X.Y.jar [-v] inputFilename outputFilename
+    Usage: java -jar ScaMATA-assembly-X.Y.jar [-v] inputFilename outputFilename
     The following options are available:
     -v: verbose
     -d: distributed (false by default)
