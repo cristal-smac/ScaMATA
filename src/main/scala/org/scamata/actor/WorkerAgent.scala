@@ -3,7 +3,7 @@ package org.scamata.actor
 
 import java.util.concurrent.ThreadLocalRandom
 
-import org.scamata.core.{NoTask, Task, Worker}
+import org.scamata.core.{NoTask, Task, Agent}
 import org.scamata.solver.{DealStrategy, LC, LCmax, SingleGiftOnly, SocialRule}
 
 import scala.collection.SortedSet
@@ -31,14 +31,14 @@ case object Responder extends State
   * @param responder under consideration
   * @param task      under consideration
   */
-class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double], val responder: Worker, val task: Task)
-  extends Product4[SortedSet[Task], Map[Worker, Double], Worker, Task] {
+class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Agent, Double], val responder: Agent, val task: Task)
+  extends Product4[SortedSet[Task], Map[Agent, Double], Agent, Task] {
 
   override def _1: SortedSet[Task] = bundle
 
-  override def _2: Map[Worker, Double] = belief
+  override def _2: Map[Agent, Double] = belief
 
-  override def _3: Worker = responder
+  override def _3: Agent = responder
 
   override def _4: Task = task
 
@@ -46,7 +46,7 @@ class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double], 
 
   override def canEqual(that: Any): Boolean = that.isInstanceOf[StateOfMind]
 
-  def initBelief(newBundle: SortedSet[Task], workers: Iterable[Worker]): StateOfMind = {
+  def initBelief(newBundle: SortedSet[Task], workers: Iterable[Agent]): StateOfMind = {
     workers.foreach { w =>
       belief += w -> 0.0
     }
@@ -56,7 +56,7 @@ class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double], 
   /**
     * Update belief with a new workload
     */
-  def updateBelief(worker: Worker, workload: Double): StateOfMind = {
+  def updateBelief(worker: Agent, workload: Double): StateOfMind = {
     new StateOfMind(bundle, belief.updated(worker, workload), responder, task)
   }
 
@@ -84,7 +84,7 @@ class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double], 
   /**
     * Change the task and the responder under consideration
     */
-  def changeDelegation(newOpponent: Worker, newTask: Task): StateOfMind = {
+  def changeDelegation(newOpponent: Agent, newTask: Task): StateOfMind = {
     new StateOfMind(bundle, belief, newOpponent, newTask)
   }
 
@@ -101,7 +101,7 @@ class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Worker, Double], 
   * @param rule     to optimize
   * @param strategy for negotiating
   */
-abstract class WorkerAgent(val worker: Worker, val rule: SocialRule, val strategy: DealStrategy) extends Actor {
+abstract class WorkerAgent(val worker: Agent, val rule: SocialRule, val strategy: DealStrategy) extends Actor {
   var trace: Boolean = false
   var debug: Boolean = false
 
@@ -123,12 +123,12 @@ abstract class WorkerAgent(val worker: Worker, val rule: SocialRule, val strateg
 
   var solverAgent: ActorRef = context.parent
   var directory: Directory = new Directory()
-  var costMatrix: Map[(Worker, Task), Double] = Map[(Worker, Task), Double]()
+  var costMatrix: Map[(Agent, Task), Double] = Map[(Agent, Task), Double]()
 
   /**
     * Return the cost of a task for a worker, eventually 0.0 if NoTask
     */
-  def cost(worker: Worker, task: Task): Double = if (task != NoTask) costMatrix(worker, task) else 0.0
+  def cost(worker: Agent, task: Task): Double = if (task != NoTask) costMatrix(worker, task) else 0.0
 
 
   /**
@@ -156,7 +156,7 @@ abstract class WorkerAgent(val worker: Worker, val rule: SocialRule, val strateg
     * @param provider of the task
     * @param supplier of the task
     */
-  def acceptable(task: Task, provider: Worker, supplier: Worker, mind: StateOfMind): Boolean = {
+  def acceptable(task: Task, provider: Agent, supplier: Agent, mind: StateOfMind): Boolean = {
     rule match {
       case LCmax =>
         Math.max(mind.belief(provider), mind.belief(supplier)) >
@@ -174,7 +174,7 @@ abstract class WorkerAgent(val worker: Worker, val rule: SocialRule, val strateg
     * @param provider    of the task
     * @param supplier    of the task
     */
-  def acceptable(task: Task, counterpart: Task, provider: Worker, supplier: Worker, mind: StateOfMind): Boolean = {
+  def acceptable(task: Task, counterpart: Task, provider: Agent, supplier: Agent, mind: StateOfMind): Boolean = {
     rule match {
       case LCmax =>
         Math.max(mind.belief(provider), mind.belief(supplier)) >
@@ -189,7 +189,7 @@ abstract class WorkerAgent(val worker: Worker, val rule: SocialRule, val strateg
   /**
     * Returns the best counterpart eventually NoTask wrt the task and the responder according to the beliefs
     */
-  def bestCounterpart(task: Task, opponent: Worker, mind: StateOfMind): Task = {
+  def bestCounterpart(task: Task, opponent: Agent, mind: StateOfMind): Task = {
     if (strategy == SingleGiftOnly) return NoTask
     val workload = mind.belief(worker)
     var bestCounterpart: Task = NoTask

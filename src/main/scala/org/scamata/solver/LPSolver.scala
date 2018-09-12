@@ -1,8 +1,8 @@
 // Copyright (C) Maxime MORGE 2018
 package org.scamata.solver
 
-import org.scamata.core.{Allocation, MWTA}
-import org.scamata.util.MWTAWriter
+import org.scamata.core.{Allocation, MATA}
+import org.scamata.util.MATAWriter
 
 import sys.process._
 import java.io.File
@@ -14,7 +14,7 @@ import com.typesafe.config.{Config, ConfigFactory}
   * @param pb to be solver
   * @param rule to be optimized
   */
-class LPSolver(pb : MWTA, rule : SocialRule) extends DualSolver(pb, rule) {
+class LPSolver(pb : MATA, rule : SocialRule) extends DualSolver(pb, rule) {
 
   val config: Config = ConfigFactory.load()
   val inputPath: String =config.getString("path.scamata")+"/"+config.getString("path.input")
@@ -29,7 +29,7 @@ class LPSolver(pb : MWTA, rule : SocialRule) extends DualSolver(pb, rule) {
   override def solve(): Allocation = {
     // 1 - Reformulate the problem
     var startingTime: Long = System.nanoTime()
-    val writer=new MWTAWriter(inputPath ,pb)
+    val writer=new MATAWriter(inputPath ,pb)
     writer.write
     preSolvingTime = System.nanoTime() - startingTime
 

@@ -1,7 +1,7 @@
 // Copyright (C) Maxime MORGE 2018
 package org.scamata.solver
 
-import org.scamata.core.{MWTA, Allocation}
+import org.scamata.core.{MATA, Allocation}
 
 /**
   * Solver testing all the allocation
@@ -9,7 +9,7 @@ import org.scamata.core.{MWTA, Allocation}
   * @param pb   to be solver
   * @param rule to be optimized
   */
-class ExhaustiveSolver(pb: MWTA, rule: SocialRule) extends Solver(pb, rule) {
+class ExhaustiveSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
   debug = false
 
   /**

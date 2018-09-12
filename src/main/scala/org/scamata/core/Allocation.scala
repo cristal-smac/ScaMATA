@@ -9,11 +9,11 @@ import scala.io.Source
 
 /**
   * Class representing a task allocation
-  * @param pb MWTA
+  * @param pb MATA
   */
-class Allocation(val pb: MWTA) {
+class Allocation(val pb: MATA) {
 
-  var bundle: Map[Worker, SortedSet[Task]] = Map[Worker, SortedSet[Task]]()
+  var bundle: Map[Agent, SortedSet[Task]] = Map[Agent, SortedSet[Task]]()
   pb.workers.foreach(a => bundle += a -> SortedSet[Task]())
 
   override def toString: String = pb.workers.toList.map(w => s"$w: " + bundle(w).toList.mkString(", ")).mkString("\n")
@@ -21,17 +21,17 @@ class Allocation(val pb: MWTA) {
   /**
     * Returns the workload of the worker
     */
-  def workload(worker: Worker): Double = bundle(worker).foldLeft(0.0)((acc: Double, t: Task) => acc + pb.cost(worker, t))
+  def workload(worker: Agent): Double = bundle(worker).foldLeft(0.0)((acc: Double, t: Task) => acc + pb.cost(worker, t))
 
   /**
     * Returns the workloads
     */
-  def workloads(): Map[Worker, Double] = pb.workers.toSeq.map( worker => worker -> workload(worker) ).toMap
+  def workloads(): Map[Agent, Double] = pb.workers.toSeq.map(worker => worker -> workload(worker) ).toMap
 
   /**
     * Returns the total costs incurred by the task allocation
     */
-  def flowtime(): Double = pb.workers.foldLeft(0.0)((acc: Double, a: Worker) => acc + workload(a))
+  def flowtime(): Double = pb.workers.foldLeft(0.0)((acc: Double, a: Agent) => acc + workload(a))
 
   /**
     * Returns the completion time of the last task to perform
@@ -47,14 +47,14 @@ class Allocation(val pb: MWTA) {
   /**
     * Return the peers which are least loaded than the initiator
     */
-  def leastLoadedAgents(initiator: Worker): Set[Worker] = pb.workers.filter(w => workload(w) < workload(initiator)).toSet
+  def leastLoadedAgents(initiator: Agent): Set[Agent] = pb.workers.filter(w => workload(w) < workload(initiator)).toSet
 
   /**
     * Returns a copy
     */
   def copy(): Allocation = {
     val allocation = new Allocation(pb)
-    this.bundle.foreach { case (a: Worker, t: Set[Task]) =>
+    this.bundle.foreach { case (a: Agent, t: Set[Task]) =>
       allocation.bundle = allocation.bundle.updated(a, t)
     }
     allocation
@@ -63,7 +63,7 @@ class Allocation(val pb: MWTA) {
   /**
     * Update an allocation with a new bundle for a worker
     */
-  def update(worker: Worker, bundle : SortedSet[Task]) : Allocation = {
+  def update(worker: Agent, bundle : SortedSet[Task]) : Allocation = {
     val allocation = this.copy()
     allocation.bundle = allocation.bundle.updated(worker, bundle)
     allocation
@@ -102,7 +102,7 @@ class Allocation(val pb: MWTA) {
   /**
     * Returns all the single swaps between two peers
     */
-  def allSingleSwap(worker1: Worker, worker2: Worker): Set[SingleSwap] = {
+  def allSingleSwap(worker1: Agent, worker2: Agent): Set[SingleSwap] = {
     var swaps = Set[SingleSwap]()
     bundle(worker1).foreach { t1 =>
       bundle(worker2).foreach { t2 =>
@@ -131,9 +131,9 @@ class Allocation(val pb: MWTA) {
       * Build an allocation
       *
       * @param path of the OPL output
-      * @param pb MWTA
+      * @param pb MATA
       */
-    def apply(path: String, pb: MWTA): Allocation = {
+    def apply(path: String, pb: MATA): Allocation = {
       val allocation = new Allocation(pb)
       val bufferedSource = Source.fromFile(path)
       var linenumber = 0
@@ -162,11 +162,11 @@ class Allocation(val pb: MWTA) {
     /**
       * Generate a random allocation
       */
-    def randomAllocation(pb: MWTA): Allocation = {
+    def randomAllocation(pb: MATA): Allocation = {
       val allocation = new Allocation(pb)
       val r = scala.util.Random
       pb.tasks.foreach { t =>
-        val randomWorker = RandomUtils.random[Worker](pb.workers)
+        val randomWorker = RandomUtils.random[Agent](pb.workers)
         var newBundle: SortedSet[Task] = allocation.bundle(randomWorker)
         newBundle += t
         allocation.bundle += (randomWorker -> newBundle)

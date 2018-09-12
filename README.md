@@ -46,7 +46,7 @@ Compile
 
 then
 
-    sbt "run org.scamata.util.MWTASolver -v -d examples/toy4x4.txt  examples/toy4x4Cmax.txt"
+    sbt "run org.scamata.util.MATASolver -v -d examples/toy4x4.txt  examples/toy4x4Cmax.txt"
  
 and eventually
 

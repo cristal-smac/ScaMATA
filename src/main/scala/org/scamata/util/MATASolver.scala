@@ -8,15 +8,15 @@ import java.nio.file.{Files, Paths}
 import akka.actor.ActorSystem
 
 /**
-  * Solve a particular MWTA Problem instance
-  * sbt "run org.scaia.util.MWTASolver -v examples/toy2x4.txt examples/toy4x4Cmax.txt"
-  * java -jar ScaIA-assembly-X.Y.jar org.scaia.util.asia.MWTASolver r -v examples/toy2x4.txt examples/toy4x4Cmax.txt
+  * Solve a particular MATA Problem instance
+  * sbt "run org.scaia.util.MATASolver -v examples/toy2x4.txt examples/toy4x4Cmax.txt"
+  * java -jar ScaIA-assembly-X.Y.jar org.scaia.util.asia.MATASolver r -v examples/toy2x4.txt examples/toy4x4Cmax.txt
   *
   */
-object MWTASolver extends App {
+object MATASolver extends App {
 
   val debug = false
-  val system = ActorSystem("MWTASolver") //The Actor system
+  val system = ActorSystem("MATASolver") //The Actor system
   val usage =
     """
     Usage: java -jar ScaMATA-assembly-X.Y.jar [-v] inputFilename outputFilename
@@ -46,12 +46,12 @@ object MWTASolver extends App {
     println(s"output:$outputFilename")
   }
   if (!nextOption(argList)) {
-    println(s"ERROR MWTASolver: options cannot be parsed ")
+    println(s"ERROR MATASolver: options cannot be parsed ")
     System.exit(1)
   }
 
   // fail if options cannot be parsed
-  val parser = new MWTAParser(inputFilename)
+  val parser = new MATAParser(inputFilename)
   val pb = parser.parse() // parse problem
   if (verbose) println(pb)
   if (verbose) println(
@@ -108,9 +108,9 @@ object MWTASolver extends App {
 
   /**
     * Returns the solver
-    * @param pb MWTA
+    * @param pb MATA
     */
-  def selectSolver(pb: MWTA): Solver = {
+  def selectSolver(pb: MATA): Solver = {
     if (distributed) new DistributedSolver(pb, socialRule, SingleGiftOnly, system)
     else new CentralizedSolver(pb, socialRule, SingleGiftOnly)
   }

@@ -5,13 +5,13 @@ import scala.util.Random
 import scala.collection.SortedSet
 
 /**
-  * Class representing a Multi-Worker Task Allocation problem
+  * Class representing a Multi-Agent Task Allocation problem
   * @param workers performing the tasks
   * @param tasks to be performed
   */
-class MWTA(val workers: SortedSet[Worker], val tasks: SortedSet[Task]) {
+class MATA(val workers: SortedSet[Agent], val tasks: SortedSet[Task]) {
 
-  var costMatrix : Map[(Worker, Task), Double] = Map[(Worker, Task), Double]()
+  var costMatrix : Map[(Agent, Task), Double] = Map[(Agent, Task), Double]()
 
   /**
     * Constructor
@@ -19,7 +19,7 @@ class MWTA(val workers: SortedSet[Worker], val tasks: SortedSet[Task]) {
     * @param tasks to be performed
     * @param costMatrix cost matrix for performing the task by the worker
     */
-  def this(workers: SortedSet[Worker], tasks: SortedSet[Task], costMatrix : Map[(Worker, Task), Double]) ={
+  def this(workers: SortedSet[Agent], tasks: SortedSet[Task], costMatrix : Map[(Agent, Task), Double]) ={
     this(workers, tasks)
     this.costMatrix = costMatrix
   }
@@ -27,10 +27,10 @@ class MWTA(val workers: SortedSet[Worker], val tasks: SortedSet[Task]) {
   /**
     * Return the cost of a task for a worker, eventually 0.0 if NoTask
      */
-  def cost(worker: Worker, task: Task): Double = if (task != NoTask) costMatrix(worker, task) else 0.0
+  def cost(worker: Agent, task: Task): Double = if (task != NoTask) costMatrix(worker, task) else 0.0
 
   /**
-    * Returns a string describing the MWTA problem
+    * Returns a string describing the MATA problem
     */
   override def toString: String = {
     "m: " + workers.size + "\n" +
@@ -57,8 +57,8 @@ class MWTA(val workers: SortedSet[Worker], val tasks: SortedSet[Task]) {
   /**
     * Returns the faster worker for a task
     */
-  def faster(task : Task) : Worker = {
-    var best : Worker = NoWorker
+  def faster(task : Task) : Agent = {
+    var best : Agent = NoAgent
     var minCost = Double.MaxValue
     workers.foreach{ worker =>
       val c = cost(worker, task)
@@ -75,7 +75,7 @@ class MWTA(val workers: SortedSet[Worker], val tasks: SortedSet[Task]) {
     *
     * @param name of the worker
     */
-  def getWorker(name: String): Worker = {
+  def getWorker(name: String): Agent = {
     workers.find(a => a.name.equals(name)) match {
       case Some(s) => s
       case None => throw new RuntimeException("No worker " + name + " has been found")
@@ -95,7 +95,7 @@ class MWTA(val workers: SortedSet[Worker], val tasks: SortedSet[Task]) {
   }
 
   /**
-    * Return a string description of the MWTA problem in the Optimization Programming Language
+    * Return a string description of the MATA problem in the Optimization Programming Language
     */
   def toOPL: String = {
     "M = " + workers.size + "; \n" +
@@ -124,7 +124,7 @@ class MWTA(val workers: SortedSet[Worker], val tasks: SortedSet[Task]) {
     * @param workers
     * @param tasks
     */
-  def allAllocation(workers: SortedSet[Worker], tasks: SortedSet[Task]): Set[Allocation] = {
+  def allAllocation(workers: SortedSet[Agent], tasks: SortedSet[Task]): Set[Allocation] = {
     if (workers.size == 1) {
       var allocation = new Allocation(this)
       allocation = allocation.update(workers.head, tasks)
@@ -147,30 +147,30 @@ class MWTA(val workers: SortedSet[Worker], val tasks: SortedSet[Task]) {
 }
 
 /**
-  * Factory for [[org.scamata.core.MWTA]] instances
+  * Factory for [[org.scamata.core.MATA]] instances
   */
-object MWTA{
+object MATA{
 
   val debug = false
 
   val MAXCOST = 1000
   /**
-    * Returns a random MWTA problem instance
+    * Returns a random MATA problem instance
     * @param m number of peers
     * @param n number of tasks
     */
-  def randomProblem(m : Int, n : Int) : MWTA = {
-    val workers: SortedSet[Worker] = collection.immutable.SortedSet[Worker]() ++ (for (k <- 1 until m+1) yield new Worker(name = s"w$k"))
+  def randomProblem(m : Int, n : Int) : MATA = {
+    val workers: SortedSet[Agent] = collection.immutable.SortedSet[Agent]() ++ (for (k <- 1 until m+1) yield new Agent(name = s"w$k"))
     val tasks: SortedSet[Task] = collection.immutable.SortedSet[Task]() ++  (for (k <- 1 until n+1) yield new Task(name = s"t$k"))
-    val cost : Map[(Worker, Task), Double] = (for(i <- 0 until m; j <- 0 until n) yield (workers.toList(i),tasks.toList(j)) -> (Random.nextInt(MAXCOST)).toInt.toDouble ).toMap
-    new MWTA(workers, tasks, cost)
+    val cost : Map[(Agent, Task), Double] = (for(i <- 0 until m; j <- 0 until n) yield (workers.toList(i),tasks.toList(j)) -> (Random.nextInt(MAXCOST)).toInt.toDouble ).toMap
+    new MATA(workers, tasks, cost)
   }
 
   /**
     * Test random problem generation
     */
   def main(args: Array[String]): Unit = {
-    val pb = MWTA.randomProblem(10, 100)
+    val pb = MATA.randomProblem(10, 100)
     println(pb)
     val allocation =Allocation.randomAllocation(pb)
     println(allocation)

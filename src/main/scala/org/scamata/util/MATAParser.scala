@@ -9,26 +9,26 @@ import scala.collection.SortedSet
 import scala.io.Source
 
 /**
-  * Build a MWTA Problem object from a text file
-  * @param fileName of the MWTA Problem
+  * Build a MATA Problem object from a text file
+  * @param fileName of the MATA Problem
   *
   */
-class MWTAParser(val fileName: String ) {
+class MATAParser(val fileName: String ) {
   val debug = false
 
   var lineNumber = 0
 
   var m=0 // number of peers
   var n=0 // number of tasks
-  var workers: SortedSet[Worker] = SortedSet[Worker]()
+  var workers: SortedSet[Agent] = SortedSet[Agent]()
   var tasks: SortedSet[Task] = SortedSet[Task]()
-  var cost: Map[(Worker, Task), Double] = Map[(Worker,Task), Double]()
-  var pb : MWTA = _
+  var cost: Map[(Agent, Task), Double] = Map[(Agent,Task), Double]()
+  var pb : MATA = _
 
   /**
     * Parse file
     */
-  def parse(): MWTA = {
+  def parse(): MATA = {
     val bufferedSource = Source.fromFile(fileName)
     for (line <- bufferedSource.getLines) {
       lineNumber += 1
@@ -38,7 +38,7 @@ class MWTAParser(val fileName: String ) {
       } else parseLine(line)
     }
     bufferedSource.close()
-    val pb = new MWTA(workers, tasks, cost)
+    val pb = new MATA(workers, tasks, cost)
     if (pb.isFullySpecified) pb
     else throw new RuntimeException(s"ERROR parse incomplete preferences")
   }
@@ -60,14 +60,14 @@ class MWTAParser(val fileName: String ) {
         parseEntities(key, value)
       }
       else if (tasks.nonEmpty && workers.nonEmpty){
-        pb = new MWTA(workers, tasks, cost)
+        pb = new MATA(workers, tasks, cost)
         parseCosts(key, value)
       }
     }
   }
 
   /**
-    * Parse the size of the MWTA Problem (m,n)
+    * Parse the size of the MATA Problem (m,n)
     * @param key of the line
     * @param value of the line
     */
@@ -78,7 +78,7 @@ class MWTAParser(val fileName: String ) {
   }
 
   /**
-    * Parse the entities (peers, tasks) of the MWTA Problem
+    * Parse the entities (peers, tasks) of the MATA Problem
     * @param key of the line
     * @param value of the line
     */
@@ -114,7 +114,7 @@ class MWTAParser(val fileName: String ) {
     val array:Array[String]=names.split(", ").map(_.trim)
     array.foreach{ str: String =>
       if (debug) println(s"parseAgents: $str")
-      workers+= new Worker(str)
+      workers+= new Agent(str)
     }
   }
 
@@ -140,9 +140,9 @@ class MWTAParser(val fileName: String ) {
 }
 
 /**
-  * Test MWTAParser
+  * Test MATAParser
   */
-object MWTAParser extends App {
-  val parser =new MWTAParser("examples/toy2x4.txt")
+object MATAParser extends App {
+  val parser =new MATAParser("examples/toy2x4.txt")
   println(parser.parse()) //Run main
 }

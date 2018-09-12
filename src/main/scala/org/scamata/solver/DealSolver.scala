@@ -1,7 +1,7 @@
 // Copyright (C) Maxime MORGE 2018
 package org.scamata.solver
 
-import org.scamata.core.{Allocation, MWTA}
+import org.scamata.core.{Allocation, MATA}
 
 
 /**
@@ -23,7 +23,7 @@ case object SingleSwapAndSingleGift extends DealStrategy
   * @param rule
   * @param strategy for selecting the kind of deal
   */
-abstract class DealSolver(pb : MWTA, rule : SocialRule, strategy : DealStrategy) extends Solver(pb, rule){
+abstract class DealSolver(pb : MATA, rule : SocialRule, strategy : DealStrategy) extends Solver(pb, rule){
   var nbPropose = 0
   var nbCounterPropose = 0
   var nbAccept = 0

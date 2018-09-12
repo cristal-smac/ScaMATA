@@ -9,8 +9,8 @@ scalacOptions += "-Yrepl-sync"
 javaOptions in run += "-Xms8G"
 javaOptions in run += "-Xmx8G"
 
-mainClass in (Compile,run) := Some("org.scamata.util.MWTASolver")
-mainClass in assembly := Some("org.scamata.util.MWTASolver")
+mainClass in (Compile,run) := Some("org.scamata.util.MATASolver")
+mainClass in assembly := Some("org.scamata.util.MATASolver")
 
 fork := true
 

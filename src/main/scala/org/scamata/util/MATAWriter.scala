@@ -4,14 +4,14 @@ package org.scamata.util
 import java.io.{BufferedWriter, File, FileWriter}
 
 import com.typesafe.config.ConfigFactory
-import org.scamata.core.MWTA
+import org.scamata.core.MATA
 
 /**
-  * Class to write a MWTA pb to a text file
+  * Class to write a MATA pb to a text file
   * @param pathName the output filename
-  * @param pb is a MWTA Problem
+  * @param pb is a MATA Problem
   */
-class MWTAWriter(pathName: String, pb : MWTA){
+class MATAWriter(pathName: String, pb : MATA){
   val debug = false
 
   val file = new File(pathName)
@@ -24,13 +24,13 @@ class MWTAWriter(pathName: String, pb : MWTA){
 }
 
 /**
-  * Test MWTAWriter
+  * Test MATAWriter
   */
-object MWTAWriter extends App{
+object MATAWriter extends App{
   val config = ConfigFactory.load()
   import org.scamata.example.toy4x4._
   println(pb)
-  val writer=new MWTAWriter(config.getString("path.scamata")+"/"+config.getString("path.input"),pb)
+  val writer=new MATAWriter(config.getString("path.scamata")+"/"+config.getString("path.input"),pb)
   writer.write
 }
 

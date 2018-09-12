@@ -1,7 +1,7 @@
 // Copyright (C) Maxime MORGE 2018
 package org.scamata.solver
 
-import org.scamata.core.MWTA
+import org.scamata.core.MATA
 import org.scamata.core.Allocation
 
 /**
@@ -20,7 +20,7 @@ case object LCmax extends SocialRule
   * Abstract class representing a solver
   * @param pb to be solver
   */
-abstract class Solver(val pb : MWTA, val rule : SocialRule) {
+abstract class Solver(val pb : MATA, val rule : SocialRule) {
   var debug = false
 
   var solvingTime : Long = 0

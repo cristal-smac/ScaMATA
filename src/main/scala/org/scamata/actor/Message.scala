@@ -1,7 +1,7 @@
 // Copyright (C) Maxime MORGE 2018
 package org.scamata.actor
 
-import org.scamata.core.{Worker, Allocation, Task}
+import org.scamata.core.{Agent, Allocation, Task}
 
 import scala.collection.SortedSet
 
@@ -15,12 +15,12 @@ case object Trace extends  Message
 // Start the reallocation
 case class Start(allocation: Allocation) extends Message
 // Initiate the worker with the bundle the directory and the cost matrix
-case class Initiate(bundle: SortedSet[Task], directory : Directory, cost : Map[(Worker, Task), Double]) extends Message
+case class Initiate(bundle: SortedSet[Task], directory : Directory, cost : Map[(Agent, Task), Double]) extends Message
 // The worker agent is ready to start
 case object Ready extends Message
-// Worker agent informs the solver agent it is deseperated
+// Agent agent informs the solver agent it is deseperated
 case class Stopped(bundle: SortedSet[Task]) extends Message
-// Worker agent informs the solver agent it is busy
+// Agent agent informs the solver agent it is busy
 case class Activated(bundle: SortedSet[Task]) extends Message
 // Query the statistics
 case object Query extends Message
@@ -39,6 +39,6 @@ case class Reject(task : Task, countpart : Task, workload: Double) extends Messa
 case class Accept(task : Task, countpart : Task, workload: Double) extends Message // Accept a proposal
 case class Confirm(task : Task, countpart : Task, workload: Double) extends Message // Confirm a deal
 case class Withdraw(task : Task, countpart : Task, workload: Double) extends Message // Withdraw a deal
-case class Inform(worker: Worker, workload: Double) extends Message // Inform the peer about the workload
+case class Inform(worker: Agent, workload: Double) extends Message // Inform the peer about the workload
 
 

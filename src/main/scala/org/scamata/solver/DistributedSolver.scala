@@ -1,7 +1,7 @@
 // Copyright (C) Maxime MORGE 2018
 package org.scamata.solver
 
-import org.scamata.core.{Allocation, MWTA}
+import org.scamata.core.{Allocation, MATA}
 
 import org.scamata.actor._
 import akka.actor.{ActorRef, ActorSystem, Props}
@@ -18,7 +18,7 @@ import scala.language.postfixOps
   * @param rule to be optimized
   * @param system of Actors
   */
-class DistributedSolver(pb : MWTA, rule : SocialRule, strategy : DealStrategy, system: ActorSystem) extends DealSolver(pb, rule, strategy) {
+class DistributedSolver(pb : MATA, rule : SocialRule, strategy : DealStrategy, system: ActorSystem) extends DealSolver(pb, rule, strategy) {
 
   val TIMEOUTVALUE : FiniteDuration = 600 minutes // Default timeout of a run
   implicit val timeout : Timeout = Timeout(TIMEOUTVALUE)
