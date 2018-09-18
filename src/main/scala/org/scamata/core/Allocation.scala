@@ -9,6 +9,7 @@ import scala.io.Source
 
 /**
   * Class representing a task allocation
+  *
   * @param pb MATA
   */
 class Allocation(val pb: MATA) {
@@ -26,7 +27,7 @@ class Allocation(val pb: MATA) {
   /**
     * Returns the workloads
     */
-  def workloads(): Map[Agent, Double] = pb.workers.toSeq.map(worker => worker -> workload(worker) ).toMap
+  def workloads(): Map[Agent, Double] = pb.workers.toSeq.map(worker => worker -> workload(worker)).toMap
 
   /**
     * Returns the total costs incurred by the task allocation
@@ -38,8 +39,8 @@ class Allocation(val pb: MATA) {
     */
   def makespan(): Double = {
     var max = 0.0
-    pb.workers.foreach{ worker =>
-        max = Math.max(max, workload(worker))
+    pb.workers.foreach { worker =>
+      max = Math.max(max, workload(worker))
     }
     max
   }
@@ -63,7 +64,7 @@ class Allocation(val pb: MATA) {
   /**
     * Update an allocation with a new bundle for a worker
     */
-  def update(worker: Agent, bundle : SortedSet[Task]) : Allocation = {
+  def update(worker: Agent, bundle: SortedSet[Task]): Allocation = {
     val allocation = this.copy()
     allocation.bundle = allocation.bundle.updated(worker, bundle)
     allocation
@@ -71,9 +72,9 @@ class Allocation(val pb: MATA) {
 
   def apply(deal: Deal): Allocation = {
     deal match {
-      case g: SingleGift =>  apply(g.asInstanceOf[SingleGift])
-      case s: SingleSwap =>  apply(s.asInstanceOf[SingleSwap])
-      case d: Deal=> throw new RuntimeException(s"Do not know how to apply deal $d")
+      case g: SingleGift => apply(g.asInstanceOf[SingleGift])
+      case s: SingleSwap => apply(s.asInstanceOf[SingleSwap])
+      case d: Deal => throw new RuntimeException(s"Do not know how to apply deal $d")
     }
   }
 
@@ -117,60 +118,73 @@ class Allocation(val pb: MATA) {
     */
   def isSound: Boolean =
     pb.tasks == bundle.values.foldLeft(Set[Task]())((acc, bundle) => acc ++ bundle.toSet) &&
-    bundle.values.forall( b1 =>  bundle.values.filter(_ != b1).forall( b2 => b2.toSet.intersect(b1.toSet).isEmpty))
-
-  }
+      bundle.values.forall(b1 => bundle.values.filter(_ != b1).forall(b2 => b2.toSet.intersect(b1.toSet).isEmpty))
 
   /**
-    * Factory for [[Allocation]] instances
+    * Returns true if a task is performed by at most one task
     */
-  object Allocation {
-    val debug = false
-
-    /**
-      * Build an allocation
-      *
-      * @param path of the OPL output
-      * @param pb MATA
-      */
-    def apply(path: String, pb: MATA): Allocation = {
-      val allocation = new Allocation(pb)
-      val bufferedSource = Source.fromFile(path)
-      var linenumber = 0
-      for (line <- bufferedSource.getLines) { // foreach line
-        if (linenumber == 0) {
-          val u = line.toDouble
-          if (debug) println(s"Rule = $u")
+  def isCoherent: Boolean = {
+    pb.workers.foreach { i =>
+      bundle(i).foreach { t =>
+        (pb.workers - i).foreach { j =>
+          if (bundle(j).contains(t)) return false
         }
-        if (linenumber == 1) {
-          val t = line.toDouble
-          if (debug) println(s"T (ms) = $t")
-        }
-        if (linenumber > 1) {
-          val task: Task = pb.tasks.toVector(linenumber - 2)
-          val agentNumber = line.toInt
-          val agent = pb.workers.toVector(agentNumber - 1)
-          if (debug) println(s"${agent.name} -> ${task.name}")
-          allocation.bundle += (agent -> (allocation.bundle(agent) + task))
-        }
-        linenumber += 1
       }
-      allocation
     }
-
-
-    /**
-      * Generate a random allocation
-      */
-    def randomAllocation(pb: MATA): Allocation = {
-      val allocation = new Allocation(pb)
-      val r = scala.util.Random
-      pb.tasks.foreach { t =>
-        val randomWorker = RandomUtils.random[Agent](pb.workers)
-        var newBundle: SortedSet[Task] = allocation.bundle(randomWorker)
-        newBundle += t
-        allocation.bundle += (randomWorker -> newBundle)
-      }
-      allocation
-    }
+    true
   }
+}
+
+/**
+  * Factory for [[Allocation]] instances
+  */
+object Allocation {
+  val debug = false
+
+  /**
+    * Build an allocation
+    *
+    * @param path of the OPL output
+    * @param pb   MATA
+    */
+  def apply(path: String, pb: MATA): Allocation = {
+    val allocation = new Allocation(pb)
+    val bufferedSource = Source.fromFile(path)
+    var linenumber = 0
+    for (line <- bufferedSource.getLines) { // foreach line
+      if (linenumber == 0) {
+        val u = line.toDouble
+        if (debug) println(s"Rule = $u")
+      }
+      if (linenumber == 1) {
+        val t = line.toDouble
+        if (debug) println(s"T (ms) = $t")
+      }
+      if (linenumber > 1) {
+        val task: Task = pb.tasks.toVector(linenumber - 2)
+        val agentNumber = line.toInt
+        val agent = pb.workers.toVector(agentNumber - 1)
+        if (debug) println(s"${agent.name} -> ${task.name}")
+        allocation.bundle += (agent -> (allocation.bundle(agent) + task))
+      }
+      linenumber += 1
+    }
+    allocation
+  }
+
+
+  /**
+    * Generate a random allocation
+    */
+  def randomAllocation(pb: MATA): Allocation = {
+    val allocation = new Allocation(pb)
+    val r = scala.util.Random
+    pb.tasks.foreach { t =>
+      val randomWorker = RandomUtils.random[Agent](pb.workers)
+      var newBundle: SortedSet[Task] = allocation.bundle(randomWorker)
+      newBundle += t
+      allocation.bundle += (randomWorker -> newBundle)
+    }
+    allocation
+  }
+}

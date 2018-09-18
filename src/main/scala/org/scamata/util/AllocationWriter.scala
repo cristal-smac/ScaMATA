@@ -27,7 +27,7 @@ class AllocationWriter(pathName: String, allocation : Allocation) {
   */
 object AllocationWriter extends App {
   val config = ConfigFactory.load()
-  import org.scamata.example.toy4x4._
+  import org.scamata.example.Toy4x4._
   println(pb)
   val alloc = new Allocation(pb)
   alloc.bundle += ( pb.getWorker("a1") -> SortedSet(pb.getTask("t1")) )

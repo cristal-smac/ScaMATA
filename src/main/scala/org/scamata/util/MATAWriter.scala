@@ -28,7 +28,7 @@ class MATAWriter(pathName: String, pb : MATA){
   */
 object MATAWriter extends App{
   val config = ConfigFactory.load()
-  import org.scamata.example.toy4x4._
+  import org.scamata.example.Toy4x4._
   println(pb)
   val writer=new MATAWriter(config.getString("path.scamata")+"/"+config.getString("path.input"),pb)
   writer.write

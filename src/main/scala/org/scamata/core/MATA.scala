@@ -134,7 +134,7 @@ class MATA(val workers: SortedSet[Agent], val tasks: SortedSet[Task]) {
     val worker = workers.head // Select one worker
     val otherWorkers = workers - worker
     tasks.subsets().foreach { bundle => // For each subset of tasks
-      var complementary = tasks -- bundle
+      val complementary = tasks -- bundle
       val subAllocations = allAllocation(otherWorkers, complementary) // compute the sub-allocation of the complementary
       // and allocate the current bundle to the worker
       subAllocations.foreach { a =>

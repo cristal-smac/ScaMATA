@@ -105,7 +105,7 @@ class CentralizedSolver(pb : MATA, rule : SocialRule, strategy : DealStrategy) e
   */
 object CentralizedSolver extends App {
   val debug = false
-  import org.scamata.example.toy4x4._
+  import org.scamata.example.Toy4x4._
   println(pb)
   val negotiationSolver = new CentralizedSolver(pb, LCmax, SingleSwapAndSingleGift)//SingleSwapAndSingleGift
   var allocation = new Allocation(pb)

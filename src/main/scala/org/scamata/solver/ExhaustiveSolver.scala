@@ -43,7 +43,7 @@ class ExhaustiveSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
   */
 object ExhaustiveSolver extends App {
   val debug = false
-  import org.scamata.example.toy4x4._
+  import org.scamata.example.Toy4x4._
   println(pb)
   val solver = new ExhaustiveSolver(pb,LCmax)
   println(solver.run().toString)

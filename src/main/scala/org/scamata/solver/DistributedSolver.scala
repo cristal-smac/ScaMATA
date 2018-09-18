@@ -58,7 +58,7 @@ object DistributedSolver{
   var id = 0
   val debug = false
   def main(args: Array[String]): Unit = {
-    import org.scamata.example.toy4x4._
+    import org.scamata.example.Toy4x4._
     println(pb)
     var allocation = new Allocation(pb)
     allocation = allocation.update(w1, SortedSet(t4))
