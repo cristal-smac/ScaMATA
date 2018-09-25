@@ -12,7 +12,7 @@ import org.scamata.util.MathUtils._
   * @param rule to be optimized
   */
 class HungarianSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
-  debug = true
+  debug = false
 
   // Buid cost matrix
   val nbRows = Math.min(pb.n(), pb.m())
@@ -41,11 +41,17 @@ class HungarianSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
       i += 1
     }
   }
-  // Build the primed zero matrix
+  // Build the starred zero matrix
   val primed = Array.ofDim[Boolean](nbRows, nbCols)
   for (i <- 0 until nbRows) {
     for (j <- 0 until nbCols) {
       starred(i)(j) = false
+    }
+  }
+  // Build the primed zero matrix
+  for (i <- 0 until nbRows) {
+    for (j <- 0 until nbCols) {
+      primed(i)(j) = false
     }
   }
   // none value
@@ -65,11 +71,7 @@ class HungarianSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
     * Cover the column of the element z
     */
   def coverColumn(z: (Int, Int)): Unit = coveredColumns += z._2
-  for (i <- 0 until nbRows) {
-    for (j <- 0 until nbCols) {
-      primed(i)(j) = false
-    }
-  }
+
 
   /**
     * Returns an allocation
@@ -80,22 +82,24 @@ class HungarianSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
     stepA() //  For each row of the matrix, find the smallest element and subtract it from every element in its row.
     if (debug) {
       println("Step A")
-      showCost()
+      if (debug) showCost()
     }
+
     stepB() // For each column of the matrix, find the smallest element and subtract it from every element in its column.
     if (debug) {
       println("Step B")
-      showCost()
+      if (debug) showCost()
     }
+
     stepC() // While there exists a zero Z with no starred zero in its row and column do star Z
     if (debug) {
       println("Step C")
-      showCost()
+      if (debug) showCost()
     }
     stepD() // Cover each column containing a starred zero.
     if (debug) {
       println("Step D")
-      showCost()
+      if (debug) showCost()
     }
     if (coveredColumns.size == nbRows) { // If K columns are covered
       if (debug) println("Step D successful")
@@ -141,7 +145,7 @@ class HungarianSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
   def stepC(): Unit = {
     for (i <- 0 until nbRows) {
       for (j <- 0 until nbCols) {
-        if ((cost(i)(j) ~= 0.0) && isSingle(i, j)) {
+        if (isZero(i, j) && isSingle(i, j)) {
           starred(i)(j) = true
         }
       }
@@ -153,10 +157,10 @@ class HungarianSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
     */
   def isSingle(i: Int, j: Int): Boolean = {
     for (row <- 0 until nbRows) {
-      if (row != i && (cost(row)(j) ~= 0.0) && starred(row)(j)) return false
+      if (row != i && isZero(row,j) && starred(row)(j)) return false
     }
     for (col <- 0 until nbCols) {
-      if (col != j && (cost(i)(col) ~= 0.0) && starred(i)(col)) return false
+      if (col != j && isZero(i, col) && starred(i)(col)) return false
     }
     true
   }
@@ -165,13 +169,13 @@ class HungarianSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
     * Cover each column containing a starred zero.
     */
   def stepD(): Unit = {
-    nbLines += coverColumnWithStarredZero()
+    nbLines += coverColumnsWithStarredZero()
   }
 
   /**
     * Cover each column containing a starred zero and returns the number of covered columns
     */
-  def coverColumnWithStarredZero(): Int = {
+  def coverColumnsWithStarredZero(): Int = {
     var nbCoveredColumns = 0
     for (j <- 0 until nbCols) {
       breakable {
@@ -223,40 +227,67 @@ class HungarianSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
   def stepE(): Unit = {
     while (true) {
       var z = uncoveredZero()
-      while (z != NONE) {
+      if (debug && (z != NONE)) println(s"There is an uncovered zero $z in\n${showCost}")
+      if (debug && (z == NONE)) println(s"There is no uncovered zero $z in\n${showCost}")
+      while (z != NONE){//E
         prime(z)
+        if (debug) println(s"Prime z=$z which is an uncovered zero in\n${showCost}")
         var zstar = starredZeroInRow(z)
         if (zstar != NONE) {
-          // There exists a starred zero in the same row of z
-          coverRow(zstar) // i.e. row of z
+          // F
+          if (debug) println(s" there is a starred zero zstar=$zstar in the row of z=$z")
+          coverRow(zstar)
           uncoverColumn(zstar)
-        } else {
+          if (debug) println(s"Cover row and uncover column of zstar in\n${showCost}")
+        } else {//H
+          if (debug) println(s" there is no starred zero in the row of z=$z")
           unprime(z)
           star(z)
-          zstar = starredZeroInColumn(z)
+          if (debug) println(s"Unprime and star z=$z in\n${showCost}")
+          zstar = anotherStarredZeroInColumn(z)
           while (zstar != NONE) {
-            // There exists a starred zero in the same column of z
+            if (debug) println(s"There exists a starred zero zstar=$zstar in the column of z=$z")
             unstar(zstar)
             z = primedZeroInRow(zstar)
             unprime(z)
             star(z)
-            zstar = starredZeroInColumn(z)
+            zstar = anotherStarredZeroInColumn(z)
+            if (debug) println(s"Unstar zstar, rename the primed zero in the row of zstar z, unprime z and star z in\n${showCost}")
           }
           nbLines += 1
           coveredColumns = Set[Int]()
           coveredRows = Set[Int]()
-          coverColumnWithStarredZero()
-        }
+          coverColumnsWithStarredZero()//nbLines = ???
+          if (debug) println(s"Recover starred zeros\n${showCost}")
+        }//end H
         z = uncoveredZero()
+        if (debug) println(s"There is still an uncovered zero $z in\n${showCost}")
+      }//end E
+      if (debug) println(s"Nblines $nbLines")
+      if (nbLines == nbRows){// I
+        if (debug) println(s"Solution found\n${showCost}")
+        return
       }
-      if (nbLines == nbRows) return
       val h: Double = minimalUncorvedValue()
-      for (i <- 0 until nbRows) {
-        for (j <- 0 until nbCols) {
-          if (coveredRows.contains(i)) cost(i)(j) += h
+      if (debug) println(s"minimal uncovered value $h")
+      if (h > 0) {// J
+        for (i <- 0 until nbRows) {
+          if (coveredRows.contains(i)) {
+            for (j <- 0 until nbCols) {
+              cost(i)(j) += h
+            }
+          }
         }
-      }
-    }
+        for (j <- 0 until nbCols) {
+            if (!coveredColumns.contains(j)) {
+              for (i <- 0 until nbRows) {
+                cost(i)(j) -= h
+              }
+            }
+          }
+        if (debug) println(s"Simplify cost\n${showCost}")
+      }// end J
+    }//end repeat
   }
 
   /**
@@ -302,7 +333,7 @@ class HungarianSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
     */
   def uncoveredZero(): (Int, Int) = {
     for (i <- 0 until nbRows) {
-      for (j <- 1 until nbCols) {
+      for (j <- 0 until nbCols) {
         if (isZero(i, j) && !isCovered(i, j)) return (i, j)
       }
     }
@@ -312,7 +343,7 @@ class HungarianSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
   /**
     * Returns true if cost(i)(j) is covered
     */
-  def isCovered(i: Int, j: Int): Boolean = coveredRows.contains(i) || coveredColumns(j)
+  def isCovered(i: Int, j: Int): Boolean = coveredRows.contains(i) || coveredColumns.contains(j)
 
   /**
     * Returns true if cost(i)(j) is zero
@@ -332,7 +363,7 @@ class HungarianSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
   /**
     * Returns a starred zero in the same column as z if exists, eventually none
     */
-  def starredZeroInColumn(z: (Int, Int)): (Int, Int) = {
+  def anotherStarredZeroInColumn(z: (Int, Int)): (Int, Int) = {
     for (i <- 0 until nbRows) {
       if (i != z._1 & isZero(i, z._2) & starred(i)(z._2)) return (i, z._2)
     }
@@ -351,7 +382,7 @@ class HungarianSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
   }
 
   /**
-    * Returns the minimal walue which is not covered
+    * Returns the minimal value which is not covered
     */
   def minimalUncorvedValue(): Double = {
     var min = Double.MaxValue
@@ -364,27 +395,33 @@ class HungarianSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
     min
   }
 
-    /**
-      * Show costs
-      */
-    def showCost(): Unit = {
-      for (i <- 0 until nbRows) {
-        for (j <- 0 until nbCols) {
-          val strikethrough = coveredColumns(j) match {
-            case true => "\u0336"
-            case false => ""
-          }
-          val star = starred(i)(j) match {
-            case true => "* "
-            case false => "  "
-          }
-          print(cost(i)(j) + strikethrough + star)
+  /**
+    * Show costs
+    */
+  def showCost(): String = {
+    var output =""
+    for (i <- 0 until nbRows) {
+      for (j <- 0 until nbCols) {
+        val strikethrough = (coveredColumns.contains(j) || coveredRows.contains(i)) match {
+          case true => "-"
+          case false => " "
         }
-        print("\n")
+        val star = starred(i)(j) match {
+          case true => "* "
+          case false => "  "
+        }
+        val prime = primed(i)(j) match {
+          case true => "' "
+          case false => "  "
+        }
+        output += cost(i)(j) + strikethrough + star + prime
       }
-      print("\n")
+      output += "\n"
     }
+    output += "\n"
+    output
   }
+}
 
 /**
   * Companion object to test it
@@ -398,4 +435,25 @@ object HungarianSolver extends App {
   val solver = new HungarianSolver(pb, LC)
   println(solver.run().toString)
 }
-
+/* TODO
+m: 4
+n: 4
+peers: w1, w2, w3, w4
+tasks: t1, t2, t3, t4
+w1: t1 703.0
+w1: t2 182.0
+w1: t3 209.0
+w1: t4 338.0
+w2: t1 943.0
+w2: t2 372.0
+w2: t3 970.0
+w2: t4 484.0
+w3: t1 353.0
+w3: t2 68.0
+w3: t3 152.0
+w3: t4 914.0
+w4: t1 497.0
+w4: t2 528.0
+w4: t3 239.0
+w4: t4 271.0
+*/
