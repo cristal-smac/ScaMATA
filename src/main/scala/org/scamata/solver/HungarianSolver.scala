@@ -12,13 +12,13 @@ import org.scamata.util.MathUtils._
   * @param rule to be optimized
   */
 class HungarianSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
-  debug = false
+  debug = true
 
   // Buid cost matrix
   val nbRows = Math.min(pb.n(), pb.m())
   val nbCols = Math.max(pb.n(), pb.m())
   val cost = Array.ofDim[Double](nbRows, nbCols)
-  // Build the starred zero matrix
+  // Build the mask zero matrix
   val starred = Array.ofDim[Boolean](nbRows, nbCols)
   if (pb.m() <= pb.n()) {
     // There are at least as many columns as rows
@@ -41,7 +41,7 @@ class HungarianSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
       i += 1
     }
   }
-  // Build the starred zero matrix
+  // Build the mask zero matrix
   val primed = Array.ofDim[Boolean](nbRows, nbCols)
   for (i <- 0 until nbRows) {
     for (j <- 0 until nbCols) {
@@ -91,19 +91,19 @@ class HungarianSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
       if (debug) showCost()
     }
 
-    stepC() // While there exists a zero Z with no starred zero in its row and column do star Z
+    stepC() // While there exists a zero Z with no mask zero in its row and column do star Z
     if (debug) {
       println("Step C")
       if (debug) showCost()
     }
-    stepD() // Cover each column containing a starred zero.
+    stepD() // Cover each column containing a mask zero.
     if (debug) {
       println("Step D")
       if (debug) showCost()
     }
     if (coveredColumns.size == nbRows) { // If K columns are covered
       if (debug) println("Step D successful")
-      return starAllocation() // the starred zeros describe a complete set of unique assignments
+      return starAllocation() // the mask zeros describe a complete set of unique assignments
     }
     stepE() // Cover all unncovered zeros
     starAllocation()
@@ -140,7 +140,7 @@ class HungarianSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
   }
 
   /**
-    * While there exists a zero Z with no starred zero in its row and column do star Z
+    * While there exists a zero Z with no mask zero in its row and column do star Z
     */
   def stepC(): Unit = {
     for (i <- 0 until nbRows) {
@@ -153,7 +153,7 @@ class HungarianSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
   }
 
   /**
-    * Returns true if there is no starred zero in row i and column j
+    * Returns true if there is no mask zero in row i and column j
     */
   def isSingle(i: Int, j: Int): Boolean = {
     for (row <- 0 until nbRows) {
@@ -166,33 +166,32 @@ class HungarianSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
   }
 
   /**
-    * Cover each column containing a starred zero.
+    * Cover each column containing a mask zero.
     */
   def stepD(): Unit = {
     nbLines += coverColumnsWithStarredZero()
   }
 
   /**
-    * Cover each column containing a starred zero and returns the number of covered columns
+    * Cover each column containing a mask zero and returns the number of covered columns
     */
   def coverColumnsWithStarredZero(): Int = {
     var nbCoveredColumns = 0
-    for (j <- 0 until nbCols) {
-      breakable {
-        for (i <- 0 until nbRows) {
-          if (starred(i)(j)) {
-            coveredColumns += j
-            nbCoveredColumns += 1
-            break()
-          }
+    for (i <- 0 until nbRows) {
+      for (j <- 0 until nbCols) {
+        if (starred(i)(j) ) {
+          coveredColumns +=j
         }
       }
+    }
+    for (j <- 0 until nbCols) {
+      if (coveredColumns.contains(j)) nbCoveredColumns +=1
     }
     nbCoveredColumns
   }
 
   /**
-    * Returns the allocation based on the starred Z
+    * Returns the allocation based on the mask Z
     */
   def starAllocation(): Allocation = {
     val allocation = new Allocation(pb)
@@ -235,18 +234,18 @@ class HungarianSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
         var zstar = starredZeroInRow(z)
         if (zstar != NONE) {
           // F
-          if (debug) println(s" there is a starred zero zstar=$zstar in the row of z=$z")
+          if (debug) println(s" there is a mask zero zstar=$zstar in the row of z=$z")
           coverRow(zstar)
           uncoverColumn(zstar)
           if (debug) println(s"Cover row and uncover column of zstar in\n${showCost}")
         } else {//H
-          if (debug) println(s" there is no starred zero in the row of z=$z")
+          if (debug) println(s" there is no mask zero in the row of z=$z")
           unprime(z)
           star(z)
           if (debug) println(s"Unprime and star z=$z in\n${showCost}")
           zstar = anotherStarredZeroInColumn(z)
           while (zstar != NONE) {
-            if (debug) println(s"There exists a starred zero zstar=$zstar in the column of z=$z")
+            if (debug) println(s"There exists a mask zero zstar=$zstar in the column of z=$z")
             unstar(zstar)
             z = primedZeroInRow(zstar)
             unprime(z)
@@ -258,10 +257,11 @@ class HungarianSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
           coveredColumns = Set[Int]()
           coveredRows = Set[Int]()
           coverColumnsWithStarredZero()//nbLines = ???
-          if (debug) println(s"Recover starred zeros\n${showCost}")
+          if (debug) println(s"Recover mask zeros\n${showCost}")
         }//end H
         z = uncoveredZero()
-        if (debug) println(s"There is still an uncovered zero $z in\n${showCost}")
+        if (debug && (z != NONE)) println(s"There is still an uncovered zero $z in\n${showCost}")
+        if (debug && (z == NONE)) println(s"There are no more uncovered zeroin\n${showCost}")
       }//end E
       if (debug) println(s"Nblines $nbLines")
       if (nbLines == nbRows){// I
@@ -351,21 +351,21 @@ class HungarianSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
   def isZero(i: Int, j: Int): Boolean = cost(i)(j) ~= 0.0
 
   /**
-    * Returns a starred zero in the same row as z if exists, eventually none
+    * Returns a mask zero in the same row as z if exists, eventually none
     */
   def starredZeroInRow(z: (Int, Int)): (Int, Int) = {
     for (j <- 0 until nbCols) {
-      if (j != z._2 & isZero(z._1, j) & starred(z._1)(j)) return (z._1, j)
+      if (j != z._2 &&isZero(z._1, j) && starred(z._1)(j)) return (z._1, j)
     }
     NONE
   }
 
   /**
-    * Returns a starred zero in the same column as z if exists, eventually none
+    * Returns a mask zero in the same column as z if exists, eventually none
     */
   def anotherStarredZeroInColumn(z: (Int, Int)): (Int, Int) = {
     for (i <- 0 until nbRows) {
-      if (i != z._1 & isZero(i, z._2) & starred(i)(z._2)) return (i, z._2)
+      if ((i != z._1) &&  isZero(i, z._2) && starred(i)(z._2) && ! primed(i)(z._2)) return (i, z._2)
     }
     NONE
   }
@@ -376,7 +376,7 @@ class HungarianSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
     */
   def primedZeroInRow(z: (Int, Int)): (Int, Int) = {
     for (j <- 0 until nbCols) {
-      if (isZero(z._1, j) & primed(z._1)(j)) return (z._1, j)
+      if (isZero(z._1, j) && primed(z._1)(j)) return (z._1, j)
     }
     throw new RuntimeException(s"The prime zero in the row of $z is not found")
   }
@@ -388,10 +388,10 @@ class HungarianSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
     var min = Double.MaxValue
     for (i <- 0 until nbRows) {
       for (j <- 0 until nbCols) {
-        if (!coveredRows.contains(i) && !coveredColumns.contains(j) & cost(i)(j) < min) min = cost(i)(j)
+        if (!coveredRows.contains(i) && !coveredColumns.contains(j) && cost(i)(j) < min) min = cost(i)(j)
       }
     }
-    if (min ~= Double.MaxValue) throw new RuntimeException("No uncoverd element is found")
+    if (min ~= Double.MaxValue) throw new RuntimeException("No uncovered element is found")
     min
   }
 
@@ -429,31 +429,12 @@ class HungarianSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
 object HungarianSolver extends App {
   val debug = false
 
-  import org.scamata.example.Toy3x3._
+  import org.scamata.example.Confusing4x4._
 
   println(pb)
   val solver = new HungarianSolver(pb, LC)
-  println(solver.run().toString)
+  val alloc =solver.run()
+  println(alloc.toString)
+  println(alloc.flowtime())
+
 }
-/* TODO
-m: 4
-n: 4
-peers: w1, w2, w3, w4
-tasks: t1, t2, t3, t4
-w1: t1 703.0
-w1: t2 182.0
-w1: t3 209.0
-w1: t4 338.0
-w2: t1 943.0
-w2: t2 372.0
-w2: t3 970.0
-w2: t4 484.0
-w3: t1 353.0
-w3: t2 68.0
-w3: t3 152.0
-w3: t4 914.0
-w4: t1 497.0
-w4: t2 528.0
-w4: t3 239.0
-w4: t4 271.0
-*/
