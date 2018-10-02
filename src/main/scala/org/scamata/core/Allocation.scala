@@ -56,8 +56,10 @@ class Allocation(val pb: MATA) {
     */
   def copy(): Allocation = {
     val allocation = new Allocation(pb)
-    this.bundle.foreach { case (a: Agent, t: Set[Task]) =>
-      allocation.bundle = allocation.bundle.updated(a, t)
+    this.bundle.foreach {
+      case (a: Agent, t: Set[Task]) =>
+        allocation.bundle = allocation.bundle.updated(a, t)
+      case _ => throw new RuntimeException("Not able to copy bundle")
     }
     allocation
   }

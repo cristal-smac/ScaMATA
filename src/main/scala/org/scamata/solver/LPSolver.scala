@@ -24,7 +24,10 @@ class LPSolver(pb : MATA, rule : SocialRule) extends DualSolver(pb, rule) {
       config.getString("path.scamata")+"/"+config.getString("path.cmax")
     case LC =>
       config.getString("path.scamata")+"/"+config.getString("path.flowtime")
+    case _ =>
+      throw new RuntimeException("Unknown social rulle")
   }
+  if (rule == SingleSwapOnly) config.getString("path.scamata")+"/"+config.getString("path.assignment")
 
   override def solve(): Allocation = {
     // 1 - Reformulate the problem

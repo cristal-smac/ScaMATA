@@ -108,7 +108,7 @@ object CentralizedSolver extends App {
   val debug = false
   import org.scamata.example.Toy4x4._
   println(pb)
-  val negotiationSolver = new CentralizedSolver(pb, LCmax, SingleSwapAndSingleGift)//SingleSwapAndSingleGift
+  val negotiationSolver = new CentralizedSolver(pb, LCmax, SingleSwapAndSingleGift)//SingleSwapAndSingleGift or SingleSwapOnly
   var allocation = new Allocation(pb)
   allocation = allocation.update(w1, SortedSet(t4))
   allocation = allocation.update(w2, SortedSet(t3))

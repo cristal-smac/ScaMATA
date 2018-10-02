@@ -15,12 +15,16 @@ object Test {
   val debug= true
 
   def main(args: Array[String]): Unit = {
-    if (args.length <= 0) throw new RuntimeException("Usage: Test LC|LCmax")
-    val rule: SocialRule = args(0) match {
+    /*
+    if (args.length <= 1) throw new RuntimeException("Usage: Test LC|LCmax")
+    val rule: SocialRule = args(1) match {
       case "LCmax" => LCmax
       case "LC" => LC
-      case _ => throw new RuntimeException("Bad social rule")
+      case _ => throw new RuntimeException(s"Bad social rule ${args(1)}")
     }
+    */
+    val rule: SocialRule = LCmax
+
     val nbTasksPerWorker = rule match {
       case LCmax => 5
       case LC => 5
@@ -119,11 +123,13 @@ object Test {
         lpSolverPreTime ::= lpSolver.preSolvingTime
         lpSolverPostTime ::= lpSolver.postSolvingTime
       }
+
       lpSolverRule = lpSolverRule.sortWith(_ < _)
       giftSolverRule = giftSolverRule.sortWith(_ < _)
       distributedGiftSolverRule = distributedGiftSolverRule.sortWith(_ < _)
       swapSolverRule = swapSolverRule.sortWith(_ < _)
       distributedSwapSolverRule = distributedSwapSolverRule.sortWith(_ < _)
+
       lpSolverTime = lpSolverTime.sortWith(_ < _)
       lpSolverPreTime = lpSolverPreTime.sortWith(_ < _)
       lpSolverPostTime = lpSolverPostTime.sortWith(_ < _)
@@ -131,22 +137,23 @@ object Test {
       swapSolverTime = swapSolverTime.sortWith(_ < _)
       distributedGiftSolverTime = distributedGiftSolverTime.sortWith(_ < _)
       distributedSwapSolverTime = distributedSwapSolverTime.sortWith(_ < _)
+      
       bw.write(
-        s"$m,$n,${giftSolverRule.min},${giftSolverRule(nbPb / 4)},${giftSolverRule(nbPb / 2)},${giftSolverRule(nbPb * 3 / 4)},${giftSolverRule.max}," +
-          s"${distributedGiftSolverRule.min},${distributedGiftSolverRule(nbPb / 4)},${distributedGiftSolverRule(nbPb / 2)},${distributedGiftSolverRule(nbPb * 3 / 4)},${distributedGiftSolverRule.max}," +
-          s"${swapSolverRule.min},${swapSolverRule(nbPb / 4)},${swapSolverRule(nbPb / 2)},${swapSolverRule(nbPb * 3 / 4)},${swapSolverRule.max}," +
-          s"${distributedSwapSolverRule.min},${distributedSwapSolverRule(nbPb / 4)},${distributedSwapSolverRule(nbPb / 2)},${distributedSwapSolverRule(nbPb * 3 / 4)},${distributedSwapSolverRule.max}," +
-          s"${lpSolverRule.min},${lpSolverRule(nbPb / 4)},${lpSolverRule(nbPb / 2)},${lpSolverRule(nbPb * 3 / 4)},${lpSolverRule.max}," +
-          s"${giftSolverTime.min},${giftSolverTime(nbPb / 4)},${giftSolverTime(nbPb / 2)},${giftSolverTime(nbPb * 3 / 4)},${giftSolverTime.max}," +
-          s"${distributedGiftSolverTime.min},${distributedGiftSolverTime(nbPb / 4)},${distributedGiftSolverTime(nbPb / 2)},${distributedGiftSolverTime(nbPb * 3 / 4)},${distributedGiftSolverTime.max}," +
-          s"${swapSolverTime.min},${swapSolverTime(nbPb / 4)},${swapSolverTime(nbPb / 2)},${swapSolverTime(nbPb * 3 / 4)},${swapSolverTime.max}," +
-          s"${distributedSwapSolverTime.min},${distributedSwapSolverTime(nbPb / 4)},${distributedSwapSolverTime(nbPb / 2)},${distributedSwapSolverTime(nbPb * 3 / 4)},${distributedSwapSolverTime.max}," +
-          s"${lpSolverTime.min},${lpSolverTime(nbPb / 4)},${lpSolverTime(nbPb / 2)},${lpSolverTime(nbPb * 3 / 4)},${lpSolverTime.max}," +
-          s"${lpSolverPreTime.min},${lpSolverPreTime(nbPb / 4)},${lpSolverPreTime(nbPb / 2)},${lpSolverPreTime(nbPb * 3 / 4)},${lpSolverPreTime.max}," +
-          s"${lpSolverPostTime.min},${lpSolverPostTime(nbPb / 4)},${lpSolverPostTime(nbPb / 2)},${lpSolverPostTime(nbPb / 4)},${lpSolverPostTime.max}," +
-          s"${gift4gift / nbPb},${gift4swap / nbPb },${swap4swap /nbPb}," +
-          s"${nbPropose4gift / nbPb},${nbCounterPropose4gift / nbPb},${nbAccept4gift / nbPb},${nbReject4gift / nbPb},${nbWithdraw4gift / nbPb},${nbConfirmGift4gift / nbPb},${nbConfirmSwap4gift / nbPb},${nbInform4gift / nbPb}," +
-          s"${nbPropose4swap / nbPb},${nbCounterPropose4swap / nbPb},${nbAccept4swap / nbPb},${nbReject4swap / nbPb},${nbWithdraw4swap / nbPb},${nbConfirmGift4swap / nbPb},${nbConfirmSwap4swap / nbPb},${nbInform4swap / nbPb}\n")
+        m+","+n+","+giftSolverRule.min+","+giftSolverRule(nbPb / 4)+","+giftSolverRule(nbPb / 2)+","+giftSolverRule(nbPb * 3 / 4)+","+giftSolverRule.max+","+
+          distributedGiftSolverRule.min+","+distributedGiftSolverRule(nbPb / 4)+","+distributedGiftSolverRule(nbPb / 2)+","+distributedGiftSolverRule(nbPb * 3 / 4)+","+distributedGiftSolverRule.max+","+
+          swapSolverRule.min+","+swapSolverRule(nbPb / 4)+","+swapSolverRule(nbPb / 2)+","+swapSolverRule(nbPb * 3 / 4)+","+swapSolverRule.max+","+
+          distributedSwapSolverRule.min+","+distributedSwapSolverRule(nbPb / 4)+","+distributedSwapSolverRule(nbPb / 2)+","+distributedSwapSolverRule(nbPb * 3 / 4)+","+distributedSwapSolverRule.max+","+
+          lpSolverRule.min+","+lpSolverRule(nbPb / 4)+","+lpSolverRule(nbPb / 2)+","+lpSolverRule(nbPb * 3 / 4)+","+lpSolverRule.max+","+
+          giftSolverTime.min+","+giftSolverTime(nbPb / 4)+","+giftSolverTime(nbPb / 2)+","+giftSolverTime(nbPb * 3 / 4)+","+giftSolverTime.max+","+
+          distributedGiftSolverTime.min+","+distributedGiftSolverTime(nbPb / 4)+","+distributedGiftSolverTime(nbPb / 2)+","+distributedGiftSolverTime(nbPb * 3 / 4)+","+distributedGiftSolverTime.max+","+
+          swapSolverTime.min+","+swapSolverTime(nbPb / 4)+","+swapSolverTime(nbPb / 2)+","+swapSolverTime(nbPb * 3 / 4)+","+swapSolverTime.max+","+
+          distributedSwapSolverTime.min+","+distributedSwapSolverTime(nbPb / 4)+","+distributedSwapSolverTime(nbPb / 2)+","+distributedSwapSolverTime(nbPb * 3 / 4)+","+distributedSwapSolverTime.max+","+
+          lpSolverTime.min+","+lpSolverTime(nbPb / 4)+","+lpSolverTime(nbPb / 2)+","+lpSolverTime(nbPb * 3 / 4)+","+lpSolverTime.max+","+
+          lpSolverPreTime.min+","+lpSolverPreTime(nbPb / 4)+","+lpSolverPreTime(nbPb / 2)+","+lpSolverPreTime(nbPb * 3 / 4)+","+lpSolverPreTime.max+","+
+          lpSolverPostTime.min+","+lpSolverPostTime(nbPb / 4)+","+lpSolverPostTime(nbPb / 2)+","+lpSolverPostTime(nbPb / 4)+","+lpSolverPostTime.max+","+
+          gift4gift / nbPb+","+gift4swap / nbPb +","+swap4swap /nbPb+","+
+          nbPropose4gift / nbPb+","+nbCounterPropose4gift / nbPb+","+nbAccept4gift / nbPb+","+nbReject4gift / nbPb+","+nbWithdraw4gift / nbPb+","+nbConfirmGift4gift / nbPb+","+nbConfirmSwap4gift / nbPb+","+nbInform4gift / nbPb+","+
+          nbPropose4swap / nbPb+","+nbCounterPropose4swap / nbPb+","+nbAccept4swap / nbPb+","+nbReject4swap / nbPb+","+nbWithdraw4swap / nbPb+","+nbConfirmGift4swap / nbPb+","+nbConfirmSwap4swap / nbPb+","+nbInform4swap / nbPb+"\n")
       bw.flush()
     }
     System.exit(0)

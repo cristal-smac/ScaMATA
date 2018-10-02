@@ -37,8 +37,9 @@ abstract class Solver(val pb : MATA, val rule : SocialRule) {
     val startingTime = System.nanoTime()
     val allocation = solve()
     solvingTime = System.nanoTime() - startingTime
-    if (allocation.isCoherent) allocation
-    else throw new RuntimeException(s"Solver: the outcome\n $allocation\nis not complete for\n ${allocation.pb}")
+    if (rule ==SingleSwapOnly && ! allocation.isSingle) throw new RuntimeException(s"Solver: the outcome\n $allocation\n for\n ${allocation.pb} assign more than one task per agent")
+    if (allocation.isCoherent && allocation.isSound) allocation
+    else throw new RuntimeException(s"Solver: the outcome\n $allocation\nis not coherent or sound for\n ${allocation.pb}")
   }
 
 }

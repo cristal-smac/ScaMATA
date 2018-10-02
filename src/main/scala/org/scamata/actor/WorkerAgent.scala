@@ -30,9 +30,10 @@ case object Responder extends State
   * @param belief    about the workloads
   * @param responder under consideration
   * @param task      under consideration
+  * @param blackList of task/worker
   */
-class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Agent, Double], val responder: Agent, val task: Task)
-  extends Product4[SortedSet[Task], Map[Agent, Double], Agent, Task] {
+class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Agent, Double], val responder: Agent, val task: Task, var blackList : List[(Task, Agent)])
+  extends Product5[SortedSet[Task], Map[Agent, Double], Agent, Task, List[(Task, Agent)]] {
 
   override def _1: SortedSet[Task] = bundle
 
@@ -42,6 +43,8 @@ class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Agent, Double], v
 
   override def _4: Task = task
 
+  override def _5: List[(Task, Agent)] = blackList
+
   override def toString: String = bundle.mkString("(", ",", ")")
 
   override def canEqual(that: Any): Boolean = that.isInstanceOf[StateOfMind]
@@ -50,43 +53,55 @@ class StateOfMind(val bundle: SortedSet[Task], var belief: Map[Agent, Double], v
     workers.foreach { w =>
       belief += w -> 0.0
     }
-    new StateOfMind(bundle, belief, responder, task)
+    new StateOfMind(bundle, belief, responder, task, List[(Task,Agent)]())
   }
 
   /**
     * Update belief with a new workload
     */
   def updateBelief(worker: Agent, workload: Double): StateOfMind = {
-    new StateOfMind(bundle, belief.updated(worker, workload), responder, task)
+    new StateOfMind(bundle, belief.updated(worker, workload), responder, task, blackList)
   }
 
   /**
     * Add a new bundle to the current one
     */
   def addBundle(newBundle: SortedSet[Task]): StateOfMind = {
-    new StateOfMind(bundle ++ newBundle, belief, responder, task)
+    new StateOfMind(bundle ++ newBundle, belief, responder, task, blackList)
   }
 
   /**
     * Add a task to the current bundle
     */
   def add(task: Task): StateOfMind = {
-    new StateOfMind(bundle + task, belief, responder, task)
+    new StateOfMind(bundle + task, belief, responder, task, blackList)
   }
 
   /**
     * Remove a task from the current bundle
     */
   def remove(task: Task): StateOfMind = {
-    new StateOfMind(bundle - task, belief, responder, task)
+    new StateOfMind(bundle - task, belief, responder, task, blackList)
   }
 
   /**
     * Change the task and the responder under consideration
     */
   def changeDelegation(newOpponent: Agent, newTask: Task): StateOfMind = {
-    new StateOfMind(bundle, belief, newOpponent, newTask)
+    new StateOfMind(bundle, belief, newOpponent, newTask, blackList)
   }
+
+  /**
+    * Put a task and a worker agent in the black list
+    */
+  def barred(t: Task, a: Agent) : StateOfMind = {
+    new StateOfMind(bundle, belief, responder, task, (t, a) :: blackList  )
+  }
+
+  /**
+    * Is a task and a worker agent in the black list ?
+    */
+  def isBarred(t: Task, a: Agent) : Boolean = blackList.contains(t, a)
 
   /**
     * Return the belief about the flowtime
@@ -222,4 +237,6 @@ abstract class WorkerAgent(val worker: Agent, val rule: SocialRule, val strategy
     }
     bestCounterpart
   }
+
+
 }

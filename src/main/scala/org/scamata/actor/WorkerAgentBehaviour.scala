@@ -2,8 +2,8 @@
 package org.scamata.actor
 
 import akka.actor.{FSM, Stash}
-import org.scamata.core.{NoTask, NoAgent, Task, Agent}
-import org.scamata.solver.{SocialRule, LCmax, LC, DealStrategy}
+import org.scamata.core.{Agent, NoAgent, NoTask, Task}
+import org.scamata.solver._
 
 import scala.collection.SortedSet
 import scala.language.postfixOps
@@ -22,7 +22,7 @@ class WorkerAgentBehaviour(worker: Agent, rule: SocialRule, strategy: DealStrate
   /**
     * Initially the worker is in the initial state with no bundle, no beliefs about the workloads and no responder for any particular task
     */
-  startWith(Initial, new StateOfMind(SortedSet[Task](), Map[Agent, Double](), NoAgent, NoTask))
+  startWith(Initial, new StateOfMind(SortedSet[Task](), Map[Agent, Double](), NoAgent, NoTask, List[(Task,Agent)]() ) )
 
   /**
     * Either the worker is in Initial state
@@ -45,7 +45,7 @@ class WorkerAgentBehaviour(worker: Agent, rule: SocialRule, strategy: DealStrate
       }
       // Either the worker has an empty bundle or no potential partners
       if (suppliers.isEmpty || updatedMind.bundle.isEmpty) {
-        if (debug) println(s"$worker desesperated since $suppliers")
+        if (debug) println(s"$worker hopeless since $suppliers")
         solverAgent ! Stopped(updatedMind.bundle)
         stay using updatedMind
       } else { // Otherwise
@@ -68,7 +68,7 @@ class WorkerAgentBehaviour(worker: Agent, rule: SocialRule, strategy: DealStrate
               case LC =>
                 cost(supplier, task) - cost(worker, task)
             }
-            if (giftGoal < bestGoal) {
+            if (giftGoal < bestGoal && ! updatedMind.isBarred(task, supplier) ) {
               found = true
               bestGoal = giftGoal
               bestSupplier = supplier
@@ -104,7 +104,7 @@ class WorkerAgentBehaviour(worker: Agent, rule: SocialRule, strategy: DealStrate
         nbCounterPropose += 1
         goto(Proposer) using updatedMind
 
-      } else if (acceptable(task, provider = opponent, supplier = worker, updatedMind)) {
+      } else if (acceptable(task, provider = opponent, supplier = worker, updatedMind) && strategy != SingleSwapOnly) {
         solverAgent ! Activated(updatedMind.bundle)
         if (trace) println(s"$worker -> $opponent : Accept($task, $NoTask)")
         sender ! Accept(task, NoTask, updatedMind.belief(worker))
@@ -160,6 +160,7 @@ class WorkerAgentBehaviour(worker: Agent, rule: SocialRule, strategy: DealStrate
       if (opponent != mind.responder || task != mind.task) {
         stay using updatedMind
       } else {
+        updatedMind= updatedMind.barred(task, opponent)
         updatedMind = updatedMind.changeDelegation(NoAgent, NoTask)
         self ! Trigger
         goto(Initial) using updatedMind

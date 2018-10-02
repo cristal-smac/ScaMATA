@@ -320,30 +320,18 @@ class MunkresSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
   def starAllocation(): Allocation = {
     val allocation = new Allocation(pb)
     var (i, j) = (0, 0)
-    if (pb.m() <= pb.n()) {
-      // There are at least as many columns as rows
-      pb.workers.toList.foreach { a =>
-        j = 0
-        pb.tasks.toList.foreach { t =>
-          if (marked(i)(j) == 1) allocation.bundle = allocation.bundle.updated(a, allocation.bundle(a) + t)
-          j += 1
-        }
-        i += 1
-      }
-      return allocation
-    }
-    // The matrix is rotated
-    pb.tasks.toList.foreach { t =>
+    // There are at least as many columns as rows
+    pb.workers.toList.foreach { a =>
       j = 0
-      pb.workers.toList.foreach { a =>
+      pb.tasks.toList.foreach { t =>
         if (marked(i)(j) == 1) allocation.bundle = allocation.bundle.updated(a, allocation.bundle(a) + t)
         j += 1
       }
       i += 1
     }
-    return allocation
+    if (! allocation.isSingle) throw new RuntimeException("More than one task is allocated to an agent")
+    allocation
   }
-
 
   /**
     * Returns true if cost(i)(j) is zero

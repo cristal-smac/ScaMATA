@@ -6,11 +6,20 @@ scalacOptions += "-deprecation"
 scalacOptions += "-feature"
 scalacOptions += "-Yrepl-sync"
 
-javaOptions in run += "-Xms8G"
-javaOptions in run += "-Xmx8G"
+javaOptions in run += "-Xms2G"
+javaOptions in run += "-Xmx2G"
+javaOptions in run += "-Xss2G"
 
-mainClass in (Compile,run) := Some("org.scamata.util.MATASolver")
-mainClass in assembly := Some("org.scamata.util.MATASolver")
+javaOptions in assembly += "-Xms2G"
+javaOptions in assembly += "-Xmx2G"
+javaOptions in assembly += "-Xss2G"
+
+
+//mainClass in (Compile,run) := Some("org.scamata.util.MATASolver")
+//mainClass in assembly := Some("org.scamata.util.MATASolver")
+
+mainClass in (Compile,run) := Some("org.scamata.experiments.Test")
+mainClass in assembly := Some("org.scamata.experiments.Test")
 
 fork := true
 
@@ -19,7 +28,7 @@ cancelable in Global := true
 resolvers += "Artifactory-UCL" at "http://artifactory.info.ucl.ac.be/artifactory/libs-snapshot-local/"
 resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.12.4"
 
 
 libraryDependencies ++= Seq(
