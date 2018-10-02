@@ -3,59 +3,63 @@ package org.scamata.solver
 
 import org.scamata.core.{Allocation, MATA}
 import org.scamata.util.MathUtils._
+import util.control.Breaks._
 
 /**
-  * Solver based on the Munkres' algorithm
-  *
+  * Solver based on the Munkres' algorithm also called the Hungarian algorithm or the Kuhn-Munkres algorithm
+  * for solving the Assignment Problem in O(n&#94;3) time
   * @param pb   to be solver
   * @param rule to be optimized
   */
 class MunkresSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
-  debug = true
+  debug = false
 
-  val NONE = (-1, -1)
+  val NONE = (-1, -1)// not in the cost matrix
+  var zero0 = (0,0)// first cell
+  if (pb.n() !=  pb.m()) throw new RuntimeException("The problem must have the same number of agents and tasks")
 
-  var zero0 = NONE
   // Build cost matrix
-  val nbRows = Math.min(pb.n(), pb.m())
-  val nbCols = Math.max(pb.n(), pb.m())
-  val cost = Array.ofDim[Double](nbRows, nbCols)
-  builCostMatrix()
+  val n= pb.n()
+  val cost = Array.ofDim[Double](n, n)
+  buildCostMatrix()
 
-  // Build the mask matrix 0 none 1 starred 2 primed
-  val mask = Array.fill[Int](nbRows, nbCols)(elem = 0)
-  // Covered lines and columns
-  var coveredColumns = Array.fill[Boolean](nbCols)(elem = false)
-  var coveredRows =  Array.fill[Boolean](nbCols)(elem = false)
+  // Build the marked matrix : 0 if none, 1 if starred,  2 if primed
+  val marked = Array.fill[Int](n, n)(elem = 0)
 
+  // Covered lines and columns, initially none
+  var coveredColumns = Array.fill[Boolean](n)(elem = false)
+  var coveredRows =  Array.fill[Boolean](n)(elem = false)
+
+  //  Series of alternating primed and starred zeros
+  var path =  Array.fill[(Int, Int)](2* n)(elem =  (0,0))
 
   /**
     * Build cost matrix
     */
-  def builCostMatrix() : Unit = {
+  def buildCostMatrix() : Unit = {
     var (i, j) = (0, 0)
     if (pb.m() <= pb.n()) {
-    // There are at least as many columns as rows
-    pb.workers.toList.foreach { a =>
-      j = 0
-      pb.tasks.toList.foreach { t =>
-        cost(i)(j) = pb.cost(a, t)
-        j += 1
-      }
-      i += 1
-    }
-  } else {
-    //Rotate the matrix
-    pb.tasks.toList.foreach { t =>
-      j = 0
+      // There are at least as many columns as rows
       pb.workers.toList.foreach { a =>
-        cost(i)(j) = pb.cost(a, t)
-        j += 1
+        j = 0
+        pb.tasks.toList.foreach { t =>
+          cost(i)(j) = pb.cost(a, t)
+          j += 1
+        }
+        i += 1
       }
-      i += 1
+    } else {
+      //Rotate the matrix
+      pb.tasks.toList.foreach { t =>
+        j = 0
+        pb.workers.toList.foreach { a =>
+          cost(i)(j) = pb.cost(a, t)
+          j += 1
+        }
+        i += 1
+      }
     }
   }
-}
 
 
   /**
@@ -102,12 +106,12 @@ class MunkresSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
     * For each row of the matrix, find the smallest element and subtract it from every element in its row.
     */
   def step1(): Int = {
-    for (i <- 0 until nbRows) {
+    for (i <- 0 until n) {
       var minInRow = cost(i)(0)
-      for (j <- 1 until nbCols) {
+      for (j <- 1 until n) {
         if (cost(i)(j) < minInRow) minInRow = cost(i)(j)
       }
-      for (j <- 0 until nbCols) {
+      for (j <- 0 until n) {
         cost(i)(j) -= minInRow
       }
     }
@@ -118,12 +122,12 @@ class MunkresSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
     * TODO For each column of the matrix, find the smallest element and subtract it from every element in its column.
     */
   def step1bis(): Int = {
-    for (j <- 0 until nbCols) {
+    for (j <- 0 until n) {
       var minInCol = cost(0)(j)
-      for (i <- 1 until nbRows) {
+      for (i <- 1 until n) {
         if (cost(i)(j) < minInCol) minInCol = cost(i)(j)
       }
-      for (i <- 0 until nbRows) {
+      for (i <- 0 until n) {
         cost(i)(j) -= minInCol
       }
     }
@@ -134,40 +138,39 @@ class MunkresSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
     * While there exists a zero Z with no starred zero in its row and column do star Z
     */
   def step2(): Int = {
-    for (i <- 0 until nbRows) {
-      for (j <- 0 until nbCols) {
-        if (isZero(i, j) && coveredRows(i) && coveredColumns(j)) {
-          mask(i)(j) = 1
-          coveredRows(i) = true
-          coveredColumns(j) = true
+    for (i <- 0 until n) {
+      breakable{
+        for (j <- 0 until n) {
+          if (isZero(i, j) && ! coveredRows(i) && ! coveredColumns(j)) {
+            marked(i)(j) = 1
+            coveredRows(i) = true
+            coveredColumns(j) = true
+            break
+          }
         }
       }
     }
-    coveredColumns = Array.fill[Boolean](nbCols)(elem = false)
-    coveredRows =  Array.fill[Boolean](nbCols)(elem = false)
+    coveredColumns = Array.fill[Boolean](n)(elem = false)
+    coveredRows =  Array.fill[Boolean](n)(elem = false)
     3
   }
 
-
-
   /**
     * Cover each column containing a starred zero
-    * either nbRows columns are covered, we have done
+    * either n columns are covered, we have done
     * or got to step 4
     */
   def step3(): Int = {
-    for (i <- 0 until nbRows) {
-        for (j <- 0 until nbCols) {
-          if (mask(i)(j) == 1) {
-            coveredColumns(j) = true
-          }
-        }
-    }
     var nbCoveredColumns = 0
-    for (j <- 0 until nbCols) {
-      if (coveredColumns(j)) nbCoveredColumns +=1
+    for (i <- 0 until n) {
+      for (j <- 0 until n) {
+        if (marked(i)(j) == 1 && !coveredColumns(j)) {
+          coveredColumns(j) = true
+          nbCoveredColumns += 1
+        }
+      }
     }
-    if (nbCoveredColumns == nbRows) return 7
+    if (nbCoveredColumns >= n) return 7
     4
   }
 
@@ -179,27 +182,30 @@ class MunkresSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
     * Continue in this manner until there are no uncovered zeros left. Save the smallest uncovered value and Go to Step 6.
     */
   def step4() : Int = {
+    var step = 0
     var (i,j)= NONE
     var found = false
-    while (! found){
-        val z = uncoveredZero()
-        if (z == NONE){
-          if (debug) println(s"There are no more uncovered zeros")
-          found = true
-          return  6
-        }
-      if (debug) println(s"$z is a non covered zero")
-      mask(z._1)(z._2) = 2 // Prime z
-      val zstar = starredZeroInRow(z._1)
-      if (zstar == NONE){
+    while (! found) {
+      val z = uncoveredZero(i0 = 0,j0 = 0)
+      if (z == NONE) {
+        if (debug) println(s"There are no more uncovered zeros")
         found = true
-        zero0 = z
-        return 5
+        step = 6
+      } else {
+        if (debug) println(s"$z is a non covered zero")
+        marked(z._1)(z._2) = 2 // Prime z
+        val zstar = starredZeroInRow(z._1)
+        if (zstar != NONE) {
+          coveredRows(z._1) = true
+          coveredColumns(zstar._2) = false
+        } else {
+          found = true
+          zero0 = z
+          step = 5
+        }
       }
-      coveredRows(zstar._1) = true
-      coveredColumns(zstar._2) = false
     }
-    -1 // useless
+    return step // useless
   }
 
   /**
@@ -208,30 +214,36 @@ class MunkresSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
     * Let Z1 denote the starred zero in the column of Z0 (if any).
     * Let Z2 denote the primed zero in the row of Z1 (there will always be one).
     * Continue until the series terminates at a primed zero that has no starred zero in its column.
-    * Unstar each starred zero of the series, star each primed zero of the series, erase all primes and uncover every line in the matrix.
+    * Unstar each starred zero of the series, star each primed zero of the series, erasePrime all primes and uncover every line in the matrix.
     * Return to Step 3.
     *
     */
   def step5() : Int = {
-    var path = List[(Int, Int)](zero0)
+    var count = 0
+    path(count) = zero0
+    if (debug) println(s"Add starred z0 $zero0 in path")
     var finished = false
     while (! finished){
       if (debug) println(path)
-      val z1 = starredZeroInColumn(path.head._2)
-      if (z1 == NONE){
-        finished = true
+      val z1 = starredZeroInColumn(path(count)._2)
+      if (z1 != NONE){
+        count +=1
+        if (debug) println(s"Add starred $z1 in path")
+        path(count) = z1
       }
       else {
-        path ::= z1
+        finished = true
       }
       if (! finished){
-        val z2 = primedZeroInRow(path.head._1)
-        path ::= z2
+        val z2 = primedZeroInRow(path(count)._1)
+        count += 1
+        if (debug) println(s"Add primed $z2 in path")
+        path(count) = z2
       }
     }
-    convert(path)
+    convert(path, count)
     clear()
-    erase()
+    erasePrime()
     3
   }
 
@@ -244,37 +256,62 @@ class MunkresSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
   def step6() : Int = {
     val h = minimalUncorvedValue()
     var nbMoves = 0
-    for (i <- 0 until nbRows) {
-        for (j <- 0 until nbCols) {
-          if (coveredRows(i)){
-            cost(i)(j) += h
-            nbMoves +=1
-          }
-          if (! coveredColumns(j)){
-            cost(i)(j) -= h
-            nbMoves +=1
-          }
-          if (coveredRows(i) && ! coveredColumns(j)){
-            nbMoves -=2
-          }
+    for (i <- 0 until n) {
+      for (j <- 0 until n) {
+        if (coveredRows(i)){
+          cost(i)(j) += h
+          nbMoves +=1
+        }
+        if (! coveredColumns(j)){
+          cost(i)(j) -= h
+          nbMoves +=1
+        }
+        if (coveredRows(i) && ! coveredColumns(j)){
+          nbMoves -=2
         }
       }
+    }
     if (nbMoves == 0) throw new RuntimeException("Problem cannot be solved !")
     4
   }
-
-
 
   /**
     * Returns an uncovered zero if exists, eventually none
     */
   def uncoveredZero(): (Int, Int) = {
-    for (i <- 0 until nbRows) {
-      for (j <- 0 until nbCols) {
+    for (i <- 0 until n) {
+      for (j <- 0 until n) {
         if (isZero(i, j) && !coveredRows(i) && !coveredColumns(j) ) return (i, j)
       }
     }
     NONE
+  }
+
+
+  /**
+    * Returns an uncovered zero if exists, eventually none from (i0,j0)
+    */
+  def uncoveredZero(i0 : Int = 0, j0 : Int = 0): (Int, Int) = {
+    var (r, c) = NONE
+    var i = i0
+    var done = false
+    while (!done) {
+      breakable {
+        var j = j0
+        while (true) {
+          if (isZero(i, j) && !coveredRows(i) && !coveredColumns(j)) {
+            r = i
+            c = j
+            done = true
+          }
+          j = (j + 1) % n
+          if (j == j0) break()
+        }
+      }
+      i = (i + 1) % n
+      if (i == i0) done = true
+    }
+    (r,c)
   }
 
   /**
@@ -288,7 +325,7 @@ class MunkresSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
       pb.workers.toList.foreach { a =>
         j = 0
         pb.tasks.toList.foreach { t =>
-          if (mask(i)(j) == 1) allocation.bundle = allocation.bundle.updated(a, allocation.bundle(a) + t)
+          if (marked(i)(j) == 1) allocation.bundle = allocation.bundle.updated(a, allocation.bundle(a) + t)
           j += 1
         }
         i += 1
@@ -299,7 +336,7 @@ class MunkresSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
     pb.tasks.toList.foreach { t =>
       j = 0
       pb.workers.toList.foreach { a =>
-        if (mask(i)(j) == 1) allocation.bundle = allocation.bundle.updated(a, allocation.bundle(a) + t)
+        if (marked(i)(j) == 1) allocation.bundle = allocation.bundle.updated(a, allocation.bundle(a) + t)
         j += 1
       }
       i += 1
@@ -318,8 +355,8 @@ class MunkresSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
     * Returns the first starred zero in the row i if exists, eventually none
     */
   def starredZeroInRow(i: Int): (Int, Int) = {
-    for (j <- 0 until nbCols) {
-      if (isZero(i, j) && mask(i)(j) == 1 ) return (i, j)//
+    for (j <- 0 until n) {
+      if (isZero(i, j) && marked(i)(j) == 1 ) return (i, j)
     }
     NONE
   }
@@ -328,30 +365,31 @@ class MunkresSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
     * Returns the first starred zero in the same column as j if exists, eventually none
     */
   def starredZeroInColumn(j : Int): (Int, Int) = {
-    for (i <- 0 until nbRows) {
-      if (isZero(i, j) && mask(i)(j) == 1 ) return (i, j) //
+    for (i <- 0 until n) {
+      if (isZero(i, j) && marked(i)(j) == 1 ) return (i, j)
     }
     NONE
   }
 
   /**
-    * Returns the first primed zero in the row i if exists, eventually none
+    * Returns the first primed zero in the row i which necessary exists
     *
     */
   def primedZeroInRow(i:  Int): (Int, Int) = {
-    for (j <- 0 until nbCols) {
-      if (isZero(i, j) && mask(i)(j)== 2) return (i, j)//isZero(i, j) &&
+    for (j <- 0 until n) {
+      if (isZero(i, j) && marked(i)(j)== 2) return (i, j)
     }
     throw new RuntimeException(s"No primed zero found in row $i")
   }
 
   /**
-    * Unstar the stars and star the primes in the path
-   */
-  def convert(path: List[(Int, Int)]) = {
-    path.foreach{ case (i, j) =>
-    if (mask(i)(j) == 1) mask(i)(j) = 2
-    else mask(i)(j) = 1
+    * Unstar the stars and star the primes in the path until the last element
+    */
+  def convert(path: Array[(Int, Int)], last : Int ) = {
+    for (k <- 0 to last){
+      val (i, j) = path(k)
+      if (marked(i)(j) == 1) marked(i)(j) = 0
+      else marked(i)(j) = 1
     }
   }
 
@@ -359,17 +397,19 @@ class MunkresSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
     * Uncover all rows/columns
     */
   def clear() = {
-    coveredColumns = Array.fill[Boolean](nbCols)(elem = false)
-    coveredRows =  Array.fill[Boolean](nbCols)(elem = false)
+    coveredColumns = Array.fill[Boolean](n)(elem = false)
+    coveredRows =  Array.fill[Boolean](n)(elem = false)
   }
 
   /**
     * Erase all primed
     */
-  def erase() = {
-    for (i <- 0 until nbRows) {
-      for (j <- 1 until nbCols) {
-        if (mask(i)(j) == 2) mask(i)(j) = 0
+  def erasePrime() = {
+    for (i <- 0 until n) {
+      for (j <- 0 until n) {
+        if (marked(i)(j) == 2) {
+          marked(i)(j) = 0
+        }
       }
     }
   }
@@ -379,8 +419,8 @@ class MunkresSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
     */
   def minimalUncorvedValue(): Double = {
     var min = Double.MaxValue
-    for (i <- 0 until nbRows) {
-      for (j <- 0 until nbCols) {
+    for (i <- 0 until n) {
+      for (j <- 0 until n) {
         if (!coveredRows(i) && !coveredColumns(j) && cost(i)(j) < min) min = cost(i)(j)
       }
     }
@@ -393,13 +433,13 @@ class MunkresSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
     */
   def showCost(): String = {
     var output =""
-    for (i <- 0 until nbRows) {
-      for (j <- 0 until nbCols) {
+    for (i <- 0 until n) {
+      for (j <- 0 until n) {
         val strikethrough = (coveredColumns(j) || coveredRows(i)) match {
           case true => "- "
           case false => "  "
         }
-        val masked = mask(i)(j) match {
+        val masked = marked(i)(j) match {
           case 0 => " "
           case 1 => "*"
           case 2 => "'"
@@ -418,9 +458,7 @@ class MunkresSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
   */
 object MunkresSolver extends App {
   val debug = false
-
   import org.scamata.example.Confusing4x4._
-
   println(pb)
   val solver = new MunkresSolver(pb, LC)
   val alloc =solver.run()

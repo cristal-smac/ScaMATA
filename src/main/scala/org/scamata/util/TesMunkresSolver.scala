@@ -12,7 +12,7 @@ object TesMunkresSolver extends App {
   var nbInstances = 1
   while(true) {
     println(s"Instance $nbInstances")
-    val pb = MATA.randomProblem(4, 4)
+    val pb = MATA.randomProblem(5, 5)
     if (debug) println(pb)
     val exSolver = new ExhaustiveAssignementSolver(pb, LC)
     val hunSolver = new MunkresSolver(pb, LC)
