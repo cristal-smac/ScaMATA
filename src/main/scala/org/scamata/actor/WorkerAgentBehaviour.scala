@@ -90,7 +90,7 @@ class WorkerAgentBehaviour(worker: Agent, rule: SocialRule, strategy: DealStrate
         }
       }
 
-    // If the worker agent receives a proposal
+    // If the worker agent receives a proposal TODO wiyh SingleSwapOnly
     case Event(Propose(task, NoTask, peerWorkload), mind) =>
       val opponent = directory.workers(sender)
       var updatedMind = mind.updateBelief(opponent, peerWorkload)

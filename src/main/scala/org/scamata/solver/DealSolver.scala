@@ -15,6 +15,7 @@ class DealStrategy{
 }
 case object SingleGiftOnly extends DealStrategy
 case object SingleSwapAndSingleGift extends DealStrategy
+case object SingleSwapOnly extends DealStrategy
 
 /**
   * Abstract solver based on deals (gifts/swaps)

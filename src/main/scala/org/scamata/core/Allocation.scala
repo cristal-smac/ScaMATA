@@ -1,7 +1,8 @@
 // Copyright (C) Maxime MORGE 2018
 package org.scamata.core
 
-import org.scamata.deal.{SingleGift, SingleSwap, Deal}
+import org.scamata.actor.WorkerAgent
+import org.scamata.deal.{Deal, SingleGift, SingleSwap}
 import org.scamata.util.RandomUtils
 
 import scala.collection.SortedSet
@@ -133,6 +134,17 @@ class Allocation(val pb: MATA) {
     }
     true
   }
+
+  /**
+    * Return true if each agent has at most one task
+    */
+  def isSingle: Boolean = {
+    pb.workers.foreach { i =>
+        if (bundle(i).size > 1) return false
+    }
+    true
+  }
+
 }
 
 /**
@@ -179,8 +191,10 @@ object Allocation {
   def randomAllocation(pb: MATA): Allocation = {
     val allocation = new Allocation(pb)
     val r = scala.util.Random
+    var availableWorkers = pb.workers
     pb.tasks.foreach { t =>
-      val randomWorker = RandomUtils.random[Agent](pb.workers)
+      val randomWorker = RandomUtils.random[Agent](availableWorkers)
+      if (pb.n() == pb.m()) availableWorkers -= randomWorker
       var newBundle: SortedSet[Task] = allocation.bundle(randomWorker)
       newBundle += t
       allocation.bundle += (randomWorker -> newBundle)

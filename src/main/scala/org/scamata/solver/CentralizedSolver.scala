@@ -47,6 +47,7 @@ class CentralizedSolver(pb : MATA, rule : SocialRule, strategy : DealStrategy) e
               val counterparts = strategy match {
                 case SingleGiftOnly =>  Set[Task](NoTask)
                 case SingleSwapAndSingleGift =>  a.bundle(r)+NoTask
+                case SingleSwapOnly =>  a.bundle(r)
               }
               counterparts.foreach { t2 : Task =>
                 val deal : Swap = t2 match {

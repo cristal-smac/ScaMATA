@@ -22,6 +22,8 @@ object TesMunkresSolver extends App {
     if (debug) println("Munkres solution\n"+hunAlloc)
     val exFlow = exAlloc.flowtime()
     val hunFlow = hunAlloc.flowtime()
+    if (!exAlloc.isSingle || !exAlloc.isSingle)
+      throw new RuntimeException(s"In an allocation, an agent has more than one task ")
     if (hunFlow > exFlow) throw new RuntimeException(s"Allocation computed with the hungarian algorithm is not optimal $hunFlow vs $exFlow")
     nbInstances += 1
   }
