@@ -6,13 +6,10 @@ scalacOptions += "-deprecation"
 scalacOptions += "-feature"
 scalacOptions += "-Yrepl-sync"
 
-javaOptions in run += "-Xms2G"
-javaOptions in run += "-Xmx2G"
-javaOptions in run += "-Xss2G"
 
-javaOptions in assembly += "-Xms2G"
-javaOptions in assembly += "-Xmx2G"
-javaOptions in assembly += "-Xss2G"
+javaOptions in Compile += "-Xms4G"
+javaOptions in Compile += "-Xss2M"
+javaOptions in Compile += "-Xmx4G"
 
 
 //mainClass in (Compile,run) := Some("org.scamata.util.MATASolver")

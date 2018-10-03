@@ -15,15 +15,12 @@ object Test {
   val debug= true
 
   def main(args: Array[String]): Unit = {
-    /*
-    if (args.length <= 1) throw new RuntimeException("Usage: Test LC|LCmax")
-    val rule: SocialRule = args(1) match {
+
+    val rule: SocialRule = args(args.length-1) match {
       case "LCmax" => LCmax
       case "LC" => LC
-      case _ => throw new RuntimeException(s"Bad social rule ${args(1)}")
+      case _ => throw new RuntimeException(s"Bad social rule : ${args(0)} ${args(1)}")
     }
-    */
-    val rule: SocialRule = LCmax
 
     val nbTasksPerWorker = rule match {
       case LCmax => 5
@@ -137,7 +134,7 @@ object Test {
       swapSolverTime = swapSolverTime.sortWith(_ < _)
       distributedGiftSolverTime = distributedGiftSolverTime.sortWith(_ < _)
       distributedSwapSolverTime = distributedSwapSolverTime.sortWith(_ < _)
-      
+
       bw.write(
         m+","+n+","+giftSolverRule.min+","+giftSolverRule(nbPb / 4)+","+giftSolverRule(nbPb / 2)+","+giftSolverRule(nbPb * 3 / 4)+","+giftSolverRule.max+","+
           distributedGiftSolverRule.min+","+distributedGiftSolverRule(nbPb / 4)+","+distributedGiftSolverRule(nbPb / 2)+","+distributedGiftSolverRule(nbPb * 3 / 4)+","+distributedGiftSolverRule.max+","+
