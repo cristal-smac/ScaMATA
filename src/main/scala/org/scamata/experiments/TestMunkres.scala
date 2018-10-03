@@ -32,7 +32,7 @@ object TestMunkres {
       s"minLpSolverTime,openLpSolverTime,meanLpSolverTime,closedLpSolverTime,maxLpSolverTime," +
       s"swap4swap," +
       s"nbPropose4swap,nbCounterPropose4swap,nbAccept4swap,nbReject4swap,nbWithdraw4swap,nbConfirmGift4swap,nbConfirmSwap4swap,nbInform4swap\n")
-    for (m <- 2 to 70 by 2) {
+    for (m <- 2 to 350 by 2) {
       val n = nbTasksPerWorker * m
       if (debug) println(s"Test configuration with $m peers and $n tasks")
       val nbPb = 20 // should be x*4
