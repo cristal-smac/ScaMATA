@@ -66,7 +66,7 @@ object Test {
       for (o <- 1 to nbPb) {
         val pb = MATA.randomProblem(m, n)
         if (debug) println(s"Configuration $o")
-        val lpSolver: LPSolver = new LPSolver(pb, rule)
+        val lpSolver: LPECTSolver = new LPECTSolver(pb, rule)
         val giftSolver: CentralizedSolver = new CentralizedSolver(pb, rule, SingleGiftOnly)
         val swapSolver: CentralizedSolver = new CentralizedSolver(pb, rule, SingleSwapAndSingleGift)
         val distributedGiftSolver: DistributedSolver = new DistributedSolver(pb, rule, SingleGiftOnly, system1)

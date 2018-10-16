@@ -147,6 +147,24 @@ class Allocation(val pb: MATA) {
     true
   }
 
+  /**
+    * Returns the allocated tasks
+    */
+  def allocatedTasks() : Set[Task] = {
+    var tasks = Set[Task]()
+    pb.workers.foreach{ w =>
+      tasks ++= bundle(w)
+    }
+    tasks
+  }
+
+  /**
+    * Returns the allocated tasks
+    */
+  def unAllocatedTasks() : Set[Task] = {
+    pb.tasks.toSet -- allocatedTasks()
+  }
+
 }
 
 /**
