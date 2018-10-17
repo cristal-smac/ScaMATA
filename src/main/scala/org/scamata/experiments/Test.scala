@@ -23,8 +23,8 @@ object Test {
     }
 
     val nbTasksPerWorker = rule match {
-      case LCmax => 5
-      case LC => 5
+      case LCmax => 50
+      case LC => 50
     }
     val r = scala.util.Random
     val system1 = ActorSystem("Test1" + rule + r.nextInt.toString)

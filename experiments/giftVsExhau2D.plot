@@ -1,4 +1,4 @@
-set terminal pdf
+set terminal pdfcairo
 set termoption dashed
 set datafile separator ","
 set style fill solid border rgb "black"

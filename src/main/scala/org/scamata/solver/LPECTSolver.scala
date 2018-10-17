@@ -16,6 +16,7 @@ import scala.sys.process._
   */
 class LPECTSolver(pb : MATA, rule : SocialRule) extends DualSolver(pb, rule) {
 
+  debug = false
   val config: Config = ConfigFactory.load()
   val inputPath: String =config.getString("path.scamata")+"/"+config.getString("path.input")
   val outputPath: String = config.getString("path.scamata")+"/"+config.getString("path.output")
@@ -30,6 +31,7 @@ class LPECTSolver(pb : MATA, rule : SocialRule) extends DualSolver(pb, rule) {
   if (rule == SingleSwapOnly) config.getString("path.scamata")+"/"+config.getString("path.assignment")
 
   override def solve(): Allocation = {
+    /*
     // 1 - Reformulate the problem
     var startingTime: Long = System.nanoTime()
     val writer=new MATAWriter(inputPath ,pb)
@@ -48,23 +50,21 @@ class LPECTSolver(pb : MATA, rule : SocialRule) extends DualSolver(pb, rule) {
     var allocation : Allocation = Allocation(outputPath, pb)
     postSolvingTime = System.nanoTime() - startingTime
     if (debug) println(s"First step allocation: $allocation")
-    // 4 - Adopt the earlier completion time heurisitc
+    */
+    // 4 - Adopt the earlier completion time heuristic
+    var allocation : Allocation = new Allocation(pb)
     allocation.unAllocatedTasks().foreach{ t =>
       if (debug) println(s"Allocate $t")
       var goal = Double.MaxValue
-      var bestAllocation = allocation
+      var bestCandidate = pb.workers.head
       pb.workers.foreach{ w =>
-        val a = allocation.update(w, allocation.bundle(w) + t)
-        val currentGoal = rule match {
-          case LCmax => a.makespan()
-          case LC => a.flowtime()
-        }
-        if (currentGoal < goal){
-          goal = currentGoal
-          bestAllocation = a
+        val workload = allocation.workload(w) + pb.cost(w,t)
+        if (workload < goal){
+          goal = workload
+          bestCandidate = w
         }
       }
-      allocation = bestAllocation
+      allocation = allocation.update(bestCandidate, allocation.bundle(bestCandidate) + t)
       if (debug) println(s"Second step allocation: $allocation")
     }
     allocation

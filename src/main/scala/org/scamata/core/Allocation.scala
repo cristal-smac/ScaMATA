@@ -31,9 +31,9 @@ class Allocation(val pb: MATA) {
   def workloads(): Map[Agent, Double] = pb.workers.toSeq.map(worker => worker -> workload(worker)).toMap
 
   /**
-    * Returns the total costs incurred by the task allocation
+    * Returns the mean cost incurred by the task allocation
     */
-  def flowtime(): Double = pb.workers.foldLeft(0.0)((acc: Double, a: Agent) => acc + workload(a))
+  def flowtime(): Double = pb.workers.foldLeft(0.0)((acc: Double, a: Agent) => acc + workload(a))/pb.m
 
   /**
     * Returns the completion time of the last task to perform

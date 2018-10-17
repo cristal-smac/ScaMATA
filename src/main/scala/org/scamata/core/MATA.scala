@@ -153,7 +153,7 @@ object MATA{
 
   val debug = false
 
-  val MAXCOST = 1000
+  val MAXCOST = 100
   /**
     * Returns a random MATA problem instance
     * @param m number of peers
@@ -162,7 +162,7 @@ object MATA{
   def randomProblem(m : Int, n : Int) : MATA = {
     val workers: SortedSet[Agent] = collection.immutable.SortedSet[Agent]() ++ (for (k <- 1 until m+1) yield new Agent(name = s"w$k"))
     val tasks: SortedSet[Task] = collection.immutable.SortedSet[Task]() ++  (for (k <- 1 until n+1) yield new Task(name = s"t$k"))
-    val cost : Map[(Agent, Task), Double] = (for(i <- 0 until m; j <- 0 until n) yield (workers.toList(i),tasks.toList(j)) -> (Random.nextInt(MAXCOST)).toInt.toDouble ).toMap
+    val cost : Map[(Agent, Task), Double] = (for(i <- 0 until m; j <- 0 until n) yield (workers.toList(i),tasks.toList(j)) -> (Random.nextInt(MAXCOST)+1).toInt.toDouble ).toMap // [1;MAXCOST]
     new MATA(workers, tasks, cost)
   }
 

@@ -6,7 +6,7 @@ range T = 1..N; // The set of tasks
 float C[A][T] = ...; // The costs of the tasks for the workers
 
 dvar float X[A][T] in 0..1; // The decision variables for assignments
-dvar int makespan; // The decision variables for the minimal cost
+dvar float makespan; // The decision variables for the minimal cost
 
 /* Preprocessing */
 float startingTime;
