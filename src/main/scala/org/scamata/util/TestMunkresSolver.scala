@@ -7,7 +7,7 @@ import org.scamata.solver.{ExhaustiveAssignementSolver,MunkresSolver, LC}
 /**
   * Companion object to test it
   */
-object TesMunkresSolver extends App {
+object TestMunkresSolver extends App {
   val debug = false
   var nbInstances = 1
   while(true) {
@@ -20,8 +20,8 @@ object TesMunkresSolver extends App {
     val hunAlloc = hunSolver.run()
     if (debug) println("Exhaustive solution\n"+exAlloc)
     if (debug) println("Munkres solution\n"+hunAlloc)
-    val exFlow = exAlloc.flowtime()
-    val hunFlow = hunAlloc.flowtime()
+    val exFlow = exAlloc.meanWorkload()
+    val hunFlow = hunAlloc.meanWorkload()
     if (!exAlloc.isSingle || !exAlloc.isSingle)
       throw new RuntimeException(s"In an allocation, an agent has more than one task ")
     if (hunFlow > exFlow) throw new RuntimeException(s"Allocation computed with the hungarian algorithm is not optimal $hunFlow vs $exFlow")

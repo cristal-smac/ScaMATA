@@ -106,11 +106,11 @@ object Test {
             distributedGiftSolverRule ::= distributedGiftAlloc.makespan()
             distributedSwapSolverRule ::= distributedSwapAlloc.makespan()
           case LC =>
-            lpSolverRule ::= lpAlloc.flowtime()
-            giftSolverRule ::= giftAlloc.flowtime()
-            swapSolverRule ::= swapAlloc.flowtime()
-            distributedGiftSolverRule ::= distributedGiftAlloc.flowtime()
-            distributedSwapSolverRule ::= distributedSwapAlloc.flowtime()
+            lpSolverRule ::= lpAlloc.meanWorkload()
+            giftSolverRule ::= giftAlloc.meanWorkload()
+            swapSolverRule ::= swapAlloc.meanWorkload()
+            distributedGiftSolverRule ::= distributedGiftAlloc.meanWorkload()
+            distributedSwapSolverRule ::= distributedSwapAlloc.meanWorkload()
         }
         giftSolverTime ::= giftSolver.solvingTime
         swapSolverTime ::= swapSolver.solvingTime

@@ -57,8 +57,8 @@ object GiftVsDisGift {
                   giftSolverRule ::= giftAlloc.makespan()
                   distributedGiftSolverRule ::= distributedGiftAlloc.makespan()
                 case LC =>
-                  giftSolverRule ::= giftAlloc.flowtime()
-                  distributedGiftSolverRule ::= distributedGiftAlloc.flowtime()
+                  giftSolverRule ::= giftAlloc.meanWorkload()
+                  distributedGiftSolverRule ::= distributedGiftAlloc.meanWorkload()
             }
             giftSolverTime ::= giftSolver.solvingTime
             distributedGiftSolverTime ::= distributedGiftSolver.solvingTime

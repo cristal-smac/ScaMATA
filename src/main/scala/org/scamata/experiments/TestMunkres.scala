@@ -65,11 +65,11 @@ object TestMunkres {
         nbConfirmSwap4swap += distributedSwapSolver.nbConfirmSwap
         nbInform4swap += distributedSwapSolver.nbInform
 
-        munkresSolverRule ::= munkresAlloc.flowtime()
-        swapSolverRule ::= swapAlloc.flowtime()
-        distributedSwapSolverRule ::= distributedSwapAlloc.flowtime()
+        munkresSolverRule ::= munkresAlloc.meanWorkload()
+        swapSolverRule ::= swapAlloc.meanWorkload()
+        distributedSwapSolverRule ::= distributedSwapAlloc.meanWorkload()
 
-        if (swapAlloc.flowtime() <  munkresAlloc.flowtime() || distributedSwapAlloc.flowtime() < munkresAlloc.flowtime()) throw new RuntimeException(s"Pb with\n $pb")
+        if (swapAlloc.meanWorkload() <  munkresAlloc.meanWorkload() || distributedSwapAlloc.meanWorkload() < munkresAlloc.meanWorkload()) throw new RuntimeException(s"Pb with\n $pb")
 
 
         swapSolverTime ::= swapSolver.solvingTime

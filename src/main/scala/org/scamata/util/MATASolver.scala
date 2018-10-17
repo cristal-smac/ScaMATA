@@ -69,7 +69,7 @@ object MATASolver extends App {
   writer.write()
   socialRule match {
     case LCmax => println(s"Makespan: ${allocation.makespan}")
-    case LC => println(s"LC: ${allocation.flowtime}")
+    case LC => println(s"LC: ${allocation.meanWorkload}")
   }
 
   println(s"Processing time: ${solver.solvingTime} (ns)")

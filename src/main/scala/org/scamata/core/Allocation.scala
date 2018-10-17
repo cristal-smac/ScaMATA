@@ -26,14 +26,27 @@ class Allocation(val pb: MATA) {
   def workload(worker: Agent): Double = bundle(worker).foldLeft(0.0)((acc: Double, t: Task) => acc + pb.cost(worker, t))
 
   /**
+    * Returns the delay of the worker
+    */
+  def delay(worker: Agent): Double = {
+    var sortedBundle = bundle(worker).toSeq.sortWith( pb.cost(worker,_) > pb.cost(worker,_))
+    var delay = 0.0
+    for(k <- 1 to bundle(worker).size) {
+        delay+= k * pb.cost(worker, sortedBundle.head)
+        sortedBundle = sortedBundle.tail
+    }
+    delay
+  }
+
+  /**
     * Returns the workloads
     */
   def workloads(): Map[Agent, Double] = pb.workers.toSeq.map(worker => worker -> workload(worker)).toMap
 
   /**
-    * Returns the mean cost incurred by the task allocation
+    * Returns the mean workload incurred by the task allocation
     */
-  def flowtime(): Double = pb.workers.foldLeft(0.0)((acc: Double, a: Agent) => acc + workload(a))/pb.m
+  def meanWorkload(): Double = pb.workers.foldLeft(0.0)((acc: Double, a: Agent) => acc + workload(a))/pb.m
 
   /**
     * Returns the completion time of the last task to perform
@@ -45,6 +58,13 @@ class Allocation(val pb: MATA) {
     }
     max
   }
+
+  /**
+    * Returns the mean flowtime, i.e. The mean flowtime rule minimizes the mean
+    * number of unfinished tasks at each point.
+    */
+  def flowtime(): Double = pb.workers.foldLeft(0.0)((acc: Double, a: Agent) => acc + delay(a))/pb.n
+
 
   /**
     * Return the peers which are least loaded than the initiator

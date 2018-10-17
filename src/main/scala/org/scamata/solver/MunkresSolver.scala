@@ -446,11 +446,11 @@ class MunkresSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
   */
 object MunkresSolver extends App {
   val debug = false
-  import org.scamata.example.Confusing4x4._
+  import org.scamata.example.AAMAS4x4._
   println(pb)
   val solver = new MunkresSolver(pb, LC)
   val alloc =solver.run()
   println(alloc.toString)
-  println(alloc.flowtime())
+  println(alloc.meanWorkload())
 
 }
