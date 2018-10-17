@@ -38,11 +38,12 @@ class CentralizedSolver(pb : MATA, rule : SocialRule, strategy : DealStrategy) e
           var found = false
           var bestA: Allocation = a
           var bestD: Swap= new SingleSwap(i, NoAgent, NoTask, NoTask)
-          var bestT = rule match {
+          var bestT : Double = rule match {
             case LCmax => a.workload(i)
-            case LC => 0.0
+            case LC => Double.MaxValue
           }
           responders.foreach { r =>
+            if (rule == LC) bestT = a.delay(i) + a.delay(r)
             a.bundle(i).foreach { t1 =>
               val counterparts = strategy match {
                 case SingleGiftOnly =>  Set[Task](NoTask)
@@ -55,17 +56,12 @@ class CentralizedSolver(pb : MATA, rule : SocialRule, strategy : DealStrategy) e
                   case _ => new SingleSwap(i, r, t1, t2)
                 }
                 val postA = a.apply(deal)
-                val currentT = rule match {
+                val currentT : Double = rule match {
                   case LCmax =>
                     Math.max(postA.workload(i), postA.workload(r))
                   case LC =>
-                    if (t2 !=NoTask && pb.cost(r, t1) < pb.cost(i, t1) &&
-                      pb.cost(i, t2) < pb.cost(r, t2))
-                      pb.cost(r, t1) - pb.cost(i, t1) + pb.cost(i, t2) - pb.cost(r, t2)
-                    else if (t2 == NoTask && pb.cost(r, t1) < pb.cost(i, t1))
-                      pb.cost(r, t1) - pb.cost(i, t1)
-                    else 0.0
-                    }
+                    postA.delay(i) + postA.delay(r)
+                }
                 if (currentT < bestT) {
                   bestT = currentT
                   bestA = postA
