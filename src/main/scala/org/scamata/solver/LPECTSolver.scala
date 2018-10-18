@@ -31,13 +31,12 @@ class LPECTSolver(pb : MATA, rule : SocialRule) extends DualSolver(pb, rule) {
   if (rule == SingleSwapOnly) config.getString("path.scamata")+"/"+config.getString("path.assignment")
 
   override def solve(): Allocation = {
-    /*
+
     // 1 - Reformulate the problem
     var startingTime: Long = System.nanoTime()
     val writer=new MATAWriter(inputPath ,pb)
     writer.write
     preSolvingTime = System.nanoTime() - startingTime
-
     // 2 - Run the solver
     val command : String= config.getString("path.opl")+" "+
       lpPath+" "+
@@ -50,9 +49,7 @@ class LPECTSolver(pb : MATA, rule : SocialRule) extends DualSolver(pb, rule) {
     var allocation : Allocation = Allocation(outputPath, pb)
     postSolvingTime = System.nanoTime() - startingTime
     if (debug) println(s"First step allocation: $allocation")
-    */
     // 4 - Adopt the earlier completion time heuristic
-    var allocation : Allocation = new Allocation(pb)
     allocation.unAllocatedTasks().foreach{ t =>
       if (debug) println(s"Allocate $t")
       var goal = Double.MaxValue
