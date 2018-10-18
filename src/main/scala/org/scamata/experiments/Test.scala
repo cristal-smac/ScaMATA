@@ -16,16 +16,17 @@ object Test {
 
   def main(args: Array[String]): Unit = {
 
-    val rule: SocialRule = args(args.length-1) match {
+    val rule: SocialRule = args(args.length-2) match {
       case "LCmax" => LCmax
       case "LC" => LC
-      case _ => throw new RuntimeException(s"Bad social rule : ${args(0)} ${args(1)}")
+      case _ => throw new RuntimeException(s"Bad social rule : ${args(0)} ${args(1)} ${args(2)}")
     }
 
-    val nbTasksPerWorker = rule match {
+    val nbTasksPerWorker = args(args.length-1).toInt
+      /*rule match {
       case LCmax => 50
       case LC => 50
-    }
+    }*/
     val r = scala.util.Random
     val system1 = ActorSystem("Test1" + rule + r.nextInt.toString)
     val system2 = ActorSystem("Test2" + rule + r.nextInt.toString)
