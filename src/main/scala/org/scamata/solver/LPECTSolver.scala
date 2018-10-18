@@ -50,6 +50,7 @@ class LPECTSolver(pb : MATA, rule : SocialRule) extends DualSolver(pb, rule) {
     postSolvingTime = System.nanoTime() - startingTime
     if (debug) println(s"First step allocation: $allocation")
     // 4 - Adopt the earlier completion time heuristic
+    println("Unallocated tasks: "+  allocation.unAllocatedTasks().size +"/"+pb.n())
     allocation.unAllocatedTasks().foreach{ t =>
       if (debug) println(s"Allocate $t")
       var goal = Double.MaxValue
