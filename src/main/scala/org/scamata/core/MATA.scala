@@ -156,9 +156,6 @@ object MATA{
   val MAXCOST = 100
   def uniformCost() : Double = (Random.nextInt(MAXCOST)+1).toDouble
 
-  def correlatedJob(i : Int,j : j): Double =
-
-
   /**
     * Returns a random MATA problem instance
     * @param m number of peers
