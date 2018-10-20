@@ -31,7 +31,7 @@ object ComputeCmax {
             (List[Double](), List[Double](),  List[Double](), List[Double]())
           for (o <- 1 to nbPb) {
             if (debug) println(s"Configuration $o")
-            val pb = MATA.randomProblem(m, n)
+            val pb = MATA.randomProblem(m, n, Uncorrelated)
             val exhaustiveSolver = new ExhaustiveSolver(pb, rule)
             val exhaustiveAlloc = exhaustiveSolver.run()
             val giftSolver = new CentralizedSolver(pb, rule, SingleGiftOnly)

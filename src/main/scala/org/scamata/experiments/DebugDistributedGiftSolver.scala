@@ -2,7 +2,7 @@
 package org.scamata.experiments
 
 import akka.actor.ActorSystem
-import org.scamata.core.MATA
+import org.scamata.core.{MATA, Uncorrelated}
 import org.scamata.solver._
 
 /**
@@ -22,7 +22,7 @@ object DebugDistributedGiftSolver {
         var (nbDeal, nbDealDis) = (0.0, 0.0)
         for (o <- 1 to nbPb) {
           println(s"DEBUG configuration $o")
-          val pb =  MATA.randomProblem(m, n)
+          val pb =  MATA.randomProblem(m, n, Uncorrelated)
           //println(pb)
           val distributedGiftSolver: DistributedSolver = new DistributedSolver(pb, rule, strategy, system)
           distributedGiftSolver.debug = true

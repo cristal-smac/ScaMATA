@@ -39,10 +39,17 @@ object RandomUtils {
   }
 
   /**
-    * Return a random element in a set
+    * Returns a random element in a set
     */
   def random[T](s: SortedSet[T]): T = {
     val n = util.Random.nextInt(s.size)
     s.iterator.drop(n).next
+  }
+
+  /**
+    * Returns a pseudo-randomly generated Double in [min, max]
+    */
+  def random(min : Int, max : Int) : Double = {
+    (min + util.Random.nextInt((max - min) + 1)).toDouble
   }
 }

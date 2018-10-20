@@ -45,7 +45,7 @@ object TestMunkres {
           0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 
       for (o <- 1 to nbPb) {
-        val pb = MATA.randomProblem(m, n)
+        val pb = MATA.randomProblem(m, n, Uncorrelated)
         if (debug) println(s"Configuration $o")
         val munkresSolver: MunkresSolver = new MunkresSolver(pb, rule)
         val swapSolver: CentralizedSolver = new CentralizedSolver(pb, rule, SingleSwapOnly)

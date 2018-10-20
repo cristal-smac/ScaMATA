@@ -1,6 +1,8 @@
 // Copyright (C) Maxime MORGE 2018
 package org.scamata.core
 
+import org.scamata.util.{MathUtils, RandomUtils}
+
 import scala.util.Random
 import scala.collection.SortedSet
 
@@ -147,6 +149,15 @@ class MATA(val workers: SortedSet[Agent], val tasks: SortedSet[Task]) {
 }
 
 /**
+  * Class representing a social rule
+  */
+class RandomGenerationRule
+case object Uncorrelated extends RandomGenerationRule
+case object MachineCorrelated extends RandomGenerationRule
+case object TaskCorrelated extends RandomGenerationRule
+case object MachineTaskCorrelated extends RandomGenerationRule
+
+/**
   * Factory for [[org.scamata.core.MATA]] instances
   */
 object MATA{
@@ -161,14 +172,27 @@ object MATA{
     * @param m number of peers
     * @param n number of tasks
     */
-  def randomProblem(m : Int, n : Int) : MATA = {
+  def randomProblem(m : Int, n : Int, rule : RandomGenerationRule) : MATA = {
 
     val beta : Array[Double] =  Array.fill(n)((Random.nextInt(MAXCOST)+1).toDouble) // uniform cost
+    val alpha : Array[Double] =  Array.fill(m)((Random.nextInt(MAXCOST)+1).toDouble) // uniform cost
 
-    val workers: SortedSet[Agent] = collection.immutable.SortedSet[Agent]() ++ (for (k <- 1 until m+1) yield new Agent(name = s"w$k"))
-    val tasks: SortedSet[Task] = collection.immutable.SortedSet[Task]() ++  (for (k <- 1 until n+1) yield new Task(name = s"t$k"))
-    //start + rnd.nextInt( (end - start) + 1 )
-    val cost : Map[(Agent, Task), Double] = (for(i <- 0 until m; j <- 0 until n) yield (workers.toList(i),tasks.toList(j)) -> (beta(i)+1 + Random.nextInt(20))).toMap //
+    val workers: SortedSet[Agent] = collection.immutable.SortedSet[Agent]() ++
+      (for (k <- 1 until m+1) yield new Agent(name = s"w$k"))
+    val tasks: SortedSet[Task] = collection.immutable.SortedSet[Task]() ++
+      (for (k <- 1 until n+1) yield new Task(name = s"t$k"))
+
+    val cost = Map[(Agent, Task), Double]()
+    for(i <- 0 until m){
+      for (j <- 0 until n){
+        cost(workers.toList(i),tasks.toList(j)) = rule match {
+          case Uncorrelated => RandomUtils.random(1,MAXCOST)
+          case MachineCorrelated => alpha(i)+ RandomUtils.random(1,20)
+          case TaskCorrelated => beta(j) + RandomUtils.random(1,20)
+          case MachineTaskCorrelated => alpha(i)* beta(j) + RandomUtils.random(1,20)
+        }
+      }
+    }
     new MATA(workers, tasks, cost)
   }
 
@@ -176,7 +200,7 @@ object MATA{
     * Test random problem generation
     */
   def main(args: Array[String]): Unit = {
-    val pb = MATA.randomProblem(10, 100)
+    val pb = MATA.randomProblem(10, 100, Uncorrelated)
     println(pb)
     val allocation =Allocation.randomAllocation(pb)
     println(allocation)

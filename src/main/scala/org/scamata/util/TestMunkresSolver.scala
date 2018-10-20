@@ -1,8 +1,8 @@
 // Copyright (C) Maxime MORGE 2018
 package org.scamata.util
 
-import org.scamata.core.{MATA}
-import org.scamata.solver.{ExhaustiveAssignementSolver,MunkresSolver, LC}
+import org.scamata.core.{MATA, Uncorrelated}
+import org.scamata.solver.{ExhaustiveAssignementSolver, LC, MunkresSolver}
 
 /**
   * Companion object to test it
@@ -12,7 +12,7 @@ object TestMunkresSolver extends App {
   var nbInstances = 1
   while(true) {
     println(s"Instance $nbInstances")
-    val pb = MATA.randomProblem(5, 5)
+    val pb = MATA.randomProblem(5, 5, Uncorrelated)
     if (debug) println(pb)
     val exSolver = new ExhaustiveAssignementSolver(pb, LC)
     val hunSolver = new MunkresSolver(pb, LC)
