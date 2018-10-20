@@ -173,18 +173,22 @@ object MATA{
     * @param n number of tasks
     */
   def randomProblem(m : Int, n : Int, rule : RandomGenerationRule) : MATA = {
-    val beta : Array[Double] =  Array.fill(n)((Random.nextInt(MAXCOST)+1).toDouble) // uniform cost
-    val alpha : Array[Double] =  Array.fill(m)((Random.nextInt(MAXCOST)+1).toDouble) // uniform cost
-
     val workers: SortedSet[Agent] = collection.immutable.SortedSet[Agent]() ++
       (for (k <- 1 until m+1) yield new Agent(name = s"w$k"))
     val tasks: SortedSet[Task] = collection.immutable.SortedSet[Task]() ++
       (for (k <- 1 until n+1) yield new Task(name = s"t$k"))
-
+    val beta : Array[Double] =  Array.fill(n)(
+      if (rule == MachineTaskCorrelated) RandomUtils.random(1,20)
+      else RandomUtils.random(1,MAXCOST)
+    )
+    val alpha : Array[Double] =  Array.fill(m)(
+      if (rule == MachineTaskCorrelated) RandomUtils.random(1,20)
+      else RandomUtils.random(1,MAXCOST)
+    )
     var cost = Map[(Agent, Task), Double]()
     for(i <- 0 until m){
       for (j <- 0 until n){
-        val value = rule match {
+        val value : Double  = rule match {
           case Uncorrelated => RandomUtils.random(1,MAXCOST)
           case MachineCorrelated => alpha(i)+ RandomUtils.random(1,20)
           case TaskCorrelated => beta(j) + RandomUtils.random(1,20)
