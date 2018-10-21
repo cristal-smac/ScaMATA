@@ -82,7 +82,10 @@ class CentralizedSolver(pb : MATA, rule : SocialRule, strategy : DealStrategy) e
               nbCounterPropose += 1
               nbConfirmSwap +=1
             }
-            else nbConfirmGift += 1
+            else {
+              nbPropose += 1
+              nbConfirmGift += 1
+            }
             nbAccept += 1
             a = bestA
             if (rule == LCmax) {
