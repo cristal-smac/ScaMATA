@@ -9,7 +9,7 @@ set ticslevel 0
 set style data lines
 set xlabel "m workers (5m tasks)"
 set ylabel "Makespan"
-set log y
+# set log y
 set key center right
 set output 'figures/rule2DerrorCmax.pdf'
 plot  "data/cmax.csv" using 1:4:6 with filledcurves lc "light-blue" notitle,\
