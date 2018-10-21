@@ -5,7 +5,7 @@ range A = 1..M; // The set of workers
 range T = 1..N; // The set of tasks
 float C[A][T] = ...; // The costs of the tasks for the workers
 
-dvar float X[A][T] in 0..1; // The decision variables for assignements
+dvar float X[A][T]; // The decision variables for assignements
 
 /* Preprocessing */
 float startingTime;
@@ -21,6 +21,9 @@ minimize
 		forall(t in T)
 			ct_taskAssignment:
 				sum(i in A) X[i][t] == 1.0;
+		forall(t in T)
+			forall(i in A)
+				X[i][t] >=0;
 	}
 
 /* Postprocessing */
