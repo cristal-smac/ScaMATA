@@ -5,7 +5,7 @@ range A = 1..M; // The set of workers
 range T = 1..N; // The set of tasks
 float C[A][T] = ...; // The costs of the tasks for the workers
 
-dvar float X[A][T] in 0..1; // The decision variables for assignments
+dvar float X[A][T]; // The decision variables for assignments
 dvar float makespan; // The decision variables for the minimal cost
 
 /* Preprocessing */
@@ -25,6 +25,9 @@ subject to {
 	forall(i in A)
 	  ct_workload:
 	  	sum(t in T) X[i][t]*C[i][t]  <= makespan;
+	forall(t in T)
+	  forall(i in A)
+		X[i][t] >=0;
 }
 
 /* Postprocessing */
