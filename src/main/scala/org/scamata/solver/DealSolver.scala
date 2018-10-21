@@ -38,8 +38,9 @@ abstract class DealSolver(pb : MATA, rule : SocialRule, strategy : DealStrategy)
     * Returns an allocation
     */
   override def solve(): Allocation = {
-    val allocation = Allocation.randomAllocation(pb)
-    if (debug) println(s"Give with a random allocation:\n$allocation")
+    val solver = new ECTSolver(pb, rule)
+    val allocation = solver.solve()
+    if (debug) println(s"Give with an allocation with ECT:\n$allocation")
     reallocate(allocation)
   }
 
