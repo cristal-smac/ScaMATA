@@ -118,8 +118,8 @@ object Test {
         distributedGiftSolverTime ::= distributedGiftSolver.solvingTime
         distributedSwapSolverTime ::= distributedSwapSolver.solvingTime
         lpSolverTime ::= lpSolver.solvingTime
-        lpSolverPreTime ::= lpSolver.preSolvingTime
-        lpSolverPostTime ::= lpSolver.postSolvingTime
+        lpSolverPreTime ::= 0.0//lpSolver.preSolvingTime
+        lpSolverPostTime ::= 0.0//lpSolver.postSolvingTime
       }
 
       lpSolverRule = lpSolverRule.sortWith(_ < _)
