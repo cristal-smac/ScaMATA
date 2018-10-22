@@ -9,14 +9,11 @@ set grid
 set ticslevel 0
 set style data lines
 set key left above
-set xlabel "m workers (2m tasks)"
+set xtics 1
+set xlabel "m workers (10 tasks)"
 set ylabel "Makespan"
 set output 'figures/giftVsExhau2DCmax.pdf'
-plot  "data/mincmax.csv" using 1:4:6 with filledcurves lc "light-green" notitle,\
-      "data/mincmax.csv" using 1:5 with lines dt 1 lc "dark-green" title 'min makespan',\
-      "data/mincmax.csv" using 1:9:11 with filledcurves lc "light-blue" notitle,\
+plot  "data/mincmax.csv" using 1:5 with lines dt 1 lc "dark-green" title 'Minimal makespan',\
       "data/mincmax.csv" using 1:10 with lines dt 3 lc "dark-blue" title '(Dis)Gift',\
-      "data/mincmax.csv" using 1:14:16 with filledcurves lc "cyan" notitle,\
-      "data/mincmax.csv" using 1:15 with lines dt 3 lc "dark-cyan" title '(Dis)Swap',\
-      "data/mincmax.csv" using 1:19:21 with filledcurves lc "light-red" notitle,\
+      "data/mincmax.csv" using 1:15 with lines dt 7 lc "dark-magenta" title '(Dis)Swap',\
       "data/mincmax.csv" using 1:20 with lines dt 5 lc "dark-red" title 'ECT'
