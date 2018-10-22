@@ -19,4 +19,4 @@ plot  "data/mincmax.csv" using 1:4:6 with filledcurves lc "light-green" notitle,
       "data/mincmax.csv" using 1:14:16 with filledcurves lc "cyan" notitle,\
       "data/mincmax.csv" using 1:15 with lines dt 3 lc "dark-cyan" title '(Dis)Swap',\
       "data/mincmax.csv" using 1:19:21 with filledcurves lc "light-red" notitle,\
-      "data/mincmax.csv" using 1:20 with lines dt 5 lc "dark-red" title 'LP'
+      "data/mincmax.csv" using 1:20 with lines dt 5 lc "dark-red" title 'ECT'
