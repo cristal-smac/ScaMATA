@@ -24,7 +24,7 @@ object ComputeCmax {
         s"minswapSolver$rule,openswapSolver$rule,meanswapSolver$rule,closedswapSolver$rule,maswapSolver$rule,"+
         s"minectSolver$rule,openectSolver$rule,meanectSolver$rule,closedectSolver$rule,maxectSolver$rule\n")
       for (m <- 2 to 100 by 2) {
-        for (n <- 5 to 5) {
+        for (n <- 5*m to 5*m) {
           if (debug) println(s"Test configuration with $m peers and $n tasks")
           val nbPb = 20 // should be x*4
           var (exhaustiveSolverRule, giftSolverRule, swapSolverRule, ectSolverRule) =
