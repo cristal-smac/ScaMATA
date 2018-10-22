@@ -1,0 +1,6 @@
+m,n,minexhaustiveSolvercmax,openexhaustiveSolvercmax,meanexhaustiveSolvercmax,closedexhaustiveSolvercmax,maxexhaustiveSolvercmax,mingiftSolvercmax,opengiftSolvercmax,meangiftSolvercmax,closedgiftSolvercmax,maxgiftSolvercmax,minswapSolvercmax,openswapSolvercmax,meanswapSolvercmax,closedswapSolvercmax,maswapSolvercmax,minectSolvercmax,openectSolvercmax,meanectSolvercmax,closedectSolvercmax,maxectSolvercmax
+2,5,101.0,143.0,165.0,178.0,217.0,101.0,149.0,165.0,185.0,241.0,101.0,149.0,165.0,184.0,240.0,102.0,149.0,171.0,208.0,260.0
+3,5,62.0,98.0,118.0,127.0,151.0,62.0,99.0,120.0,136.0,169.0,62.0,98.0,120.0,130.0,151.0,81.0,117.0,134.0,148.0,169.0
+4,5,46.0,89.0,99.0,122.0,157.0,46.0,89.0,108.0,122.0,166.0,46.0,89.0,99.0,122.0,157.0,46.0,96.0,120.0,151.0,171.0
+5,5,75.0,83.0,93.0,101.0,108.0,75.0,86.0,95.0,108.0,117.0,75.0,83.0,93.0,101.0,108.0,75.0,86.0,95.0,108.0,117.0
+6,5,64.0,81.0,91.0,100.0,103.0,64.0,82.0,96.0,102.0,106.0,64.0,81.0,91.0,100.0,103.0,64.0,82.0,96.0,102.0,106.0
