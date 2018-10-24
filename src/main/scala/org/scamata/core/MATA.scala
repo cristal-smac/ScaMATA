@@ -110,6 +110,23 @@ class MATA(val workers: SortedSet[Agent], val tasks: SortedSet[Task]) {
       ).mkString("[", ", ", "] ;\n")
   }
 
+    /**
+      * Return a string description of the transportation problem in the Optimization Programming Language
+      */
+    def toTOPL: String = {
+      var s= Seq[java.io.Serializable]()
+      for (k <- 1 to tasks.size) {
+        s :+= workers.toList.map(a =>
+          tasks.toList.map(t =>
+            (k*cost(a, t)).toString
+          ).mkString("[", ", ", "]"))
+      }
+      "M = " + workers.size + "; \n" +
+        "N = " + tasks.size + "; \n" +
+        "Q = " + s.mkString("[", ", ", "] ;\n").replace("List(", "").replace(")", "")
+    }
+
+
   /**
     * Returns true if the cost of allActors tasks for allActors peers are specified
     */

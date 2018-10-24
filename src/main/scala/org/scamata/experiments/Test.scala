@@ -18,15 +18,11 @@ object Test {
 
     val rule: SocialRule = args(args.length-2) match {
       case "LCmax" => LCmax
-      case "LC" => LF
+      case "LF" => LF
       case _ => throw new RuntimeException(s"Bad social rule : ${args(0)} ${args(1)} ${args(2)}")
     }
 
     val nbTasksPerWorker = args(args.length-1).toInt
-      /*rule match {
-      case LCmax => 50
-      case LC => 50
-    }*/
     val r = scala.util.Random
     val system1 = ActorSystem("Test1" + rule + r.nextInt.toString)
     val system2 = ActorSystem("Test2" + rule + r.nextInt.toString)
@@ -38,7 +34,7 @@ object Test {
       s"minDistributedGiftSolver$rule,openDistributedGiftSolver$rule,meanDistributedGiftSolver$rule,closedDistributedGiftSolver$rule,maxDistributedGiftSolver$rule," +
       s"minSwapSolver$rule,openSwapSolver$rule,meanSwapSolver$rule,closedSwapSolver$rule,maxSwapSolver$rule," +
       s"minDistributedSwapSolver$rule,openDistributedSwapSolver$rule,meanDistributedSwapSolver$rule,closedDistributedSwapSolver$rule,maxDistributedSwapSolver$rule," +
-      s"minLpSolver$rule,openLpSolver$rule,meanLpSolver$rule,closedLpSolver$rule,maxLpSolver$rule," +
+      s"minRefSolver$rule,openRefSolver$rule,meanRefSolver$rule,closedRefSolver$rule,maxRefSolver$rule," +
       s"minGiftSolverTime,openGiftSolverTime,meanGiftSolverTime,closedGiftSolverTime,maxGiftSolverTime," +
       s"minDistributedGiftSolverTime,openDistributedGiftSolverTime,meanDistributedGiftSolverTime,closedDistributedGiftSolverTime,maxDistributedGiftSolverTime," +
       s"minSwapSolverTime,openSwapSolverTime,meanSwapSolverTime,closedSwapSolverTime,maxSwapSolverTime," +
@@ -53,8 +49,8 @@ object Test {
       val n = nbTasksPerWorker * m
       if (debug) println(s"Test configuration with $m peers and $n tasks")
       val nbPb = 20 // should be x*4
-      var (lpSolverRule, giftSolverRule, distributedGiftSolverRule, swapSolverRule, distributedSwapSolverRule,
-      lpSolverTime, lpSolverPreTime, lpSolverPostTime, giftSolverTime, swapSolverTime, distributedGiftSolverTime, distributedSwapSolverTime) =
+      var (refSolverRule, giftSolverRule, distributedGiftSolverRule, swapSolverRule, distributedSwapSolverRule,
+      refSolverTime, refSolverPreTime, refSolverPostTime, giftSolverTime, swapSolverTime, distributedGiftSolverTime, distributedSwapSolverTime) =
         (List[Double](), List[Double](), List[Double](), List[Double](), List[Double](), List[Double](),
           List[Double](), List[Double](), List[Double](), List[Double](), List[Double](), List[Double]())
       var (gift4gift, gift4swap, swap4swap,
@@ -67,12 +63,15 @@ object Test {
       for (o <- 1 to nbPb) {
         val pb = MATA.randomProblem(m, n, TaskCorrelated)
         if (debug) println(s"Configuration $o")
-        val lpSolver: ECTSolver = new ECTSolver(pb, rule)
+        val refSolver = rule match {
+          case LCmax => new ECTSolver(pb, rule)
+          case LF => new BrunoSolver(pb, rule)
+        }
         val giftSolver: CentralizedSolver = new CentralizedSolver(pb, rule, SingleGiftOnly)
         val swapSolver: CentralizedSolver = new CentralizedSolver(pb, rule, SingleSwapAndSingleGift)
         val distributedGiftSolver: DistributedSolver = new DistributedSolver(pb, rule, SingleGiftOnly, system1)
         val distributedSwapSolver: DistributedSolver = new DistributedSolver(pb, rule, SingleSwapAndSingleGift, system2)
-        val lpAlloc = lpSolver.run()
+        val refAlloc = refSolver.run()
         val giftAlloc = giftSolver.run()
         gift4gift += giftSolver.nbPropose
         val swapAlloc = swapSolver.run()
@@ -101,36 +100,36 @@ object Test {
 
         rule match {
           case LCmax =>
-            lpSolverRule ::= lpAlloc.makespan()
+            refSolverRule ::= refAlloc.makespan()
             giftSolverRule ::= giftAlloc.makespan()
             swapSolverRule ::= swapAlloc.makespan()
             distributedGiftSolverRule ::= distributedGiftAlloc.makespan()
             distributedSwapSolverRule ::= distributedSwapAlloc.makespan()
           case LF =>
-            lpSolverRule ::= lpAlloc.meanWorkload()
-            giftSolverRule ::= giftAlloc.meanWorkload()
-            swapSolverRule ::= swapAlloc.meanWorkload()
-            distributedGiftSolverRule ::= distributedGiftAlloc.meanWorkload()
-            distributedSwapSolverRule ::= distributedSwapAlloc.meanWorkload()
+            refSolverRule ::= refAlloc.flowtime()
+            giftSolverRule ::= giftAlloc.flowtime()
+            swapSolverRule ::= swapAlloc.flowtime()
+            distributedGiftSolverRule ::= distributedGiftAlloc.flowtime()
+            distributedSwapSolverRule ::= distributedSwapAlloc.flowtime()
         }
         giftSolverTime ::= giftSolver.solvingTime
         swapSolverTime ::= swapSolver.solvingTime
         distributedGiftSolverTime ::= distributedGiftSolver.solvingTime
         distributedSwapSolverTime ::= distributedSwapSolver.solvingTime
-        lpSolverTime ::= lpSolver.solvingTime
-        lpSolverPreTime ::= 0.0//lpSolver.preSolvingTime
-        lpSolverPostTime ::= 0.0//lpSolver.postSolvingTime
+        refSolverTime ::= refSolver.solvingTime
+        refSolverPreTime ::= 0.0//refSolver.preSolvingTime
+        refSolverPostTime ::= 0.0//refSolver.postSolvingTime
       }
 
-      lpSolverRule = lpSolverRule.sortWith(_ < _)
+      refSolverRule = refSolverRule.sortWith(_ < _)
       giftSolverRule = giftSolverRule.sortWith(_ < _)
       distributedGiftSolverRule = distributedGiftSolverRule.sortWith(_ < _)
       swapSolverRule = swapSolverRule.sortWith(_ < _)
       distributedSwapSolverRule = distributedSwapSolverRule.sortWith(_ < _)
 
-      lpSolverTime = lpSolverTime.sortWith(_ < _)
-      lpSolverPreTime = lpSolverPreTime.sortWith(_ < _)
-      lpSolverPostTime = lpSolverPostTime.sortWith(_ < _)
+      refSolverTime = refSolverTime.sortWith(_ < _)
+      refSolverPreTime = refSolverPreTime.sortWith(_ < _)
+      refSolverPostTime = refSolverPostTime.sortWith(_ < _)
       giftSolverTime = giftSolverTime.sortWith(_ < _)
       swapSolverTime = swapSolverTime.sortWith(_ < _)
       distributedGiftSolverTime = distributedGiftSolverTime.sortWith(_ < _)
@@ -141,14 +140,14 @@ object Test {
           distributedGiftSolverRule.min+","+distributedGiftSolverRule(nbPb / 4)+","+distributedGiftSolverRule(nbPb / 2)+","+distributedGiftSolverRule(nbPb * 3 / 4)+","+distributedGiftSolverRule.max+","+
           swapSolverRule.min+","+swapSolverRule(nbPb / 4)+","+swapSolverRule(nbPb / 2)+","+swapSolverRule(nbPb * 3 / 4)+","+swapSolverRule.max+","+
           distributedSwapSolverRule.min+","+distributedSwapSolverRule(nbPb / 4)+","+distributedSwapSolverRule(nbPb / 2)+","+distributedSwapSolverRule(nbPb * 3 / 4)+","+distributedSwapSolverRule.max+","+
-          lpSolverRule.min+","+lpSolverRule(nbPb / 4)+","+lpSolverRule(nbPb / 2)+","+lpSolverRule(nbPb * 3 / 4)+","+lpSolverRule.max+","+
+          refSolverRule.min+","+refSolverRule(nbPb / 4)+","+refSolverRule(nbPb / 2)+","+refSolverRule(nbPb * 3 / 4)+","+refSolverRule.max+","+
           giftSolverTime.min+","+giftSolverTime(nbPb / 4)+","+giftSolverTime(nbPb / 2)+","+giftSolverTime(nbPb * 3 / 4)+","+giftSolverTime.max+","+
           distributedGiftSolverTime.min+","+distributedGiftSolverTime(nbPb / 4)+","+distributedGiftSolverTime(nbPb / 2)+","+distributedGiftSolverTime(nbPb * 3 / 4)+","+distributedGiftSolverTime.max+","+
           swapSolverTime.min+","+swapSolverTime(nbPb / 4)+","+swapSolverTime(nbPb / 2)+","+swapSolverTime(nbPb * 3 / 4)+","+swapSolverTime.max+","+
           distributedSwapSolverTime.min+","+distributedSwapSolverTime(nbPb / 4)+","+distributedSwapSolverTime(nbPb / 2)+","+distributedSwapSolverTime(nbPb * 3 / 4)+","+distributedSwapSolverTime.max+","+
-          lpSolverTime.min+","+lpSolverTime(nbPb / 4)+","+lpSolverTime(nbPb / 2)+","+lpSolverTime(nbPb * 3 / 4)+","+lpSolverTime.max+","+
-          lpSolverPreTime.min+","+lpSolverPreTime(nbPb / 4)+","+lpSolverPreTime(nbPb / 2)+","+lpSolverPreTime(nbPb * 3 / 4)+","+lpSolverPreTime.max+","+
-          lpSolverPostTime.min+","+lpSolverPostTime(nbPb / 4)+","+lpSolverPostTime(nbPb / 2)+","+lpSolverPostTime(nbPb / 4)+","+lpSolverPostTime.max+","+
+          refSolverTime.min+","+refSolverTime(nbPb / 4)+","+refSolverTime(nbPb / 2)+","+refSolverTime(nbPb * 3 / 4)+","+refSolverTime.max+","+
+          refSolverPreTime.min+","+refSolverPreTime(nbPb / 4)+","+refSolverPreTime(nbPb / 2)+","+refSolverPreTime(nbPb * 3 / 4)+","+refSolverPreTime.max+","+
+          refSolverPostTime.min+","+refSolverPostTime(nbPb / 4)+","+refSolverPostTime(nbPb / 2)+","+refSolverPostTime(nbPb / 4)+","+refSolverPostTime.max+","+
           gift4gift / nbPb+","+gift4swap / nbPb +","+swap4swap /nbPb+","+
           nbPropose4gift / nbPb+","+nbCounterPropose4gift / nbPb+","+nbAccept4gift / nbPb+","+nbReject4gift / nbPb+","+nbWithdraw4gift / nbPb+","+nbConfirmGift4gift / nbPb+","+nbConfirmSwap4gift / nbPb+","+nbInform4gift / nbPb+","+
           nbPropose4swap / nbPb+","+nbCounterPropose4swap / nbPb+","+nbAccept4swap / nbPb+","+nbReject4swap / nbPb+","+nbWithdraw4swap / nbPb+","+nbConfirmGift4swap / nbPb+","+nbConfirmSwap4swap / nbPb+","+nbInform4swap / nbPb+"\n")
