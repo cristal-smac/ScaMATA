@@ -7,7 +7,6 @@ import org.scamata.solver._
 
 import scala.collection.SortedSet
 import scala.language.postfixOps
-import java.util.concurrent.ThreadLocalRandom
 
 /**
   * Negotiation behaviour for a worker agent
@@ -38,7 +37,7 @@ class WorkerAgentBehaviour(worker: Agent, rule: SocialRule, strategy: DealStrate
       }
        // Otherwise the mind is up to date
       val suppliers = rule match { // The potential suppliers are
-        case LC => // all the peers
+        case LF => // all the peers
           directory.peers(worker)
         case LCmax => // the peers with a smallest workload
           directory.peers(worker).filter(j => updatedMind.belief(j) < workload)
@@ -55,7 +54,7 @@ class WorkerAgentBehaviour(worker: Agent, rule: SocialRule, strategy: DealStrate
         var bestGoal = rule match {
           case LCmax =>
             workload
-          case LC =>
+          case LF =>
             0.0
         }
         suppliers.foreach { supplier =>
@@ -65,7 +64,7 @@ class WorkerAgentBehaviour(worker: Agent, rule: SocialRule, strategy: DealStrate
             val giftGoal = rule match {
               case LCmax =>
                 Math.max(giftWorkload, giftSupplierWorkload)
-              case LC =>
+              case LF =>
                 cost(supplier, task) - cost(worker, task)
             }
             if (giftGoal < bestGoal && ! updatedMind.isBarred(task, supplier) ) {

@@ -66,7 +66,7 @@ class MunkresSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
     * Returns an allocation
     */
   override def solve(): Allocation = {
-    if (rule != LC) throw new RuntimeException("Hungarian Solver is not suitable")
+    if (rule != LF) throw new RuntimeException("Hungarian Solver is not suitable")
     var done = false
     var step = 1
     while (!done) {
@@ -448,7 +448,7 @@ object MunkresSolver extends App {
   val debug = false
   import org.scamata.example.AAMAS4x4._
   println(pb)
-  val solver = new MunkresSolver(pb, LC)
+  val solver = new MunkresSolver(pb, LF)
   val alloc =solver.run()
   println(alloc.toString)
   println(alloc.meanWorkload())

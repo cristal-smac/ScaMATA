@@ -69,7 +69,7 @@ object MATASolver extends App {
   writer.write()
   socialRule match {
     case LCmax => println(s"Makespan: ${allocation.makespan}")
-    case LC => println(s"LC: ${allocation.meanWorkload}")
+    case LF => println(s"LC: ${allocation.meanWorkload}")
   }
 
   println(s"Processing time: ${solver.solvingTime} (ns)")
@@ -99,7 +99,7 @@ object MATASolver extends App {
     val tag: String = tags.head.substring(1) // remove '-'
     tag match {
       case "v" => verbose = true
-      case "f" => socialRule = LC
+      case "f" => socialRule = LF
       case "d" => distributed = true
       case _ => false
     }

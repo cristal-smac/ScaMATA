@@ -22,7 +22,7 @@ class LPSolver(pb : MATA, rule : SocialRule) extends DualSolver(pb, rule) {
   var lpPath: String = rule match {
     case LCmax =>
       config.getString("path.scamata")+"/"+config.getString("path.cmax")
-    case LC =>
+    case LF =>
       config.getString("path.scamata")+"/"+config.getString("path.flowtime")
     case _ =>
       throw new RuntimeException("Unknown social rulle")

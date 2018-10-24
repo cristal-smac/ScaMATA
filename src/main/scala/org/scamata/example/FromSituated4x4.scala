@@ -1,7 +1,7 @@
 package org.scamata.example
 
 import org.scamata.core.{Allocation, MATA, Task, Agent}
-import org.scamata.solver.{CentralizedSolver, LCmax, LC, SingleGiftOnly, SingleSwapAndSingleGift}
+import org.scamata.solver.{CentralizedSolver, LCmax, LF, SingleGiftOnly, SingleSwapAndSingleGift}
 
 import scala.collection.SortedSet
 

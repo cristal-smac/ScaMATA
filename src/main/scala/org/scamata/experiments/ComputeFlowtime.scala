@@ -14,7 +14,7 @@ object ComputeFlowtime {
   val debug= true
 
     def main(args: Array[String]): Unit = {
-      val rule: SocialRule = LC
+      val rule: SocialRule = LF
       val r = scala.util.Random
       val file = s"experiments/data/min$rule.csv"
       val bw = new BufferedWriter(new FileWriter(file))
@@ -22,12 +22,12 @@ object ComputeFlowtime {
         s"minexhaustiveSolver$rule,openexhaustiveSolver$rule,meanexhaustiveSolver$rule,closedexhaustiveSolver$rule,maxexhaustiveSolver$rule," +
         s"mingiftSolver$rule,opengiftSolver$rule,meangiftSolver$rule,closedgiftSolver$rule,maxgiftSolver$rule,"+
         s"minswapSolver$rule,openswapSolver$rule,meanswapSolver$rule,closedswapSolver$rule,maswapSolver$rule,"+
-        s"minectSolver$rule,openectSolver$rule,meanectSolver$rule,closedectSolver$rule,maxectSolver$rule\n")
+        s"minlcSolver$rule,openlcSolver$rule,meanlcSolver$rule,closedlcSolver$rule,maxlcSolver$rule\n")
       for (m <- 2 to 8) {
         for (n <- 8 to 8) {
           if (debug) println(s"Test configuration with $m peers and $n tasks")
           val nbPb = 20 // should be x*4
-          var (exhaustiveSolverRule, giftSolverRule, swapSolverRule, ectSolverRule) =
+          var (exhaustiveSolverRule, giftSolverRule, swapSolverRule, lcSolverRule) =
             (List[Double](), List[Double](),  List[Double](), List[Double]())
           for (o <- 1 to nbPb) {
             if (debug) println(s"Configuration $o")
@@ -36,25 +36,25 @@ object ComputeFlowtime {
             val exhaustiveAlloc = exhaustiveSolver.run()
             val giftSolver = new CentralizedSolver(pb, rule, SingleGiftOnly)
             val giftAlloc = giftSolver.run()
-            val swapSolver = new CentralizedSolver(pb, rule, SingleSwapAndSingleGift)
+            val swapSolver = new CentralizedSolver(pb, rule, SingleSwapAndSingleGift)//  TODO show it is optimal
             val swapAlloc = swapSolver.run()
-            val ectSolver = new ECTSolver(pb, rule)
-            val ectAlloc = ectSolver.run()
+            val lcSolver = new CentralizedSolver(pb, LC, SingleGiftOnly)// TODO show it does not terminate with Swap
+            val lcAlloc = lcSolver.run()
             exhaustiveSolverRule ::= exhaustiveAlloc.flowtime()
             giftSolverRule ::= giftAlloc.flowtime()
             swapSolverRule ::= swapAlloc.flowtime()
-            ectSolverRule ::= ectAlloc.flowtime()
+            lcSolverRule ::= lcAlloc.flowtime()
           }
           exhaustiveSolverRule = exhaustiveSolverRule.sortWith(_ < _)
           giftSolverRule = giftSolverRule.sortWith(_ < _)
           swapSolverRule = swapSolverRule.sortWith(_ < _)
-          ectSolverRule = ectSolverRule.sortWith(_ < _)
+          lcSolverRule = lcSolverRule.sortWith(_ < _)
           bw.write(
             s"$m,$n,"+
               s"${exhaustiveSolverRule.min},${exhaustiveSolverRule(nbPb/4)},${exhaustiveSolverRule(nbPb/2)},${exhaustiveSolverRule(nbPb*3/4)},${exhaustiveSolverRule.max}," +
               s"${giftSolverRule.min},${giftSolverRule(nbPb/4)},${giftSolverRule(nbPb/2)},${giftSolverRule(nbPb*3/4)},${giftSolverRule.max}," +
-              s"${swapSolverRule.min},${swapSolverRule(nbPb/4)},${swapSolverRule(nbPb/2)},${swapSolverRule(nbPb*3/4)},${swapSolverRule.max}," +
-              s"${ectSolverRule.min},${ectSolverRule(nbPb/4)},${ectSolverRule(nbPb/2)},${ectSolverRule(nbPb*3/4)},${ectSolverRule.max}\n")
+              s"${swapSolverRule.min},${swapSolverRule(nbPb/4)},${swapSolverRule(nbPb/2)},${swapSolverRule(nbPb*3/4)},${swapSolverRule.max},"+
+              s"${lcSolverRule.min},${lcSolverRule(nbPb/4)},${lcSolverRule(nbPb/2)},${lcSolverRule(nbPb*3/4)},${lcSolverRule.max}\n")
           bw.flush()
         }
       }

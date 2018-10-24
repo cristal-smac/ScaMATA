@@ -17,25 +17,19 @@ class ExhaustiveSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
     */
   override def solve(): Allocation = {
     var bestAllocation = new Allocation(pb)
-    if (rule == LC) {
-      pb.tasks.foreach { task =>
-        val worker = pb.faster(task)
-        bestAllocation = bestAllocation.update(worker, bestAllocation.bundle(worker) + task)
-      }
-      bestAllocation
-    } else {
       var min = Double.MaxValue
       pb.allAllocation().foreach { allocation =>
-        val goal = allocation.makespan()
+        val goal = rule match {
+          case LCmax => allocation.makespan()
+          case LF => allocation.flowtime()
+        }
         if (goal < min) {
           bestAllocation = allocation
           min = goal
         }
       }
-      bestAllocation
-    }
+    bestAllocation
   }
-
 }
 
 /**
@@ -47,5 +41,4 @@ object ExhaustiveSolver extends App {
   println(pb)
   val solver = new ExhaustiveSolver(pb,LCmax)
   println(solver.run().toString)
-
 }

@@ -27,7 +27,8 @@ class ECTSolver(pb : MATA, rule : SocialRule) extends Solver(pb, rule) {
       pb.workers.foreach{ w =>
         val current = rule match{
           case LCmax => allocation.workload(w) + pb.cost(w,t)
-          case LC => allocation.delay(w) + pb.cost(w,t)
+          case LF => allocation.delay(w) + pb.cost(w,t)
+          case LC => pb.cost(w,t)
         }
         if (current < goal){
           goal = current

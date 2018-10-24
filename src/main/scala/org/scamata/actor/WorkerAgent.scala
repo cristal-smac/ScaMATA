@@ -4,7 +4,7 @@ package org.scamata.actor
 import java.util.concurrent.ThreadLocalRandom
 
 import org.scamata.core.{NoTask, Task, Agent}
-import org.scamata.solver.{DealStrategy, LC, LCmax, SingleGiftOnly, SocialRule}
+import org.scamata.solver.{DealStrategy, LF, LCmax, SingleGiftOnly, SocialRule}
 
 import scala.collection.SortedSet
 import akka.actor.{Actor, ActorRef}
@@ -176,7 +176,7 @@ abstract class WorkerAgent(val worker: Agent, val rule: SocialRule, val strategy
       case LCmax =>
         Math.max(mind.belief(provider), mind.belief(supplier)) >
           Math.max(mind.belief(provider) - cost(provider, task), mind.belief(supplier) + cost(supplier, task))
-      case LC =>
+      case LF =>
         cost(provider, task) > cost(supplier, task)
     }
   }
@@ -195,7 +195,7 @@ abstract class WorkerAgent(val worker: Agent, val rule: SocialRule, val strategy
         Math.max(mind.belief(provider), mind.belief(supplier)) >
           Math.max(mind.belief(provider) - cost(provider, task) + cost(provider, counterpart),
             mind.belief(supplier) + cost(supplier, task) - cost(supplier, counterpart))
-      case LC =>
+      case LF =>
         cost(provider, task) > cost(supplier, task) &&
           cost(supplier, counterpart) > cost(provider, counterpart)
     }
@@ -211,7 +211,7 @@ abstract class WorkerAgent(val worker: Agent, val rule: SocialRule, val strategy
     var bestGoal = rule match {
       case LCmax =>
         mind.belief(opponent)
-      case LC =>
+      case LF =>
         0.0
     }
     (mind.bundle + NoTask).foreach { counterpart => // foreach potential single swap
@@ -220,7 +220,7 @@ abstract class WorkerAgent(val worker: Agent, val rule: SocialRule, val strategy
       val swapGoal = rule match {
         case LCmax =>
           Math.max(swapWorkload, swapOpponentWorkload)
-        case LC =>
+        case LF =>
           if (counterpart!= NoTask &&
             cost(opponent, task) > cost(worker, task) &&
             cost(worker, counterpart) > cost(opponent, counterpart))

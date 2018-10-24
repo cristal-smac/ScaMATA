@@ -38,12 +38,12 @@ class CentralizedSolver(pb : MATA, rule : SocialRule, strategy : DealStrategy) e
           var found = false
           var bestA: Allocation = a
           var bestD: Swap= new SingleSwap(i, NoAgent, NoTask, NoTask)
-          var bestT : Double = rule match {
+          var bestGoal : Double = rule match {
             case LCmax => a.workload(i)
-            case LC => Double.MaxValue
+            case LF => 0.0
+            case LC => 0.0
           }
           responders.foreach { r =>
-            if (rule == LC) bestT = a.delay(i) + a.delay(r)
             a.bundle(i).foreach { t1 =>
               val counterparts = strategy match {
                 case SingleGiftOnly =>  Set[Task](NoTask)
@@ -56,14 +56,16 @@ class CentralizedSolver(pb : MATA, rule : SocialRule, strategy : DealStrategy) e
                   case _ => new SingleSwap(i, r, t1, t2)
                 }
                 val postA = a.apply(deal)
-                val currentT : Double = rule match {
+                val currentGoal : Double = rule match {
                   case LCmax =>
                     Math.max(postA.workload(i), postA.workload(r))
-                  case LC =>
-                    postA.delay(i) + postA.delay(r)
+                  case LF =>
+                    postA.delay(i) + postA.delay(r) - (a.delay(i) + a.delay(r))
+                  case LC => pb.cost(r,t1) + pb.cost(i,t1) - (pb.cost(i,t1) + pb.cost(r,t2))
+
                 }
-                if (currentT < bestT) {
-                  bestT = currentT
+                if (currentGoal < bestGoal) {
+                  bestGoal = currentGoal
                   bestA = postA
                   bestD = deal
                   found = true
@@ -89,7 +91,7 @@ class CentralizedSolver(pb : MATA, rule : SocialRule, strategy : DealStrategy) e
             nbAccept += 1
             a = bestA
             if (rule == LCmax) {
-              cons = cons.toSet.union(pb.workers.filter(j => a.workload(j) > bestT)).to[ListBuffer]
+              cons = cons.toSet.union(pb.workers.filter(j => a.workload(j) > bestGoal)).to[ListBuffer]
             }
             cons = Random.shuffle(cons)
           }
@@ -107,7 +109,7 @@ object CentralizedSolver extends App {
   val debug = false
   import org.scamata.example.Toy4x4._
   println(pb)
-  val negotiationSolver = new CentralizedSolver(pb, LCmax, SingleSwapAndSingleGift)//SingleSwapAndSingleGift or SingleSwapOnly
+  val negotiationSolver = new CentralizedSolver(pb, LCmax, SingleGiftOnly)//SingleSwapAndSingleGift or SingleSwapOnly
   var allocation = new Allocation(pb)
   allocation = allocation.update(w1, SortedSet(t4))
   allocation = allocation.update(w2, SortedSet(t3))

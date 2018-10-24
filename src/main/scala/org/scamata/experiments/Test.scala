@@ -18,7 +18,7 @@ object Test {
 
     val rule: SocialRule = args(args.length-2) match {
       case "LCmax" => LCmax
-      case "LC" => LC
+      case "LC" => LF
       case _ => throw new RuntimeException(s"Bad social rule : ${args(0)} ${args(1)} ${args(2)}")
     }
 
@@ -106,7 +106,7 @@ object Test {
             swapSolverRule ::= swapAlloc.makespan()
             distributedGiftSolverRule ::= distributedGiftAlloc.makespan()
             distributedSwapSolverRule ::= distributedSwapAlloc.makespan()
-          case LC =>
+          case LF =>
             lpSolverRule ::= lpAlloc.meanWorkload()
             giftSolverRule ::= giftAlloc.meanWorkload()
             swapSolverRule ::= swapAlloc.meanWorkload()

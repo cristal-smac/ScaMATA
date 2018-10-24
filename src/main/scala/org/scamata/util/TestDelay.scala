@@ -25,7 +25,7 @@ object TestDelay extends App {
   println("w1 : "+allocation.delay(w1))
   println("w2 : "+allocation.delay(w2))
 
-  val solver = new CentralizedSolver(pb, LC, SingleSwapAndSingleGift)//SingleSwapAndSingleGift or SingleSwapOnly or SingleGiftOnly
+  val solver = new CentralizedSolver(pb, LF, SingleSwapAndSingleGift)//SingleSwapAndSingleGift or SingleSwapOnly or SingleGiftOnly
   solver.debug = true
   println(solver.reallocate(allocation).toString)
 }

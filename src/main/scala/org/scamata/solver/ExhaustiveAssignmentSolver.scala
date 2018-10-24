@@ -29,7 +29,7 @@ class ExhaustiveAssignementSolver(pb: MATA, rule: SocialRule) extends Solver(pb,
       }
       val goal = rule match {
         case LCmax => allocation.makespan()
-        case LC => allocation.meanWorkload()
+        case LF => allocation.meanWorkload()
       }
       if (goal < min) {
         bestAllocation = allocation

@@ -15,7 +15,7 @@ object TestMunkres {
   val debug= true
 
   def main(args: Array[String]): Unit = {
-    val rule: SocialRule = LC
+    val rule: SocialRule = LF
     val nbTasksPerWorker = 1
 
     val r = scala.util.Random
