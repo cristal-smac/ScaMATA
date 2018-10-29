@@ -6,6 +6,7 @@ set auto y
 set grid
 set ticslevel 0
 set style data lines
+set key font ",20"
 set key above left
 set xlabel "m workers (5m tasks)"
 set ylabel "Number of deals"

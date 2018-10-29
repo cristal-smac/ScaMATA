@@ -5,14 +5,13 @@ set style fill transparent solid 0.1 noborder
 set auto x
 set auto y
 set grid
-set ticslevel 0
 set key font ",20"
 set key left above
+set ticslevel 0
 set style data lines
 set xlabel "m workers (5m tasks)"
 set ylabel "Makespan"
 # set log y
-set key center right
 set output 'figures/rule2DerrorCmax.pdf'
 plot  "data/cmax.csv" using 1:4:6 with filledcurves lc "light-blue" notitle,\
       "data/cmax.csv" using 1:5 with lines dt 3 lc "dark-blue" title 'Gift',\

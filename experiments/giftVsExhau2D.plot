@@ -8,6 +8,7 @@ set auto y
 set grid
 set ticslevel 0
 set style data lines
+set key font ",20"
 set key left above
 set xtics 1
 set xlabel "m workers (8 tasks)"
