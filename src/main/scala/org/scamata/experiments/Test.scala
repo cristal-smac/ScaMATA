@@ -45,7 +45,7 @@ object Test {
       s"gift4gift,gift4swap,swap4swap," +
       s"nbPropose4gift,nbCounterPropose4gift,nbAccept4gift,nbReject4gift,nbWithdraw4gift,nbConfirmGift4gift,nbConfirmSwap4Swap,nbInform4gift," +
       s"nbPropose4swap,nbCounterPropose4swap,nbAccept4swap,nbReject4swap,nbWithdraw4swap,nbConfirmGift4swap,nbConfirmSwap4swap,nbInform4swap\n")
-    for (m <- 2 to 100 by 2) {
+    for (m <- 102 to 200 by 2) {
       val n = nbTasksPerWorker * m
       if (debug) println(s"Test configuration with $m peers and $n tasks")
       val nbPb = 20 // should be x*4
