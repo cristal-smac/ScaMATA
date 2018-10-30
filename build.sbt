@@ -15,8 +15,8 @@ javaOptions in Compile += "-Xmx4G"
 //mainClass in (Compile,run) := Some("org.scamata.util.MATASolver")
 //mainClass in assembly := Some("org.scamata.util.MATASolver")
 
-mainClass in (Compile,run) := Some("org.scamata.experiments.LargeScaleTest")
-mainClass in assembly := Some("org.scamata.experiments.LargeScaleTest")
+mainClass in (Compile,run) := Some("org.scamata.experiments.Test")
+mainClass in assembly := Some("org.scamata.experiments.Test")
 
 fork := true
 
