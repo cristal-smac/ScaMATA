@@ -1,3 +1,4 @@
+// Copyright (C) Maxime MORGE 2018
 package org.scamata.example
 
 import org.scamata.core.{Allocation, MATA, Task, Agent}
