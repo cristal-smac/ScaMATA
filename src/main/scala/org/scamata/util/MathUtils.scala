@@ -53,3 +53,13 @@ object RandomUtils {
     (min + util.Random.nextInt((max - min) + 1)).toDouble
   }
 }
+
+/**
+  * Matrix in Scala
+  *
+  */
+object Matrix{
+
+  def show[T](array: Array[Array[T]]): String = array.map(_.mkString("[",", ","]")).mkString("\n")
+
+}

@@ -11,11 +11,11 @@ import scala.sys.process._
 
 /**
   * Algorithm from "Scheduling independent tasks to reduce mean finishing time" by
-  * Bruno, James and Coffman Jr, Edward G and Sethi, Ravi
+  * Bruno, James and Coffman Jr, Edward G and Sethi, Ravi using linear programming
   * @param pb to be solver
   * @param rule to be optimized
   */
-class BrunoSolver(pb : MATA, rule : SocialRule) extends DualSolver(pb, rule) {
+class LPMinFlowTimeSolver(pb : MATA, rule : SocialRule) extends DualSolver(pb, rule) {
 
   val config: Config = ConfigFactory.load()
   val inputPath: String =config.getString("path.scamata")+"/"+config.getString("path.input")
@@ -54,11 +54,11 @@ class BrunoSolver(pb : MATA, rule : SocialRule) extends DualSolver(pb, rule) {
 /**
   * Companion object to test it
   */
-object BrunoSolver extends App {
+object LPMinFlowTimeSolver extends App {
   val debug = true
   import org.scamata.example.Toy4x4._
   if (debug) println(pb)
-  val lpSolver = new BrunoSolver(pb,LF)
+  val lpSolver = new LPMinFlowTimeSolver(pb,LF)
   lpSolver.debug = true
   println(lpSolver.run().toString)
 }

@@ -65,7 +65,7 @@ object Test {
         if (debug) println(s"Configuration $o")
         val refSolver = rule match {
           case LCmax => new ECTSolver(pb, rule)
-          case LF => new BrunoSolver(pb, rule)
+          case LF => new MinFlowTimeSolver(pb, rule)
         }
         val giftSolver: CentralizedSolver = new CentralizedSolver(pb, rule, SingleGiftOnly)
         val swapSolver: CentralizedSolver = new CentralizedSolver(pb, rule, SingleSwapAndSingleGift)

@@ -56,7 +56,7 @@ object LargeScaleTest {
         if (debug) println(s"Configuration $o")
         val refSolver = rule match {
           case LCmax => new ECTSolver(pb, rule)
-          case LF => new BrunoSolver(pb, rule)
+          case LF => new LPMinFlowTimeSolver(pb, rule)
         }
         val distributedGiftSolver: DistributedSolver = new DistributedSolver(pb, rule, SingleGiftOnly, system1)
         val distributedSwapSolver: DistributedSolver = new DistributedSolver(pb, rule, SingleSwapAndSingleGift, system2)

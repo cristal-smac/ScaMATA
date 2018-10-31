@@ -26,7 +26,7 @@ class LPECTSolver(pb : MATA, rule : SocialRule) extends DualSolver(pb, rule) {
     case LF =>
       config.getString("path.scamata")+"/"+config.getString("path.nonintegerflowtime")
     case _ =>
-      throw new RuntimeException("Unknown social rulle")
+      throw new RuntimeException("Unknown social rule")
   }
   if (rule == SingleSwapOnly) config.getString("path.scamata")+"/"+config.getString("path.assignment")
 
