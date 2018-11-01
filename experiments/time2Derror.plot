@@ -25,7 +25,7 @@ plot "data/cmax.csv" using 1:($29)/1E9:($31)/1E9 with filledcurves lc "light-blu
      "data/cmax.csv" using 1:($49)/1E9:($51)/1E9 with filledcurves lc "light-red" notitle,\
      "data/cmax.csv" using 1:($50)/1E9 with lines dt 5 lc "dark-red" title 'ECT'
 set output 'figures/time2DerrorFlowtime.pdf'
-set log y
+#set log y
 set xlabel "m workers (5m tasks)"
 plot "data/flowtime.csv" using 1:($29)/1E9:($31)/1E9 with filledcurves lc "light-blue" notitle,\
      "data/flowtime.csv" using 1:($30)/1E9 with lines dt 3 lc "dark-blue" title 'Gift (LF)',\
