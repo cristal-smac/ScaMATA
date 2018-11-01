@@ -60,6 +60,25 @@ object RandomUtils {
   */
 object Matrix{
 
-  def show[T](array: Array[Array[T]]): String = array.map(_.mkString("[",", ","]")).mkString("\n")
+  /**
+    * Print
+    * @param matrix is an array of array
+    * @tparam T type of content
+    * @return string representation
+    * */
+  def show[T](matrix: Array[Array[T]]): String = matrix.map(_.mkString("[",", ","]")).mkString("\n")
 
+  /**
+    * Print
+    * @tparam T type of content
+    * @param f function
+    * @param L line number
+    * @param C column number
+    * @return string representation
+    * */
+  def show[T](f: (Integer,Integer) => T, L: Integer, C: Integer): String = {
+    (for (i <- 0 until L) yield {
+        (for (j <- 0 until C) yield f(i, j).toString).mkString("[",", ","]")
+      }).mkString("[\n",",\n","]\n")
+    }
 }
