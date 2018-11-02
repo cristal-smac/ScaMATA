@@ -34,7 +34,7 @@ object ComputeFlowtime {
             val pb = MATA.randomProblem(m, n, TaskCorrelated)
             val exhaustiveSolver = new ExhaustiveSolver(pb, rule)
             val exhaustiveAlloc = exhaustiveSolver.run()
-            val brunoSolver = new BrunoSolver(pb, rule)
+            val brunoSolver = new LPMinFlowTimeSolver(pb, rule)
             val brunoAlloc = brunoSolver.run()
             val swapSolver = new CentralizedSolver(pb, rule, SingleSwapAndSingleGift)
             val swapAlloc = swapSolver.run()
