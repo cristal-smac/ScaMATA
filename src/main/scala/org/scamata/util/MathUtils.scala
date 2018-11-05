@@ -104,7 +104,7 @@ object Statistic{
   def statistic(values1: List[Double], values2: List[Double]) : Double = {
     val (mean1, var1) = normal(values1)
     val (mean2, var2) = normal(values2)
-    (math.pow(mean1, 2) - math.pow(mean2,2)) / (math.sqrt(var1/values1.length + var2/values2.length))
+    (mean1 - mean2) / (math.sqrt(var1/values1.length + var2/values2.length))
   }
 
 
