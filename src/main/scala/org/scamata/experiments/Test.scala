@@ -50,7 +50,7 @@ object Test {
     for (m <- 2 to 500 by 2) {
       val n = nbTasksPerWorker * m
       if (debug) println(s"Test configuration with $m peers and $n tasks")
-      val nbPb = 20 // should be x*4
+      val nbPb = 100 // should be x*4
       var (refSolverRule, giftSolverRule, distributedGiftSolverRule, swapSolverRule, distributedSwapSolverRule,
       refSolverTime, refSolverPreTime, refSolverPostTime, giftSolverTime, swapSolverTime, distributedGiftSolverTime, distributedSwapSolverTime) =
         (List[Double](), List[Double](), List[Double](), List[Double](), List[Double](), List[Double](),
