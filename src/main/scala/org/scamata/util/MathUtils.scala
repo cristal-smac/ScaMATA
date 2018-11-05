@@ -99,7 +99,7 @@ object Stat{
     * @param values of the random variable
     */
   def variance(values: List[Double]) : Double = {
-    val mean = mean(values)
+    val mean : Double = mean(values)
     values.map(a => math.pow(a - mean, 2)).sum / values.length
   }
 
