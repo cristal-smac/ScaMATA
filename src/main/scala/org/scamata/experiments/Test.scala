@@ -173,7 +173,7 @@ object Test {
           nbPropose4gift / nbPb+","+nbCounterPropose4gift / nbPb+","+nbAccept4gift / nbPb+","+nbReject4gift / nbPb+","+nbWithdraw4gift / nbPb+","+nbConfirmGift4gift / nbPb+","+nbConfirmSwap4gift / nbPb+","+nbInform4gift / nbPb+","+
           nbPropose4swap / nbPb+","+nbCounterPropose4swap / nbPb+","+nbAccept4swap / nbPb+","+nbReject4swap / nbPb+","+nbWithdraw4swap / nbPb+","+nbConfirmGift4swap / nbPb+","+nbConfirmSwap4swap / nbPb+","+nbInform4swap / nbPb+"\n")
       bw.flush()
-      bw2.write( s"m,n," +
+      bw2.write( s"$m,$n," +
         Stat.mean(giftSolverRule) + "," + Stat.variance(giftSolverRule) + ","+
         Stat.mean(distributedGiftSolverRule) + "," + Stat.variance(distributedGiftSolverRule) + ","+
         Stat.mean(swapSolverRule) + "," + Stat.variance(swapSolverRule) + ","+
