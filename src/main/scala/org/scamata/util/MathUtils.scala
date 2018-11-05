@@ -82,3 +82,30 @@ object Matrix{
       }).mkString("[\n",",\n","]\n")
     }
 }
+
+
+/**
+  * Statistical tools
+  */
+object Statistic{
+  /**
+    * Returns the mean and the variance of a random variable with a Gaussian distribution (i.e. normally distributed)
+    * @param values of the random variable
+    */
+  def normal(values: List[Double]) : (Double, Double) ={
+    val mean = values.sum / values.length
+    val variance = values.map(a => math.pow(a - mean, 2)).sum / values.length
+    (mean, variance)
+  }
+
+  /**
+    * Returns the statistic t for Welch's t-test
+    */
+  def statistic(values1: List[Double], values2: List[Double]) : Double = {
+    val (mean1, var1) = normal(values1)
+    val (mean2, var2) = normal(values2)
+    (math.pow(mean1, 2) - math.pow(mean2,2)) / (math.sqrt(var1/values1.length + var2/values2.length))
+  }
+
+
+}
