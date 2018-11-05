@@ -7,7 +7,7 @@ import akka.actor.ActorSystem
 import org.scamata.core._
 import org.scamata.solver._
 import org.scamata.util.MathUtils._
-import org.scamata.util.Statistic
+import org.scamata.util.Stat
 
 /**
   * Main app to test LPSolver and (Dis)Solver with SingleGiftOnly or SingleSwapAndSingleGift
@@ -30,6 +30,7 @@ object Test {
     val system2 = ActorSystem("Test2" + rule + r.nextInt.toString)
     //The Actor system
     val file = s"experiments/data/$rule.csv"
+    val file2 = s"experiments/data/${rule}Significance.csv"
     val bw = new BufferedWriter(new FileWriter(file))
     bw.write(s"m,n," +
       s"minGiftSolver$rule,openGiftSolver$rule,meanGiftSolver$rule,closedGiftSolver$rule,maxGiftSolver$rule," +
@@ -47,6 +48,18 @@ object Test {
       s"gift4gift,gift4swap,swap4swap," +
       s"nbPropose4gift,nbCounterPropose4gift,nbAccept4gift,nbReject4gift,nbWithdraw4gift,nbConfirmGift4gift,nbConfirmSwap4Swap,nbInform4gift," +
       s"nbPropose4swap,nbCounterPropose4swap,nbAccept4swap,nbReject4swap,nbWithdraw4swap,nbConfirmGift4swap,nbConfirmSwap4swap,nbInform4swap\n")
+    val bw2 = new BufferedWriter(new FileWriter(file2))
+    bw2.write(s"m,n," +
+      s"meanGiftSolver$rule,varGiftSolver$rule," +
+      s"meanDistributedGiftSolver$rule,varDistributedGiftSolver$rule" +
+      s"meanSwapSolver$rule,varSwapSolver$rule" +
+      s"meanDistributedSwapSolver$rule,varDistributedSwapSolver$rule" +
+      s"meanRefSolver$rule,varRefSolver$rule" +
+      s"meanGiftSolverTime,varGiftSolverTime," +
+      s"meanDistributedGiftSolverTime,varDistributedGiftSolverTime" +
+      s"meanSwapSolverTime,varSwapSolverTime," +
+      s"meanDistributedSwapSolverTime,varDistributedSwapSolverTime" +
+      s"meanRefSolverTime,varRefSolverTime\n")
     for (m <- 2 to 500 by 2) {
       val n = nbTasksPerWorker * m
       if (debug) println(s"Test configuration with $m peers and $n tasks")
@@ -130,9 +143,9 @@ object Test {
       distributedSwapSolverRule = distributedSwapSolverRule.sortWith(_ < _)
 
       if (debug){
-        println("Goal Ref/Gift: t="+Statistic.statistic(refSolverRule,giftSolverRule))
-        println("Goal Ref/Swap: t="+Statistic.statistic(refSolverRule,swapSolverRule))
-        println("Goal Gift/Swap: t="+Statistic.statistic(giftSolverRule,swapSolverRule))
+        println("Goal Ref/Gift: t="+Stat.statistic(refSolverRule,giftSolverRule))
+        println("Goal Ref/Swap: t="+Stat.statistic(refSolverRule,swapSolverRule))
+        println("Goal Gift/Swap: t="+Stat.statistic(giftSolverRule,swapSolverRule))
       }
 
       refSolverTime = refSolverTime.sortWith(_ < _)
@@ -160,6 +173,18 @@ object Test {
           nbPropose4gift / nbPb+","+nbCounterPropose4gift / nbPb+","+nbAccept4gift / nbPb+","+nbReject4gift / nbPb+","+nbWithdraw4gift / nbPb+","+nbConfirmGift4gift / nbPb+","+nbConfirmSwap4gift / nbPb+","+nbInform4gift / nbPb+","+
           nbPropose4swap / nbPb+","+nbCounterPropose4swap / nbPb+","+nbAccept4swap / nbPb+","+nbReject4swap / nbPb+","+nbWithdraw4swap / nbPb+","+nbConfirmGift4swap / nbPb+","+nbConfirmSwap4swap / nbPb+","+nbInform4swap / nbPb+"\n")
       bw.flush()
+      bw2.write( s"m,n," +
+        Stat.mean(giftSolverRule) + "," + Stat.variance(giftSolverRule) + ","+
+        Stat.mean(distributedGiftSolverRule) + "," + Stat.variance(distributedGiftSolverRule) + ","+
+        Stat.mean(swapSolverRule) + "," + Stat.variance(swapSolverRule) + ","+
+        Stat.mean(distributedSwapSolverRule) + "," + Stat.variance(distributedSwapSolverRule) + ","+
+        Stat.mean(refSolverRule) + "," + Stat.variance(refSolverRule) + ","+
+        Stat.mean(giftSolverTime) + "," + Stat.variance(giftSolverTime) + ","+
+        Stat.mean(distributedGiftSolverTime) + "," + Stat.variance(distributedGiftSolverTime) + ","+
+        Stat.mean(swapSolverTime) + "," + Stat.variance(swapSolverTime) + ","+
+        Stat.mean(distributedSwapSolverTime) + "," + Stat.variance(distributedSwapSolverTime) + ","+
+        Stat.mean(refSolverTime) + "," + Stat.variance(refSolverTime) + "\n")
+      bw2.flush()
     }
     System.exit(0)
   }
