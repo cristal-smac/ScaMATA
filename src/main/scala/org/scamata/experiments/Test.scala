@@ -6,6 +6,8 @@ import java.io.{BufferedWriter, FileWriter}
 import akka.actor.ActorSystem
 import org.scamata.core._
 import org.scamata.solver._
+import org.scamata.util.MathUtils._
+import org.scamata.util.Statistic
 
 /**
   * Main app to test LPSolver and (Dis)Solver with SingleGiftOnly or SingleSwapAndSingleGift
@@ -126,6 +128,12 @@ object Test {
       distributedGiftSolverRule = distributedGiftSolverRule.sortWith(_ < _)
       swapSolverRule = swapSolverRule.sortWith(_ < _)
       distributedSwapSolverRule = distributedSwapSolverRule.sortWith(_ < _)
+
+      if (debug){
+        println("Goal Ref/Gift: t="+Statistic.statistic(refSolverRule,giftSolverRule))
+        println("Goal Ref/Swap: t="+Statistic.statistic(refSolverRule,swapSolverRule))
+        println("Goal Gift/Swap: t="+Statistic.statistic(giftSolverRule,swapSolverRule))
+      }
 
       refSolverTime = refSolverTime.sortWith(_ < _)
       refSolverPreTime = refSolverPreTime.sortWith(_ < _)
