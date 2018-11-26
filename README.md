@@ -18,13 +18,13 @@ In order to run the demonstration you need:
 
 In order to compile the code you need:
 
-- the programming language [Scala 2.11.8](http://www.scala-lang.org/download/);
+- the programming language [Scala 2.12.4](http://www.scala-lang.org/download/);
 
 - the interactive build tool [SBT 0.13](http://www.scala-sbt.org/download.html).
 
 ## Test
 
-    java -jar ScaMATA-assembly-X.Y.jar org.scamata.util.MATASolver -v -d examples/toy4x4.txt  examples/toy4x4Cmax.txt
+    java -jar ScaIA-assembly-X.Y.jar org.scaia.util.asia.MATASolver  -c -d -v examples/toy4x4.txt examples/toy4x4Result.txt
 
 Usage: 
 
@@ -32,7 +32,8 @@ Usage:
     The following options are available:
     -v: verbose
     -d: distributed (false by default)
-    -f: LC (LCmax by default)
+    -f: LF (LCmax by default)
+    -c: LC (LCmax by default)
 
 ## Installation
 

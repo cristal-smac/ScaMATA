@@ -9,8 +9,8 @@ import akka.actor.ActorSystem
 
 /**
   * Solve a particular MATA Problem instance
-  * sbt "run org.scaia.util.MATASolver -v examples/toy2x4.txt examples/toy4x4Cmax.txt"
-  * java -jar ScaIA-assembly-X.Y.jar org.scaia.util.asia.MATASolver r -v examples/toy2x4.txt examples/toy4x4Cmax.txt
+  * sbt "run org.scaia.util.MATASolver -c -d -v examples/toy4x4.txt examples/toy4x4Result.txt"
+  * java -jar ScaIA-assembly-X.Y.jar org.scaia.util.asia.MATASolver  -c -d -v examples/toy4x4.txt examples/toy4x4Result.txt
   *
   */
 object MATASolver extends App {
@@ -22,7 +22,8 @@ object MATASolver extends App {
     Usage: java -jar ScaMATA-assembly-X.Y.jar [-v] inputFilename outputFilename
     The following options are available:
     -v: verbose (false by default)
-    -f: LC (LCmax by default)
+    -f: LF (LCmax by default)
+    -c: LC (LC by default)
     -d: distributed (false by default)
   """
 
@@ -69,7 +70,7 @@ object MATASolver extends App {
   writer.write()
   socialRule match {
     case LCmax => println(s"Makespan: ${allocation.makespan}")
-    case LF => println(s"LC: ${allocation.meanWorkload}")
+    case _ => println(s"LC: ${allocation.meanWorkload}")
   }
 
   println(s"Processing time: ${solver.solvingTime} (ns)")
@@ -100,6 +101,7 @@ object MATASolver extends App {
     tag match {
       case "v" => verbose = true
       case "f" => socialRule = LF
+      case "c" => socialRule = LC
       case "d" => distributed = true
       case _ => false
     }
