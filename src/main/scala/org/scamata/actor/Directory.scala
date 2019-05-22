@@ -2,14 +2,14 @@
 package org.scamata.actor
 
 import akka.actor.ActorRef
-import org.scamata.core.Agent
+import org.scamata.core.Worker
 
 /**
   * Class representing an index of the names and addresses of peers
   */
 class Directory {
-  var adr = Map[Agent, ActorRef]()//Agents' references
-  var workers = Map[ActorRef, Agent]()// Actors' worker
+  var adr = Map[Worker, ActorRef]()//Agents' references
+  var workers = Map[ActorRef, Worker]()// Actors' worker
 
   override def toString: String = allWorkers().mkString("[",", ","]")
 
@@ -18,7 +18,7 @@ class Directory {
     * @param worker
     * @param ref
     */
-  def add(worker: Agent, ref: ActorRef) : Unit = {
+  def add(worker: Worker, ref: ActorRef) : Unit = {
     if ( ! adr.keySet.contains(worker) &&  ! workers.keySet.contains(ref)) {
       adr += (worker -> ref)
       workers += (ref -> worker)
@@ -27,8 +27,8 @@ class Directory {
   }
 
   def allActors() : Iterable[ActorRef]  = adr.values
-  def allWorkers() : Iterable[Agent]  = workers.values
-  def peers(worker: Agent) : Set[Agent] = allWorkers().filterNot(_ ==worker).toSet
-  def peersActor(worker: Agent) :  Iterable[ActorRef] = peers(worker: Agent).map(w => adr(w))
+  def allWorkers() : Iterable[Worker]  = workers.values
+  def peers(worker: Worker) : Set[Worker] = allWorkers().filterNot(_ ==worker).toSet
+  def peersActor(worker: Worker) :  Iterable[ActorRef] = peers(worker: Worker).map(w => adr(w))
 
 }

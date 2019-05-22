@@ -1,7 +1,7 @@
 // Copyright (C) Maxime MORGE 2018
 package org.scamata.example
 
-import org.scamata.core.{Allocation, MATA, Task, Agent}
+import org.scamata.core.{Allocation, MATA, Task, Worker}
 import org.scamata.solver.{CentralizedSolver, LCmax, LF, SingleGiftOnly, SingleSwapAndSingleGift}
 
 import scala.collection.SortedSet
@@ -11,10 +11,10 @@ import scala.collection.SortedSet
   */
 
 object FromSituated4x4{
-  val w1 = new Agent("1")
-  val w2 = new Agent("2")
-  val w3 = new Agent("3")
-  val w4 = new Agent("4")
+  val w1 = new Worker("1")
+  val w2 = new Worker("2")
+  val w3 = new Worker("3")
+  val w4 = new Worker("4")
   val workers = SortedSet(w1, w2, w3, w4)
 
   val t1 = new Task("t1")
@@ -23,7 +23,7 @@ object FromSituated4x4{
   val t4 = new Task("t4")
   val tasks = SortedSet(t1, t2, t3, t4)
 
-  var cost: Map[(Agent, Task), Double] = Map[(Agent,Task), Double]()
+  var cost: Map[(Worker, Task), Double] = Map[(Worker,Task), Double]()
   cost+= ((w1, t1) -> 6.0)
   cost+= ((w1, t2) -> 10.0)
   cost+= ((w1, t3) -> 17.0)

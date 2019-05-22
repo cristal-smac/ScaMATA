@@ -2,7 +2,7 @@
 package org.scamata.actor
 
 import akka.actor.{FSM, Stash}
-import org.scamata.core.{Agent, NoAgent, NoTask, Task}
+import org.scamata.core.{Worker, NoWorker$, NoTask, Task}
 import org.scamata.solver._
 
 import scala.collection.SortedSet
@@ -14,14 +14,14 @@ import scala.language.postfixOps
   * @param rule     to optimize
   * @param strategy for selecting deals
   */
-class WorkerAgentBehaviour(worker: Agent, rule: SocialRule, strategy: DealStrategy)
-  extends WorkerAgent(worker: Agent, rule: SocialRule, strategy: DealStrategy)
+class WorkerAgentBehaviour(worker: Worker, rule: SocialRule, strategy: DealStrategy)
+  extends WorkerAgent(worker: Worker, rule: SocialRule, strategy: DealStrategy)
     with FSM[State, StateOfMind] with Stash {
 
   /**
     * Initially the worker is in the initial state with no bundle, no beliefs about the workloads and no responder for any particular task
     */
-  startWith(Initial, new StateOfMind(SortedSet[Task](), Map[Agent, Double](), NoAgent, NoTask, List[(Task,Agent)]() ) )
+  startWith(Initial, new StateOfMind(SortedSet[Task](), Map[Worker, Double](), NoWorker$, NoTask, List[(Task,Worker)]() ) )
 
   /**
     * Either the worker is in Initial state
@@ -160,7 +160,7 @@ class WorkerAgentBehaviour(worker: Agent, rule: SocialRule, strategy: DealStrate
         stay using updatedMind
       } else {
         updatedMind= updatedMind.barred(task, opponent)
-        updatedMind = updatedMind.changeDelegation(NoAgent, NoTask)
+        updatedMind = updatedMind.changeDelegation(NoWorker$, NoTask)
         self ! Trigger
         goto(Initial) using updatedMind
       }
@@ -180,7 +180,7 @@ class WorkerAgentBehaviour(worker: Agent, rule: SocialRule, strategy: DealStrate
         updatedMind = updatedMind.remove(task)
         if (counterpart != NoTask) updatedMind = updatedMind.add(counterpart)
         updatedMind = updatedMind.updateBelief(worker, workload)
-        updatedMind = updatedMind.changeDelegation(NoAgent, NoTask)
+        updatedMind = updatedMind.changeDelegation(NoWorker$, NoTask)
         if (trace) println(s"$worker -> $opponent : Confirm($task, $counterpart)")
         sender ! Confirm(task, counterpart, workload)
         if (counterpart == NoTask)nbConfirmGift += 1
@@ -208,7 +208,7 @@ class WorkerAgentBehaviour(worker: Agent, rule: SocialRule, strategy: DealStrate
        else {
           if (acceptable(task, counterpart, provider = opponent, supplier = worker, updatedMind)) {
             solverAgent ! Activated(updatedMind.bundle)
-            updatedMind = updatedMind.changeDelegation(NoAgent, NoTask)
+            updatedMind = updatedMind.changeDelegation(NoWorker$, NoTask)
             if (trace) println(s"$worker -> $opponent : Accept($task, $counterpart)")
             sender ! Accept(task, counterpart, workload)
             nbAccept += 1

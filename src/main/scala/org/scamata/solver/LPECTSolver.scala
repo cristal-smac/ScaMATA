@@ -10,7 +10,7 @@ import org.scamata.util.MATAWriter
 import scala.sys.process._
 
 /**
-  * Two-pahse heuristic in which, after applying linear programming to generate a partial schedule the earliest completion time heuristic is applied
+  * Two-phase heuristic in which, after applying linear programming to generate a partial schedule the earliest completion time heuristic is applied
   * @param pb to be solver
   * @param rule to be optimized
   */

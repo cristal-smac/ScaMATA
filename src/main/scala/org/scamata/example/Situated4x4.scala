@@ -2,17 +2,17 @@
 package org.scamata.example
 
 import akka.actor.ActorSystem
-import org.scamata.core.{Allocation, MASTA, Task, Agent}
+import org.scamata.core.{Allocation, MASTA, Task, Worker}
 import org.scamata.example.FromSituated4x4._
 import org.scamata.solver._
 
 import scala.collection.SortedSet
 
 object Situated4x4 {
-  val w1 = new Agent("1")
-  val w2 = new Agent("2")
-  val w3 = new Agent("3")
-  val w4 = new Agent("4")
+  val w1 = new Worker("1")
+  val w2 = new Worker("2")
+  val w3 = new Worker("3")
+  val w4 = new Worker("4")
   val workers = SortedSet(w1, w2, w3, w4)
 
   val t1 = new Task("t1")
@@ -21,7 +21,7 @@ object Situated4x4 {
   val t4 = new Task("t4")
   val tasks = SortedSet(t1, t2, t3, t4)
 
-  var locationMatrix : Map[(Agent, Task), Int] = Map[(Agent, Task), Int]()
+  var locationMatrix : Map[(Worker, Task), Int] = Map[(Worker, Task), Int]()
   locationMatrix += ((w1,t1) -> 3)
   locationMatrix += ((w1,t2) -> 0)
   locationMatrix += ((w1,t3) -> 2)

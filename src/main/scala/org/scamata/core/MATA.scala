@@ -11,9 +11,9 @@ import scala.collection.SortedSet
   * @param workers performing the tasks
   * @param tasks to be performed
   */
-class MATA(val workers: SortedSet[Agent], val tasks: SortedSet[Task]) {
+class MATA(val workers: SortedSet[Worker], val tasks: SortedSet[Task]) {
 
-  var costMatrix : Map[(Agent, Task), Double] = Map[(Agent, Task), Double]()
+  var costMatrix : Map[(Worker, Task), Double] = Map[(Worker, Task), Double]()
 
   /**
     * Constructor
@@ -21,7 +21,7 @@ class MATA(val workers: SortedSet[Agent], val tasks: SortedSet[Task]) {
     * @param tasks to be performed
     * @param costMatrix cost matrix for performing the task by the worker
     */
-  def this(workers: SortedSet[Agent], tasks: SortedSet[Task], costMatrix : Map[(Agent, Task), Double]) ={
+  def this(workers: SortedSet[Worker], tasks: SortedSet[Task], costMatrix : Map[(Worker, Task), Double]) ={
     this(workers, tasks)
     this.costMatrix = costMatrix
   }
@@ -29,7 +29,7 @@ class MATA(val workers: SortedSet[Agent], val tasks: SortedSet[Task]) {
   /**
     * Return the cost of a task for a worker, eventually 0.0 if NoTask
      */
-  def cost(worker: Agent, task: Task): Double = if (task != NoTask) costMatrix(worker, task) else 0.0
+  def cost(worker: Worker, task: Task): Double = if (task != NoTask) costMatrix(worker, task) else 0.0
 
   /**
     * Returns a string describing the MATA problem
@@ -59,8 +59,8 @@ class MATA(val workers: SortedSet[Agent], val tasks: SortedSet[Task]) {
   /**
     * Returns the faster worker for a task
     */
-  def faster(task : Task) : Agent = {
-    var best : Agent = NoAgent
+  def faster(task : Task) : Worker = {
+    var best : Worker = NoWorker$
     var minCost = Double.MaxValue
     workers.foreach{ worker =>
       val c = cost(worker, task)
@@ -77,7 +77,7 @@ class MATA(val workers: SortedSet[Agent], val tasks: SortedSet[Task]) {
     *
     * @param name of the worker
     */
-  def getWorker(name: String): Agent = {
+  def getWorker(name: String): Worker = {
     workers.find(a => a.name.equals(name)) match {
       case Some(s) => s
       case None => throw new RuntimeException("No worker " + name + " has been found")
@@ -143,7 +143,7 @@ class MATA(val workers: SortedSet[Agent], val tasks: SortedSet[Task]) {
     * @param workers
     * @param tasks
     */
-  def allAllocation(workers: SortedSet[Agent], tasks: SortedSet[Task]): Set[Allocation] = {
+  def allAllocation(workers: SortedSet[Worker], tasks: SortedSet[Task]): Set[Allocation] = {
     if (workers.size == 1) {
       var allocation = new Allocation(this)
       allocation = allocation.update(workers.head, tasks)
@@ -190,8 +190,8 @@ object MATA{
     * @param n number of tasks
     */
   def randomProblem(m : Int, n : Int, rule : RandomGenerationRule) : MATA = {
-    val workers: SortedSet[Agent] = collection.immutable.SortedSet[Agent]() ++
-      (for (k <- 1 until m+1) yield new Agent(name = s"w$k"))
+    val workers: SortedSet[Worker] = collection.immutable.SortedSet[Worker]() ++
+      (for (k <- 1 until m+1) yield new Worker(name = s"w$k"))
     val tasks: SortedSet[Task] = collection.immutable.SortedSet[Task]() ++
       (for (k <- 1 until n+1) yield new Task(name = s"t$k"))
     val beta : Array[Double] =  Array.fill(n)(
@@ -202,7 +202,7 @@ object MATA{
       if (rule == MachineTaskCorrelated) RandomUtils.random(1,20)
       else RandomUtils.random(1,MAXCOST)
     )
-    var cost = Map[(Agent, Task), Double]()
+    var cost = Map[(Worker, Task), Double]()
     for(i <- 0 until m){
       for (j <- 0 until n){
         val value : Double  = rule match {

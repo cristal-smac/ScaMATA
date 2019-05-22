@@ -24,10 +24,10 @@ class CentralizedSolver(pb : MATA, rule : SocialRule, strategy : DealStrategy) e
     */
   def reallocate(initialAllocation: Allocation): Allocation = {
     var a = initialAllocation
-    var cons: ListBuffer[Agent] = Random.shuffle(pb.workers.to[ListBuffer])
+    var cons: ListBuffer[Worker] = Random.shuffle(pb.workers.to[ListBuffer])
     if (debug) println("All peers are initially potential contractors")
     while(cons.nonEmpty){
-      cons.foreach { i: Agent =>
+      cons.foreach { i: Worker =>
         var responders = pb.workers - i
         if (rule == LCmax) responders=responders.filter(j => a.workload(j) < a.workload(i))
         if (responders.isEmpty || a.bundle(i).isEmpty) {
@@ -37,7 +37,7 @@ class CentralizedSolver(pb : MATA, rule : SocialRule, strategy : DealStrategy) e
         else {
           var found = false
           var bestA: Allocation = a
-          var bestD: Swap= new SingleSwap(i, NoAgent, NoTask, NoTask)
+          var bestD: Swap= new SingleSwap(i, NoWorker$, NoTask, NoTask)
           var bestGoal : Double = rule match {
             case LCmax => a.workload(i)
             case LF => 0.0

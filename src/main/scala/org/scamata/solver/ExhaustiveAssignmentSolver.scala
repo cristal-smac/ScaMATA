@@ -9,14 +9,14 @@ import org.scamata.core.{Allocation, MATA}
   * @param pb   to be solver
   * @param rule to be optimized
   */
-class ExhaustiveAssignementSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
+class ExhaustiveAssignmentSolver(pb: MATA, rule: SocialRule) extends Solver(pb, rule) {
   debug = false
 
   /**
     * Returns an allocation
     */
   override def solve(): Allocation = {
-    if (pb.n() != pb.m()) new RuntimeException("ExhaustiveAssignementSolver requires a single task per worker agent")
+    if (pb.n() != pb.m()) new RuntimeException("ExhaustiveAssignmentSolver requires a single task per worker agent")
     var min = Double.MaxValue
     var bestAllocation = new Allocation(pb)
     val tasks = pb.tasks.toList

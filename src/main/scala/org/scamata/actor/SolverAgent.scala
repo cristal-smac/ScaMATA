@@ -1,7 +1,7 @@
 // Copyright (C) Maxime MORGE 2018
 package org.scamata.actor
 
-import org.scamata.core.{Allocation, MATA, Agent}
+import org.scamata.core.{Allocation, MATA, Worker}
 import org.scamata.solver.{DealStrategy, SingleGiftOnly, SingleSwapAndSingleGift, SocialRule}
 import akka.actor.{Actor, ActorRef, FSM, Props}
 
@@ -46,7 +46,7 @@ class SolverAgent(pb: MATA, rule: SocialRule, strategy : DealStrategy) extends A
     * Method invoked after starting the actor
     */
   override def preStart(): Unit = {
-    pb.workers.foreach{ worker : Agent => //For all workers
+    pb.workers.foreach{ worker : Worker => //For all workers
       val actor = context.actorOf(Props(classOf[WorkerAgentBehaviour], worker, rule, strategy), worker.name)
       directory.add(worker, actor) // Add it to the directory
     }
