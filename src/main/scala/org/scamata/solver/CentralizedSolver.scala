@@ -17,7 +17,7 @@ import scala.util.Random
   */
 class CentralizedSolver(pb : MATA, rule : SocialRule, strategy : DealStrategy) extends DealSolver(pb, rule, strategy) {
   debug = false
-  val trace = false
+  var trace = false
 
     /**
     * Reallocate the initial allocation
